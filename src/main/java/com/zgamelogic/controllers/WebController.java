@@ -43,7 +43,7 @@ public class WebController {
         APIInterfacer.pingAPI(discord);
         monitors.add(discord);
 
-        APIMonitor websiteApi = new APIMonitor("Discord API", "https://zgamelogic.com", 443, "api/health");
+        APIMonitor websiteApi = new APIMonitor("Website API", "https://zgamelogic.com", 443, "api/health");
         APIInterfacer.pingAPI(websiteApi);
         monitors.add(websiteApi);
 
