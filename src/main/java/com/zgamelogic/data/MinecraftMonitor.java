@@ -36,10 +36,12 @@ public class MinecraftMonitor extends Monitor {
         setStatus(true);
         max = json.getJSONObject("players").getInt("max");
         online = json.getJSONObject("players").getInt("online");
-        JSONArray players = json.getJSONObject("players").getJSONArray("sample");
-        onlinePlayers = new LinkedList<>();
-        for(int i = 0; i < players.length(); i++){
-            onlinePlayers.add(players.getJSONObject(i).getString("name"));
+        if(online > 0) {
+            JSONArray players = json.getJSONObject("players").getJSONArray("sample");
+            onlinePlayers = new LinkedList<>();
+            for (int i = 0; i < players.length(); i++) {
+                onlinePlayers.add(players.getJSONObject(i).getString("name"));
+            }
         }
         version = json.getJSONObject("version").getString("name");
         motd = json.getJSONObject("description").getString("text");

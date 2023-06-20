@@ -56,6 +56,7 @@ public abstract class MCInterfacer {
 
             return true;
         } catch (Exception e) {
+            e.printStackTrace();
             minecraftMonitor.setStatus(false);
             return false;
         }
