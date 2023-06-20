@@ -1,7 +1,6 @@
 package com.zgamelogic.helpers;
 
 import com.zgamelogic.data.MinecraftMonitor;
-import netscape.javascript.JSObject;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
