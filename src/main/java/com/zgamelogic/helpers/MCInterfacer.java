@@ -55,8 +55,8 @@ public abstract class MCInterfacer {
             id = readVarInt(in);
 
             return true;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            minecraftMonitor.setStatus(false);
             return false;
         }
 
