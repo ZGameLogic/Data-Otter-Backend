@@ -1,8 +1,10 @@
 package com.zgamelogic.data;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class WebMonitor extends Monitor {
 
     private String url;

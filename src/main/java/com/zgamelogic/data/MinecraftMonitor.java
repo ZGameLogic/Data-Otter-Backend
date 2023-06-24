@@ -2,6 +2,8 @@ package com.zgamelogic.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -9,6 +11,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 @AllArgsConstructor
+@NoArgsConstructor
+@ToString
 @Getter
 public class MinecraftMonitor extends Monitor {
 
@@ -20,13 +24,6 @@ public class MinecraftMonitor extends Monitor {
     private List<String> onlinePlayers;
     private String version;
     private String motd;
-
-    public MinecraftMonitor(String url, int port, String name) {
-        this.url = url;
-        this.port = port;
-        setName(name);
-        setType("minecraft");
-    }
 
     public void update(JSONObject json){
         if(json == null){
