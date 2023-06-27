@@ -16,6 +16,7 @@ public abstract class MCInterfacer {
     public static final int STATUS_HANDSHAKE = 1;
 
     public static boolean pingServer(MinecraftMonitor minecraftMonitor){
+        minecraftMonitor.setCompletedInMilliseconds(System.currentTimeMillis());
         try (Socket socket = new Socket()){
             socket.connect(new InetSocketAddress(minecraftMonitor.getUrl(), minecraftMonitor.getPort()), 1000);
             DataInputStream in = new DataInputStream(socket.getInputStream());
@@ -55,11 +56,12 @@ public abstract class MCInterfacer {
             id = readVarInt(in);
 
             socket.close();
-
+            minecraftMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - minecraftMonitor.getCompletedInMilliseconds());
             return true;
         } catch (Exception e) {
             e.printStackTrace();
             minecraftMonitor.setStatus(false);
+            minecraftMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - minecraftMonitor.getCompletedInMilliseconds());
             return false;
         }
 
