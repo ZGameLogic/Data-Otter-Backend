@@ -14,6 +14,5 @@ public class Monitor {
     private String name;
     private boolean status;
     private String type;
-    private String test;
 
 }
