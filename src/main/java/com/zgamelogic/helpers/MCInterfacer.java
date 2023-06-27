@@ -54,6 +54,8 @@ public abstract class MCInterfacer {
             readVarInt(in);
             id = readVarInt(in);
 
+            socket.close();
+
             return true;
         } catch (Exception e) {
             e.printStackTrace();
