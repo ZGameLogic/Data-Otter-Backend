@@ -121,6 +121,7 @@ public class WebController {
 
     private void saveNewMonitor(Monitor monitor){
         LinkedList<Monitor> monitors = loadMonitors();
+        monitor.setId(monitors.size());
         monitors.add(monitor);
         ObjectMapper mapper = new ObjectMapper();
         mapper.addMixIn(MinecraftMonitor.class, com.zgamelogic.data.mixins.MinecraftMonitor.class);

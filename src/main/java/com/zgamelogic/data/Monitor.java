@@ -15,5 +15,6 @@ public class Monitor {
     private boolean status;
     private String type;
     private long completedInMilliseconds;
+    private int id;
 
 }
