@@ -11,10 +11,10 @@ import lombok.ToString;
 @ToString
 public class Monitor {
 
+    private int id;
     private String name;
     private boolean status;
     private String type;
     private long completedInMilliseconds;
-    private int id;
 
 }
