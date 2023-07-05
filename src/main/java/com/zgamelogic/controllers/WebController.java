@@ -43,7 +43,7 @@ public class WebController {
 
     @GetMapping("monitors/**")
     private LinkedList<Monitor> getMonitors(HttpServletRequest request){
-        String monitorId = request.getRequestURI().replaceFirst("/monitors/", "");
+        String monitorId = request.getRequestURI().replaceFirst("monitors", "").replaceAll("/", "");
         if(monitorId.isEmpty()) {
             return getMonitorsStatus();
         }
