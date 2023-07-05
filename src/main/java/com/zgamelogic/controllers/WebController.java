@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,9 +41,16 @@ public class WebController {
         classMap.put("web", WebMonitor.class);
     }
 
-    @GetMapping("monitors")
-    private LinkedList<Monitor> getMonitors(){
-        return getMonitorStatus();
+    @GetMapping("monitors/**")
+    private LinkedList<Monitor> getMonitors(HttpServletRequest request){
+        String monitorId = request.getRequestURI().replaceFirst("/monitors/", "");
+        if(monitorId.isEmpty()) {
+            return getMonitorsStatus();
+        }
+        LinkedList<Monitor> monitors = new LinkedList<>();
+        Monitor monitor = getMonitorStatus(Integer.parseInt(monitorId));
+        if(monitor != null) monitors.add(monitor);
+        return monitors;
     }
 
     @PostMapping("monitors")
@@ -66,40 +74,44 @@ public class WebController {
             JSONObject json = new JSONObject(body);
             String monitor = json.getString("type");
             Monitor m = (Monitor) om.readValue(json.toString(), classMap.get(monitor));
-            switch(m.getType()){
-                case "minecraft":
-                    MCInterfacer.pingServer((MinecraftMonitor) m);
-                    break;
-                case "api":
-                    APIInterfacer.pingAPI((APIMonitor) m);
-                    break;
-                case "web":
-                    WebInterfacer.pingWeb((WebMonitor) m);
-                    break;
-            }
+            runMonitorCheck(m);
             return m;
         } catch (IOException e) {
             return null;
         }
     }
 
-    private LinkedList<Monitor> getMonitorStatus(){
+    private Monitor getMonitorStatus(int id){
         LinkedList<Monitor> monitors = loadMonitors();
-
         for(Monitor monitor: monitors){
-            switch(monitor.getType()){
-                case "minecraft":
-                    MCInterfacer.pingServer((MinecraftMonitor) monitor);
-                    break;
-                case "api":
-                    APIInterfacer.pingAPI((APIMonitor) monitor);
-                    break;
-                case "web":
-                    WebInterfacer.pingWeb((WebMonitor) monitor);
-                    break;
+            if(monitor.getId() == id){
+                runMonitorCheck(monitor);
+                return monitor;
             }
         }
+        return null;
+    }
+
+    private LinkedList<Monitor> getMonitorsStatus(){
+        LinkedList<Monitor> monitors = loadMonitors();
+        for(Monitor monitor: monitors){
+            runMonitorCheck(monitor);
+        }
         return monitors;
+    }
+
+    private void runMonitorCheck(Monitor monitor) {
+        switch(monitor.getType()){
+            case "minecraft":
+                MCInterfacer.pingServer((MinecraftMonitor) monitor);
+                break;
+            case "api":
+                APIInterfacer.pingAPI((APIMonitor) monitor);
+                break;
+            case "web":
+                WebInterfacer.pingWeb((WebMonitor) monitor);
+                break;
+        }
     }
 
     private LinkedList<Monitor> loadMonitors(){
@@ -118,6 +130,8 @@ public class WebController {
         }
         return monitors;
     }
+
+
 
     private void saveNewMonitor(Monitor monitor){
         LinkedList<Monitor> monitors = loadMonitors();
