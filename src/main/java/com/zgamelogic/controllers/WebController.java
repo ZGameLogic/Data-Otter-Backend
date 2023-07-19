@@ -13,6 +13,7 @@ import com.zgamelogic.helpers.WebInterfacer;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,8 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.*;
 
 @RestController
 @Slf4j
@@ -39,6 +39,9 @@ public class WebController {
         classMap.put("api", APIMonitor.class);
         classMap.put("minecraft", MinecraftMonitor.class);
         classMap.put("web", WebMonitor.class);
+        classMap.put("api[]", APIMonitor[].class);
+        classMap.put("minecraft[]", MinecraftMonitor[].class);
+        classMap.put("web[]", WebMonitor[].class);
     }
 
     @GetMapping("monitors/**")
@@ -51,6 +54,12 @@ public class WebController {
         Monitor monitor = getMonitorStatus(Integer.parseInt(monitorId));
         if(monitor != null) monitors.add(monitor);
         return monitors;
+    }
+
+    @GetMapping("history/**")
+    private LinkedList<Monitor> getMonitorHistory(HttpServletRequest request){
+        String monitorId = request.getRequestURI().replaceFirst("history", "").replaceAll("/", "");
+        return loadHistoryData(Integer.parseInt(monitorId));
     }
 
     @PostMapping("monitors")
@@ -78,6 +87,14 @@ public class WebController {
             return m;
         } catch (IOException e) {
             return null;
+        }
+    }
+
+    @Scheduled(cron = "0 */5 * * * *")
+    private void fiveMinuteTask() {
+        log.info("Logging data");
+        for(Monitor m: getMonitorsStatus()){
+            saveMonitorData(m);
         }
     }
 
@@ -131,7 +148,47 @@ public class WebController {
         return monitors;
     }
 
+    private void saveMonitorData(Monitor monitor){
+        File dataDir = new File("data");
+        if(!dataDir.exists()){
+            dataDir.mkdir();
+        }
+        LinkedList<Monitor> history = loadHistoryData(monitor);
+        history.add(monitor);
+        history.sort(Comparator.comparing(Monitor::getTaken));
+        if(history.size() > 100){
+            history.removeFirst();
+        }
+        ObjectWriter writer = new ObjectMapper().writer(new DefaultPrettyPrinter());
+        try {
+            writer.writeValue(new File(dataDir.getPath() + "/" + monitor.getId() + ".json"), history);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    private LinkedList<Monitor> loadHistoryData(int id){
+        LinkedList<Monitor> monitors = loadMonitors();
+        for(Monitor monitor: monitors){
+            if(monitor.getId() == id){
+                return loadHistoryData(monitor);
+            }
+        }
+        return new LinkedList<>();
+    }
+
+    private LinkedList<Monitor> loadHistoryData(Monitor monitor){
+        File dataDir = new File("data");
+        File monitorFile = new File(dataDir.getPath() + "/" + monitor.getId() + ".json");
+        ObjectMapper om = new ObjectMapper();
+        try {
+            Monitor[] monitors = (Monitor[]) om.readValue(monitorFile, classMap.get(monitor.getType() + "[]"));
+            return new LinkedList<>(Arrays.asList(monitors));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new LinkedList<>();
+        }
+    }
 
     private void saveNewMonitor(Monitor monitor){
         LinkedList<Monitor> monitors = loadMonitors();

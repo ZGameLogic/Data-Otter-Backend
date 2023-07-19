@@ -2,6 +2,7 @@ package com.zgamelogic.data.mixins;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.Date;
 import java.util.List;
 
 public abstract class MinecraftMonitor {
@@ -13,4 +14,5 @@ public abstract class MinecraftMonitor {
     @JsonIgnore private String motd;
     @JsonIgnore private long completedInMilliseconds;
     @JsonIgnore private boolean status;
+    @JsonIgnore private Date taken;
 }

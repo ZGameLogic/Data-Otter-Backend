@@ -11,11 +11,4 @@ public class APIMonitor extends Monitor {
     private int port;
     private String healthCheckUrl;
 
-    public APIMonitor(String name, String url, int port, String healthCheckUrl) {
-        this.url = url;
-        this.port = port;
-        this.healthCheckUrl = healthCheckUrl;
-        setName(name);
-        setType("api");
-    }
 }
