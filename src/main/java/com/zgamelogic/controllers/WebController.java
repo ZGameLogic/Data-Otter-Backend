@@ -59,6 +59,9 @@ public class WebController {
     @GetMapping("history/**")
     private LinkedList<Monitor> getMonitorHistory(HttpServletRequest request){
         String monitorId = request.getRequestURI().replaceFirst("history", "").replaceAll("/", "");
+        if(monitorId.isEmpty()) {
+            return loadAllHistoryData();
+        }
         return loadHistoryData(Integer.parseInt(monitorId));
     }
 
@@ -165,6 +168,14 @@ public class WebController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private LinkedList<Monitor> loadAllHistoryData(){
+        LinkedList<Monitor> monitors = new LinkedList<>();
+        for(Monitor m: loadMonitors()){
+            monitors.addAll(loadHistoryData(m));
+        }
+        return monitors;
     }
 
     private LinkedList<Monitor> loadHistoryData(int id){
