@@ -175,6 +175,7 @@ public class WebController {
         for(Monitor m: loadMonitors()){
             monitors.addAll(loadHistoryData(m));
         }
+        monitors.sort(Comparator.comparing(Monitor::getTaken));
         return monitors;
     }
 
