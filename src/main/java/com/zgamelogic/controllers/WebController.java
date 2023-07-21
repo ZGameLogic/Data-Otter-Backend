@@ -158,7 +158,6 @@ public class WebController {
         }
         LinkedList<Monitor> history = loadHistoryData(monitor);
         history.add(monitor);
-        history.sort(Comparator.comparing(Monitor::getTaken));
         if(history.size() > 100){
             history.removeFirst();
         }
