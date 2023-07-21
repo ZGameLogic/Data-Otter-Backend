@@ -64,6 +64,7 @@ public abstract class MCInterfacer {
             e.printStackTrace();
             minecraftMonitor.setStatus(false);
             minecraftMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - minecraftMonitor.getCompletedInMilliseconds());
+            minecraftMonitor.setTaken(new Date());
             return false;
         }
 

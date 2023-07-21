@@ -26,6 +26,7 @@ public abstract class WebInterfacer {
         } catch (Exception e) {
             webMonitor.setStatus(false);
             webMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - webMonitor.getCompletedInMilliseconds());
+            webMonitor.setTaken(new Date());
             return false;
         }
     }

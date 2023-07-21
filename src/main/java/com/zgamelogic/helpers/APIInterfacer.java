@@ -23,6 +23,7 @@ public abstract class APIInterfacer {
         } catch (Exception e) {
             apiMonitor.setStatus(false);
             apiMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - apiMonitor.getCompletedInMilliseconds());
+            apiMonitor.setTaken(new Date());
             return false;
         }
     }
