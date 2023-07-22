@@ -93,9 +93,8 @@ public class WebController {
         }
     }
 
-    @Scheduled(cron = "0 */5 * * * *")
-    private void fiveMinuteTask() {
-        log.info("Logging data");
+    @Scheduled(cron = "0 */1 * * * *")
+    private void oneMinuteTask() {
         for(Monitor m: getMonitorsStatus()){
             saveMonitorData(m);
         }
@@ -159,7 +158,7 @@ public class WebController {
         LinkedList<Monitor> history = loadHistoryData(monitor);
         history.add(monitor);
         history.sort(Comparator.comparing(Monitor::getTaken));
-        if(history.size() > 100){
+        if(history.size() > 300){
             history.removeFirst();
         }
         ObjectWriter writer = new ObjectMapper().writer(new DefaultPrettyPrinter());
