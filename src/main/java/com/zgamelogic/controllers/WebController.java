@@ -158,7 +158,7 @@ public class WebController {
         LinkedList<Monitor> history = loadHistoryData(monitor);
         history.add(monitor);
         history.sort(Comparator.comparing(Monitor::getTaken));
-        if(history.size() > 300){
+        if(history.size() > 450){
             history.removeFirst();
         }
         ObjectWriter writer = new ObjectMapper().writer(new DefaultPrettyPrinter());
