@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @RestController
@@ -157,10 +159,9 @@ public class WebController {
         }
         LinkedList<Monitor> history = loadHistoryData(monitor);
         history.add(monitor);
+        Date eightHoursAgo = Date.from(LocalDateTime.now().minusHours(8).toInstant(ZoneOffset.ofHours(0)));
+        history.removeIf(h -> h.getTaken().before(eightHoursAgo));
         history.sort(Comparator.comparing(Monitor::getTaken));
-        if(history.size() > 450){
-            history.removeFirst();
-        }
         ObjectWriter writer = new ObjectMapper().writer(new DefaultPrettyPrinter());
         try {
             writer.writeValue(new File(dataDir.getPath() + "/" + monitor.getId() + ".json"), history);
