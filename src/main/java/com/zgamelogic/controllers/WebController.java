@@ -34,6 +34,7 @@ import java.util.*;
 public class WebController {
     private HashMap<String, Class> classMap;
     private static final String PATH = "monitors.json";
+    private volatile LinkedList<Monitor> monitors;
 
     @PostConstruct
     private void init(){
@@ -114,10 +115,14 @@ public class WebController {
     }
 
     private LinkedList<Monitor> getMonitorsStatus(){
-        LinkedList<Monitor> monitors = loadMonitors();
+        monitors = loadMonitors();
+        LinkedList<Thread> threads = new LinkedList<>();
         for(Monitor monitor: monitors){
-            runMonitorCheck(monitor);
+            Thread newThread = new Thread(() -> runMonitorCheck(monitor));
+            threads.add(newThread);
+            newThread.start();
         }
+        while(!threads.isEmpty()) threads.removeIf(t -> !t.isAlive());
         return monitors;
     }
 
