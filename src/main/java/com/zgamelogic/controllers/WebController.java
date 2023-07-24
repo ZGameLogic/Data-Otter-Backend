@@ -196,7 +196,6 @@ public class WebController {
             Monitor[] monitors = (Monitor[]) om.readValue(monitorFile, classMap.get(monitor.getType() + "[]"));
             return new LinkedList<>(Arrays.asList(monitors));
         } catch (IOException e) {
-            e.printStackTrace();
             return new LinkedList<>();
         }
     }

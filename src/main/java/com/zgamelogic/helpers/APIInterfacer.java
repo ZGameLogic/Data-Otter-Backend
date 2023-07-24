@@ -11,21 +11,25 @@ import java.util.Date;
 public abstract class APIInterfacer {
 
     public static boolean pingAPI(APIMonitor apiMonitor){
-        apiMonitor.setCompletedInMilliseconds(System.currentTimeMillis());
-        final String url = apiMonitor.getUrl()  + ":" + apiMonitor.getPort() + "/" + apiMonitor.getHealthCheckUrl();
-        RestTemplate restTemplate = new RestTemplateBuilder().setConnectTimeout(Duration.ofSeconds(2)).setReadTimeout(Duration.ofSeconds(2)).build();
-        try {
-            String response = restTemplate.getForObject(new URI(url), String.class);
-            apiMonitor.setStatus(response.toLowerCase().contains("health"));
-            apiMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - apiMonitor.getCompletedInMilliseconds());
-            apiMonitor.setTaken(new Date());
-            return true;
-        } catch (Exception e) {
-            apiMonitor.setStatus(false);
-            apiMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - apiMonitor.getCompletedInMilliseconds());
-            apiMonitor.setTaken(new Date());
-            return false;
+        int tries = 0;
+        while(tries < 3) {
+            apiMonitor.setCompletedInMilliseconds(System.currentTimeMillis());
+            final String url = apiMonitor.getUrl() + ":" + apiMonitor.getPort() + "/" + apiMonitor.getHealthCheckUrl();
+            RestTemplate restTemplate = new RestTemplateBuilder().setConnectTimeout(Duration.ofSeconds(2)).setReadTimeout(Duration.ofSeconds(2)).build();
+            try {
+                String response = restTemplate.getForObject(new URI(url), String.class);
+                apiMonitor.setStatus(response.toLowerCase().contains("health"));
+                apiMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - apiMonitor.getCompletedInMilliseconds());
+                apiMonitor.setTaken(new Date());
+                return true;
+            } catch (Exception e) {
+                tries++;
+            }
         }
+        apiMonitor.setStatus(false);
+        apiMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - apiMonitor.getCompletedInMilliseconds());
+        apiMonitor.setTaken(new Date());
+        return false;
     }
 
 }

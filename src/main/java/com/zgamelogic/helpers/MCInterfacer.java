@@ -17,57 +17,58 @@ public abstract class MCInterfacer {
     public static final int STATUS_HANDSHAKE = 1;
 
     public static boolean pingServer(MinecraftMonitor minecraftMonitor){
-        minecraftMonitor.setCompletedInMilliseconds(System.currentTimeMillis());
-        try (Socket socket = new Socket()){
-            socket.connect(new InetSocketAddress(minecraftMonitor.getUrl(), minecraftMonitor.getPort()), 1000);
-            DataInputStream in = new DataInputStream(socket.getInputStream());
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+        int tries = 0;
+        while(tries < 3) {
+            try (Socket socket = new Socket()) {
+                socket.connect(new InetSocketAddress(minecraftMonitor.getUrl(), minecraftMonitor.getPort()), 1000);
+                DataInputStream in = new DataInputStream(socket.getInputStream());
+                DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
-            ByteArrayOutputStream handshake_bytes = new ByteArrayOutputStream();
-            DataOutputStream handshake = new DataOutputStream(handshake_bytes);
+                ByteArrayOutputStream handshake_bytes = new ByteArrayOutputStream();
+                DataOutputStream handshake = new DataOutputStream(handshake_bytes);
 
-            handshake.writeByte(PACKET_HANDSHAKE);
-            writeVarInt(handshake, 4);
-            writeVarInt(handshake, minecraftMonitor.getUrl().length());
-            handshake.writeBytes(minecraftMonitor.getUrl());
-            handshake.writeShort(minecraftMonitor.getPort());
-            writeVarInt(handshake, STATUS_HANDSHAKE);
+                handshake.writeByte(PACKET_HANDSHAKE);
+                writeVarInt(handshake, 4);
+                writeVarInt(handshake, minecraftMonitor.getUrl().length());
+                handshake.writeBytes(minecraftMonitor.getUrl());
+                handshake.writeShort(minecraftMonitor.getPort());
+                writeVarInt(handshake, STATUS_HANDSHAKE);
 
-            writeVarInt(out, handshake_bytes.size());
-            out.write(handshake_bytes.toByteArray());
+                writeVarInt(out, handshake_bytes.size());
+                out.write(handshake_bytes.toByteArray());
 
-            out.writeByte(0x01);
-            out.writeByte(PACKET_STATUSREQUEST);
+                out.writeByte(0x01);
+                out.writeByte(PACKET_STATUSREQUEST);
 
-            readVarInt(in);
-            int id = readVarInt(in);
+                readVarInt(in);
+                int id = readVarInt(in);
 
-            int length = readVarInt(in);
+                int length = readVarInt(in);
 
-            byte[] data = new byte[length];
-            in.readFully(data);
-            JSONObject json = new JSONObject(new String(data));
-            minecraftMonitor.update(json);
+                byte[] data = new byte[length];
+                in.readFully(data);
+                JSONObject json = new JSONObject(new String(data));
+                minecraftMonitor.update(json);
 
-            out.writeByte(0x09);
-            out.writeByte(PACKET_PING);
-            out.writeLong(System.currentTimeMillis());
+                out.writeByte(0x09);
+                out.writeByte(PACKET_PING);
+                out.writeLong(System.currentTimeMillis());
 
-            readVarInt(in);
-            id = readVarInt(in);
+                readVarInt(in);
+                id = readVarInt(in);
 
-            socket.close();
-            minecraftMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - minecraftMonitor.getCompletedInMilliseconds());
-            minecraftMonitor.setTaken(new Date());
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            minecraftMonitor.setStatus(false);
-            minecraftMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - minecraftMonitor.getCompletedInMilliseconds());
-            minecraftMonitor.setTaken(new Date());
-            return false;
+                socket.close();
+                minecraftMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - minecraftMonitor.getCompletedInMilliseconds());
+                minecraftMonitor.setTaken(new Date());
+                return true;
+            } catch (Exception e) {
+                tries++;
+            }
         }
-
+        minecraftMonitor.setStatus(false);
+        minecraftMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - minecraftMonitor.getCompletedInMilliseconds());
+        minecraftMonitor.setTaken(new Date());
+        return false;
     }
 
     private static void writeVarInt(DataOutputStream out, int paramInt) throws IOException {
