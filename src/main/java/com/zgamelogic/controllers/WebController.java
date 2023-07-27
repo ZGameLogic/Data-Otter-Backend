@@ -32,6 +32,9 @@ import java.util.*;
 @RestController
 @Slf4j
 public class WebController {
+
+    private final static int HOURS_TO_KEEP = 8;
+
     private HashMap<String, Class> classMap;
     private static final String PATH = "monitors.json";
     private volatile LinkedList<Monitor> monitors;
@@ -164,8 +167,8 @@ public class WebController {
         }
         LinkedList<Monitor> history = loadHistoryData(monitor);
         history.add(monitor);
-        Date eightHoursAgo = Date.from(LocalDateTime.now().minusHours(12).toInstant(ZoneOffset.ofHours(0)));
-        history.removeIf(h -> h.getTaken() == null || h.getTaken().before(eightHoursAgo));
+        Date xHoursAgo = Date.from(LocalDateTime.now().minusHours(HOURS_TO_KEEP).toInstant(ZoneOffset.ofHours(0)));
+        history.removeIf(h -> h.getTaken() == null || h.getTaken().before(xHoursAgo));
         history.sort(Comparator.comparing(Monitor::getTaken));
         ObjectWriter writer = new ObjectMapper().writer(new DefaultPrettyPrinter());
         try {
