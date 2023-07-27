@@ -34,6 +34,7 @@ import java.util.*;
 public class WebController {
     private HashMap<String, Class> classMap;
     private static final String PATH = "monitors.json";
+    private volatile LinkedList<Monitor> monitors;
 
     @PostConstruct
     private void init(){
@@ -114,10 +115,14 @@ public class WebController {
     }
 
     private LinkedList<Monitor> getMonitorsStatus(){
-        LinkedList<Monitor> monitors = loadMonitors();
+        monitors = loadMonitors();
+        LinkedList<Thread> threads = new LinkedList<>();
         for(Monitor monitor: monitors){
-            runMonitorCheck(monitor);
+            Thread newThread = new Thread(() -> runMonitorCheck(monitor));
+            threads.add(newThread);
+            newThread.start();
         }
+        while(!threads.isEmpty()) threads.removeIf(t -> !t.isAlive());
         return monitors;
     }
 
@@ -159,7 +164,7 @@ public class WebController {
         }
         LinkedList<Monitor> history = loadHistoryData(monitor);
         history.add(monitor);
-        Date eightHoursAgo = Date.from(LocalDateTime.now().minusHours(8).toInstant(ZoneOffset.ofHours(0)));
+        Date eightHoursAgo = Date.from(LocalDateTime.now().minusHours(12).toInstant(ZoneOffset.ofHours(0)));
         history.removeIf(h -> h.getTaken().before(eightHoursAgo));
         history.sort(Comparator.comparing(Monitor::getTaken));
         ObjectWriter writer = new ObjectMapper().writer(new DefaultPrettyPrinter());

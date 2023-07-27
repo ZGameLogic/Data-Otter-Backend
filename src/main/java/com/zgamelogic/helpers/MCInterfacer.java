@@ -17,6 +17,7 @@ public abstract class MCInterfacer {
     public static final int STATUS_HANDSHAKE = 1;
 
     public static boolean pingServer(MinecraftMonitor minecraftMonitor){
+        minecraftMonitor.setCompletedInMilliseconds(System.currentTimeMillis());
         int tries = 0;
         while(tries < 3) {
             try (Socket socket = new Socket()) {
