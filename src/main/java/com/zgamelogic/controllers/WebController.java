@@ -164,7 +164,7 @@ public class WebController {
         }
         LinkedList<Monitor> history = loadHistoryData(monitor);
         history.add(monitor);
-        Date eightHoursAgo = Date.from(LocalDateTime.now().minusHours(8).toInstant(ZoneOffset.ofHours(0)));
+        Date eightHoursAgo = Date.from(LocalDateTime.now().minusHours(12).toInstant(ZoneOffset.ofHours(0)));
         history.removeIf(h -> h.getTaken().before(eightHoursAgo));
         history.sort(Comparator.comparing(Monitor::getTaken));
         ObjectWriter writer = new ObjectMapper().writer(new DefaultPrettyPrinter());
