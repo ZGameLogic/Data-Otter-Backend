@@ -20,7 +20,6 @@ public abstract class APIInterfacer {
                 String response = restTemplate.getForObject(new URI(url), String.class);
                 apiMonitor.setStatus(response.toLowerCase().contains("health"));
                 apiMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - apiMonitor.getCompletedInMilliseconds());
-                apiMonitor.setTaken(new Date());
                 return true;
             } catch (Exception e) {
                 tries++;
@@ -28,7 +27,6 @@ public abstract class APIInterfacer {
         }
         apiMonitor.setStatus(false);
         apiMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - apiMonitor.getCompletedInMilliseconds());
-        apiMonitor.setTaken(new Date());
         return false;
     }
 

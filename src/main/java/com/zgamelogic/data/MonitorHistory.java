@@ -1,5 +1,6 @@
 package com.zgamelogic.data;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class MonitorHistory {
 
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     private Date taken;
     private boolean status;
     private long completedInMilliseconds;

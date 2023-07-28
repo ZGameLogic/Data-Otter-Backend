@@ -19,6 +19,5 @@ public class WebMonitor extends Monitor {
         this.regex = regex;
         setName(name);
         setType("web");
-        setTaken(new Date());
     }
 }

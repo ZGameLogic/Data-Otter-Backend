@@ -14,13 +14,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.*;
 
 @RestController
@@ -46,85 +43,46 @@ public class WebController {
 
     @GetMapping("monitors")
     private LinkedList<Monitor> getMonitors(
-            @RequestParam(required = false) String id,
+            @RequestParam(required = false) int id,
             @RequestParam(required = false) boolean includeHistory
     ){
-        String monitorId = request.getRequestURI().replaceFirst("monitors", "").replaceAll("/", "");
-        if(monitorId.isEmpty()) {
-            return getMonitorsStatus();
-        }
         LinkedList<Monitor> monitors = new LinkedList<>();
-        Monitor monitor = getMonitorStatus(Integer.parseInt(monitorId));
-        if(monitor != null) monitors.add(monitor);
+
+
+
+
         return monitors;
-    }
-
-    @GetMapping("history/**")
-    private LinkedList<Monitor> getMonitorHistory(HttpServletRequest request){
-        String monitorId = request.getRequestURI().replaceFirst("history", "").replaceAll("/", "");
-        if(monitorId.isEmpty()) {
-            return loadAllHistoryData();
-        }
-        return loadHistoryData(Integer.parseInt(monitorId));
-    }
-
-    @PostMapping("monitors")
-    private String createMonitor(@RequestBody String body){
-        try {
-            ObjectMapper om = new ObjectMapper();
-            JSONObject json = new JSONObject(body);
-            String monitor = json.getString("type");
-            Monitor m = (Monitor) om.readValue(json.toString(), classMap.get(monitor));
-            saveNewMonitor(m);
-            return "New monitor created";
-        } catch (IOException e) {
-            return "Error creating new monitor";
-        }
-    }
-
-    @PostMapping("test")
-    private Monitor testMonitor(@RequestBody String body){
-        try {
-            ObjectMapper om = new ObjectMapper();
-            JSONObject json = new JSONObject(body);
-            String monitor = json.getString("type");
-            Monitor m = (Monitor) om.readValue(json.toString(), classMap.get(monitor));
-            runMonitorCheck(m);
-            return m;
-        } catch (IOException e) {
-            return null;
-        }
     }
 
     @Scheduled(cron = "0 */1 * * * *")
     private void oneMinuteTask() {
-        for(Monitor m: getMonitorsStatus()){
-            saveMonitorData(m);
-        }
+//        for(Monitor m: getMonitorsStatus()){
+//
+//        }
     }
 
-    private Monitor getMonitorStatus(int id){
-        LinkedList<Monitor> monitors = loadMonitors();
-        for(Monitor monitor: monitors){
-            if(monitor.getId() == id){
-                runMonitorCheck(monitor);
-                return monitor;
-            }
-        }
-        return null;
-    }
-
-    private LinkedList<Monitor> getMonitorsStatus(){
-        monitors = loadMonitors();
-        LinkedList<Thread> threads = new LinkedList<>();
-        for(Monitor monitor: monitors){
-            Thread newThread = new Thread(() -> runMonitorCheck(monitor));
-            threads.add(newThread);
-            newThread.start();
-        }
-        while(!threads.isEmpty()) threads.removeIf(t -> !t.isAlive());
-        return monitors;
-    }
+//    private Monitor getMonitorStatus(int id){
+//        LinkedList<Monitor> monitors = loadMonitors();
+//        for(Monitor monitor: monitors){
+//            if(monitor.getId() == id){
+//                runMonitorCheck(monitor);
+//                return monitor;
+//            }
+//        }
+//        return null;
+//    }
+//
+//    private LinkedList<Monitor> getMonitorsStatus(){
+//        monitors = loadMonitors();
+//        LinkedList<Thread> threads = new LinkedList<>();
+//        for(Monitor monitor: monitors){
+//            Thread newThread = new Thread(() -> runMonitorCheck(monitor));
+//            threads.add(newThread);
+//            newThread.start();
+//        }
+//        while(!threads.isEmpty()) threads.removeIf(t -> !t.isAlive());
+//        return monitors;
+//    }
 
     private void runMonitorCheck(Monitor monitor) {
         switch(monitor.getType()){
@@ -155,55 +113,6 @@ public class WebController {
             log.error("Error when loading monitors", e);
         }
         return monitors;
-    }
-
-    private void saveMonitorData(Monitor monitor){
-        File dataDir = new File("data");
-        if(!dataDir.exists()){
-            dataDir.mkdir();
-        }
-        LinkedList<Monitor> history = loadHistoryData(monitor);
-        history.add(monitor);
-        Date xHoursAgo = Date.from(LocalDateTime.now().minusHours(HOURS_TO_KEEP).toInstant(ZoneOffset.ofHours(0)));
-        history.removeIf(h -> h.getTaken() == null || h.getTaken().before(xHoursAgo));
-        history.sort(Comparator.comparing(Monitor::getTaken));
-        ObjectWriter writer = new ObjectMapper().writer(new DefaultPrettyPrinter());
-        try {
-            writer.writeValue(new File(dataDir.getPath() + "/" + monitor.getId() + ".json"), history);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private LinkedList<Monitor> loadAllHistoryData(){
-        LinkedList<Monitor> monitors = new LinkedList<>();
-        for(Monitor m: loadMonitors()){
-            monitors.addAll(loadHistoryData(m));
-        }
-        monitors.sort(Comparator.comparing(Monitor::getTaken));
-        return monitors;
-    }
-
-    private LinkedList<MonitorHistory> loadHistoryData(int id){
-        LinkedList<Monitor> monitors = loadMonitors();
-        for(Monitor monitor: monitors){
-            if(monitor.getId() == id){
-                return loadHistoryData(monitor);
-            }
-        }
-        return new LinkedList<>();
-    }
-
-    private LinkedList<MonitorHistory> loadHistoryData(Monitor monitor){
-        File dataDir = new File("data");
-        File monitorFile = new File(dataDir.getPath() + "/" + monitor.getId() + ".json");
-        ObjectMapper om = new ObjectMapper();
-        try {
-            MonitorHistory[] monitors = om.readValue(monitorFile, MonitorHistory[].class);
-            return new LinkedList<>(Arrays.asList(monitors));
-        } catch (IOException e) {
-            return new LinkedList<>();
-        }
     }
 
     private void saveNewMonitor(Monitor monitor){

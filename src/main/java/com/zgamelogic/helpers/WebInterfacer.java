@@ -23,7 +23,6 @@ public abstract class WebInterfacer {
                 String response = restTemplate.getForObject(new URI(url), String.class);
                 webMonitor.setStatus(response.contains(webMonitor.getRegex()));
                 webMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - webMonitor.getCompletedInMilliseconds());
-                webMonitor.setTaken(new Date());
                 return true;
             } catch (Exception e) {
                 tries++;
@@ -31,7 +30,6 @@ public abstract class WebInterfacer {
         }
         webMonitor.setStatus(false);
         webMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - webMonitor.getCompletedInMilliseconds());
-        webMonitor.setTaken(new Date());
         return false;
     }
 }

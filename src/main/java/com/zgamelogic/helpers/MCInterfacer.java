@@ -60,7 +60,6 @@ public abstract class MCInterfacer {
 
                 socket.close();
                 minecraftMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - minecraftMonitor.getCompletedInMilliseconds());
-                minecraftMonitor.setTaken(new Date());
                 return true;
             } catch (Exception e) {
                 tries++;
@@ -68,7 +67,6 @@ public abstract class MCInterfacer {
         }
         minecraftMonitor.setStatus(false);
         minecraftMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - minecraftMonitor.getCompletedInMilliseconds());
-        minecraftMonitor.setTaken(new Date());
         return false;
     }
 
