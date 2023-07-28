@@ -3,10 +3,7 @@ package com.zgamelogic.controllers;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.zgamelogic.data.APIMonitor;
-import com.zgamelogic.data.MinecraftMonitor;
-import com.zgamelogic.data.Monitor;
-import com.zgamelogic.data.WebMonitor;
+import com.zgamelogic.data.*;
 import com.zgamelogic.helpers.APIInterfacer;
 import com.zgamelogic.helpers.MCInterfacer;
 import com.zgamelogic.helpers.WebInterfacer;
@@ -14,10 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -50,8 +44,11 @@ public class WebController {
         classMap.put("web[]", WebMonitor[].class);
     }
 
-    @GetMapping("monitors/**")
-    private LinkedList<Monitor> getMonitors(HttpServletRequest request){
+    @GetMapping("monitors")
+    private LinkedList<Monitor> getMonitors(
+            @RequestParam(required = false) String id,
+            @RequestParam(required = false) boolean includeHistory
+    ){
         String monitorId = request.getRequestURI().replaceFirst("monitors", "").replaceAll("/", "");
         if(monitorId.isEmpty()) {
             return getMonitorsStatus();
@@ -187,7 +184,7 @@ public class WebController {
         return monitors;
     }
 
-    private LinkedList<Monitor> loadHistoryData(int id){
+    private LinkedList<MonitorHistory> loadHistoryData(int id){
         LinkedList<Monitor> monitors = loadMonitors();
         for(Monitor monitor: monitors){
             if(monitor.getId() == id){
@@ -197,12 +194,12 @@ public class WebController {
         return new LinkedList<>();
     }
 
-    private LinkedList<Monitor> loadHistoryData(Monitor monitor){
+    private LinkedList<MonitorHistory> loadHistoryData(Monitor monitor){
         File dataDir = new File("data");
         File monitorFile = new File(dataDir.getPath() + "/" + monitor.getId() + ".json");
         ObjectMapper om = new ObjectMapper();
         try {
-            Monitor[] monitors = (Monitor[]) om.readValue(monitorFile, classMap.get(monitor.getType() + "[]"));
+            MonitorHistory[] monitors = om.readValue(monitorFile, MonitorHistory[].class);
             return new LinkedList<>(Arrays.asList(monitors));
         } catch (IOException e) {
             return new LinkedList<>();
