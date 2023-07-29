@@ -1,6 +1,6 @@
 package com.zgamelogic.helpers;
 
-import com.zgamelogic.data.serializable.APIMonitor;
+import com.zgamelogic.data.serializable.monitors.APIMonitor;
 import com.zgamelogic.data.serializable.Status;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
@@ -12,6 +12,7 @@ public abstract class APIInterfacer {
 
     public static Status pingAPI(APIMonitor apiMonitor){
         Status mh = new Status();
+        mh.setup();
         int tries = 0;
         while(tries < 3) {
             final String url = apiMonitor.getUrl() + ":" + apiMonitor.getPort() + "/" + apiMonitor.getHealthCheckUrl();

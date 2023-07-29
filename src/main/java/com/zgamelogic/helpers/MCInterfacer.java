@@ -1,6 +1,6 @@
 package com.zgamelogic.helpers;
 
-import com.zgamelogic.data.serializable.MinecraftMonitor;
+import com.zgamelogic.data.serializable.monitors.MinecraftMonitor;
 import com.zgamelogic.data.serializable.StatusMinecraft;
 import com.zgamelogic.data.serializable.Status;
 import org.json.JSONObject;
@@ -19,6 +19,8 @@ public abstract class MCInterfacer {
 
     public static Status pingServer(MinecraftMonitor minecraftMonitor){
         StatusMinecraft mh = new StatusMinecraft();
+        mh.setup();
+
         int tries = 0;
         while(tries < 3) {
             try (Socket socket = new Socket()) {
@@ -60,7 +62,6 @@ public abstract class MCInterfacer {
                 id = readVarInt(in);
 
                 socket.close();
-                mh.setStatus(true);
                 return mh;
             } catch (Exception e) {
                 tries++;

@@ -16,10 +16,6 @@ public class StatusMinecraft extends Status {
     private String version;
     private String motd;
 
-    public StatusMinecraft(){
-        super();
-    }
-
     public void update(JSONObject json){
         if(json == null){
             setStatus(false);

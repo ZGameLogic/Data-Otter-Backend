@@ -4,6 +4,10 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.zgamelogic.data.serializable.*;
+import com.zgamelogic.data.serializable.monitors.APIMonitor;
+import com.zgamelogic.data.serializable.monitors.MinecraftMonitor;
+import com.zgamelogic.data.serializable.monitors.Monitor;
+import com.zgamelogic.data.serializable.monitors.WebMonitor;
 import com.zgamelogic.helpers.APIInterfacer;
 import com.zgamelogic.helpers.MCInterfacer;
 import com.zgamelogic.helpers.WebInterfacer;
@@ -32,7 +36,6 @@ public class WebController {
 
 
     private HashMap<String, Class> classMap;
-    private volatile LinkedList<Monitor> monitors;
 
     @PostConstruct
     private void init(){
@@ -52,9 +55,12 @@ public class WebController {
             @RequestParam(required = false) Boolean history
     ){
         LinkedList<Monitor> monitors = loadMonitors();
-        if(id != null){ monitors.removeIf(m -> m.getId() != id); }
 
-        // TODO update array with history data
+        if(history == null) history = false;
+        if(id != null){ monitors.removeIf(m -> m.getId() != id); }
+        for(Monitor m: monitors){
+            m.setStatus(loadMonitorHistory(m, history));
+        }
 
 
         return monitors;
@@ -79,7 +85,7 @@ public class WebController {
         LinkedList<Status> historyData = loadMonitorHistory(monitor, true);
         Status status = runMonitorCheck(monitor);
         historyData.add(status);
-        historyData.sort(Comparator.comparing(Status::getTaken));
+        historyData.sort(Comparator.comparing(Status::getTaken).reversed());
         Date xHoursAgo = Date.from(LocalDateTime.now().minusHours(HOURS_TO_KEEP).toInstant(ZoneOffset.ofHours(0)));
         historyData.removeIf(h -> h.getTaken() == null || h.getTaken().before(xHoursAgo));
         saveMonitorHistory(monitor, historyData);
@@ -98,7 +104,7 @@ public class WebController {
                 return new LinkedList<>(Arrays.asList((Status[]) om.readValue(historyFile, classMap.get(monitor.getType() + "_history"))));
             } else {
                 LinkedList<Status> status = new LinkedList<>(Arrays.asList((Status[]) om.readValue(historyFile, classMap.get(monitor.getType() + "_history"))));
-                return new LinkedList<>(Collections.singletonList(status.removeLast()));
+                return new LinkedList<>(Collections.singletonList(status.getFirst()));
             }
         } catch (Exception e){
             return new LinkedList<>();

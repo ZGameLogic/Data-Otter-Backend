@@ -6,14 +6,15 @@ import lombok.*;
 import java.util.Date;
 
 @Getter
+@NoArgsConstructor
 public class Status {
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    private final Date taken;
+    private Date taken;
     private boolean status;
     private long completedInMilliseconds;
 
-    public Status(){
+    public void setup(){
         taken = new Date();
         completedInMilliseconds = System.currentTimeMillis();
     }

@@ -1,7 +1,7 @@
 package com.zgamelogic.helpers;
 
 import com.zgamelogic.data.serializable.Status;
-import com.zgamelogic.data.serializable.WebMonitor;
+import com.zgamelogic.data.serializable.monitors.WebMonitor;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
 
@@ -12,7 +12,7 @@ public abstract class WebInterfacer {
 
     public static Status pingWeb(WebMonitor webMonitor){
         Status mh = new Status();
-
+        mh.setup();
         int tries = 0;
         while(tries < 3) {
             final String url = webMonitor.getUrl() + ":" + webMonitor.getPort();
