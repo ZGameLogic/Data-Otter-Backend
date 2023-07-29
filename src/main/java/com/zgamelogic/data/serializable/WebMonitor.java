@@ -1,9 +1,8 @@
-package com.zgamelogic.data;
+package com.zgamelogic.data.serializable;
 
+import com.zgamelogic.data.serializable.Monitor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
 
 @Getter
 @NoArgsConstructor
