@@ -1,19 +1,20 @@
 package com.zgamelogic.helpers;
 
-import com.zgamelogic.data.WebMonitor;
+import com.zgamelogic.data.serializable.Status;
+import com.zgamelogic.data.serializable.monitors.WebMonitor;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.time.Duration;
-import java.util.Date;
 
 public abstract class WebInterfacer {
 
-    public static boolean pingWeb(WebMonitor webMonitor){
+    public static Status pingWeb(WebMonitor webMonitor){
+        Status mh = new Status();
+        mh.setup();
         int tries = 0;
         while(tries < 3) {
-            webMonitor.setCompletedInMilliseconds(System.currentTimeMillis());
             final String url = webMonitor.getUrl() + ":" + webMonitor.getPort();
             RestTemplate restTemplate = new RestTemplateBuilder()
                     .setConnectTimeout(Duration.ofSeconds(2))
@@ -21,17 +22,13 @@ public abstract class WebInterfacer {
                     .build();
             try {
                 String response = restTemplate.getForObject(new URI(url), String.class);
-                webMonitor.setStatus(response.contains(webMonitor.getRegex()));
-                webMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - webMonitor.getCompletedInMilliseconds());
-                webMonitor.setTaken(new Date());
-                return true;
+                mh.setStatus(response.contains(webMonitor.getRegex()));
+                return mh;
             } catch (Exception e) {
                 tries++;
             }
         }
-        webMonitor.setStatus(false);
-        webMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - webMonitor.getCompletedInMilliseconds());
-        webMonitor.setTaken(new Date());
-        return false;
+        mh.setStatus(false);
+        return mh;
     }
 }

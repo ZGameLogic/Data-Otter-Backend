@@ -1,9 +1,7 @@
-package com.zgamelogic.data;
+package com.zgamelogic.data.serializable.monitors;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
 
 @Getter
 @NoArgsConstructor
@@ -19,6 +17,5 @@ public class WebMonitor extends Monitor {
         this.regex = regex;
         setName(name);
         setType("web");
-        setTaken(new Date());
     }
 }

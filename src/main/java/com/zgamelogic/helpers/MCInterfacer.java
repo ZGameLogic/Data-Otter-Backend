@@ -1,6 +1,8 @@
 package com.zgamelogic.helpers;
 
-import com.zgamelogic.data.MinecraftMonitor;
+import com.zgamelogic.data.serializable.monitors.MinecraftMonitor;
+import com.zgamelogic.data.serializable.StatusMinecraft;
+import com.zgamelogic.data.serializable.Status;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
@@ -9,15 +11,16 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Date;
 
 public abstract class MCInterfacer {
 
     public static final byte PACKET_HANDSHAKE = 0x00, PACKET_STATUSREQUEST = 0x00, PACKET_PING = 0x01;
     public static final int STATUS_HANDSHAKE = 1;
 
-    public static boolean pingServer(MinecraftMonitor minecraftMonitor){
-        minecraftMonitor.setCompletedInMilliseconds(System.currentTimeMillis());
+    public static Status pingServer(MinecraftMonitor minecraftMonitor){
+        StatusMinecraft mh = new StatusMinecraft();
+        mh.setup();
+
         int tries = 0;
         while(tries < 3) {
             try (Socket socket = new Socket()) {
@@ -49,7 +52,7 @@ public abstract class MCInterfacer {
                 byte[] data = new byte[length];
                 in.readFully(data);
                 JSONObject json = new JSONObject(new String(data));
-                minecraftMonitor.update(json);
+                mh.update(json);
 
                 out.writeByte(0x09);
                 out.writeByte(PACKET_PING);
@@ -59,17 +62,13 @@ public abstract class MCInterfacer {
                 id = readVarInt(in);
 
                 socket.close();
-                minecraftMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - minecraftMonitor.getCompletedInMilliseconds());
-                minecraftMonitor.setTaken(new Date());
-                return true;
+                return mh;
             } catch (Exception e) {
                 tries++;
             }
         }
-        minecraftMonitor.setStatus(false);
-        minecraftMonitor.setCompletedInMilliseconds(System.currentTimeMillis() - minecraftMonitor.getCompletedInMilliseconds());
-        minecraftMonitor.setTaken(new Date());
-        return false;
+        mh.setStatus(false);
+        return mh;
     }
 
     private static void writeVarInt(DataOutputStream out, int paramInt) throws IOException {

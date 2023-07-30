@@ -1,4 +1,4 @@
-package com.zgamelogic.data;
+package com.zgamelogic.data.serializable.monitors;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

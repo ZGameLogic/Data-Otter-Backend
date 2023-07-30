@@ -1,24 +1,14 @@
-package com.zgamelogic.data;
+package com.zgamelogic.data.serializable;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.LinkedList;
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
 @Getter
-public class MinecraftMonitor extends Monitor {
-
-    private String url;
-    private int port;
+public class StatusMinecraft extends Status {
 
     private int max;
     private int online;
