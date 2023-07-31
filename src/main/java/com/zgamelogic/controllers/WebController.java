@@ -31,6 +31,7 @@ import java.util.*;
 public class WebController {
 
     private final static int HOURS_TO_KEEP = 12;
+    private final static int NON_EXTENDED_HOURS = 8;
     private static final String MONITORS_CONFIG = "monitors.json";
     private static final String HISTORY_DIR = "history";
 
@@ -51,14 +52,16 @@ public class WebController {
     @GetMapping("monitors")
     private LinkedList<Monitor> getMonitors(
             @RequestParam(required = false) Integer id,
-            @RequestParam(required = false) Boolean history
+            @RequestParam(required = false) Boolean history,
+            @RequestParam(required = false) Boolean extended
     ){
         LinkedList<Monitor> monitors = loadMonitors();
 
         if(history == null) history = false;
+        if(extended == null) extended = false;
         if(id != null){ monitors.removeIf(m -> m.getId() != id); }
         for(Monitor m: monitors){
-            m.setStatus(loadMonitorHistory(m, history));
+            m.setStatus(loadMonitorHistory(m, history, extended));
         }
 
 
@@ -81,7 +84,7 @@ public class WebController {
      * @param monitor Monitor to get the new data for
      */
     private void updateMonitorStatusHistory(Monitor monitor){
-        LinkedList<Status> historyData = loadMonitorHistory(monitor, true);
+        LinkedList<Status> historyData = loadMonitorHistory(monitor, true, true);
         Status status = runMonitorCheck(monitor);
         historyData.add(status);
         historyData.sort(Comparator.comparing(Status::getTaken).reversed());
@@ -95,12 +98,15 @@ public class WebController {
      * @param monitor Monitor to load the history for
      * @return Linked list of history objects for the monitor
      */
-    private LinkedList<Status> loadMonitorHistory(Monitor monitor, boolean includeHistory){
+    private LinkedList<Status> loadMonitorHistory(Monitor monitor, boolean includeHistory, boolean extended){
         File historyFile = new File(HISTORY_DIR + "/" + monitor.getId() + ".json");
         try {
             ObjectMapper om = new ObjectMapper();
             if(includeHistory) {
-                return new LinkedList<>(Arrays.asList((Status[]) om.readValue(historyFile, classMap.get(monitor.getType() + "_history"))));
+                LinkedList<Status> historyData = new LinkedList<>(Arrays.asList((Status[]) om.readValue(historyFile, classMap.get(monitor.getType() + "_history"))));
+                Date xHoursAgo = Date.from(LocalDateTime.now().minusHours(extended ? HOURS_TO_KEEP: NON_EXTENDED_HOURS).toInstant(ZoneOffset.ofHours(0)));
+                historyData.removeIf(h -> h.getTaken() == null || h.getTaken().before(xHoursAgo));
+                return historyData;
             } else {
                 LinkedList<Status> status = new LinkedList<>(Arrays.asList((Status[]) om.readValue(historyFile, classMap.get(monitor.getType() + "_history"))));
                 return new LinkedList<>(Collections.singletonList(status.getFirst()));
