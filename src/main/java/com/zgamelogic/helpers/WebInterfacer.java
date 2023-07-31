@@ -10,7 +10,7 @@ import java.time.Duration;
 
 public abstract class WebInterfacer {
 
-    public static Status pingWeb(WebMonitor webMonitor){
+    public static Status pingWeb(WebMonitor webMonitor) {
         Status mh = new Status();
         mh.setup();
         int tries = 0;
@@ -26,6 +26,11 @@ public abstract class WebInterfacer {
                 return mh;
             } catch (Exception e) {
                 tries++;
+                try {
+                    Thread.sleep(150);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         }
         mh.setStatus(false);

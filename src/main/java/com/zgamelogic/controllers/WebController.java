@@ -30,10 +30,9 @@ import java.util.*;
 @Slf4j
 public class WebController {
 
-    private final static int HOURS_TO_KEEP = 8;
+    private final static int HOURS_TO_KEEP = 12;
     private static final String MONITORS_CONFIG = "monitors.json";
     private static final String HISTORY_DIR = "history";
-
 
     private HashMap<String, Class> classMap;
 
