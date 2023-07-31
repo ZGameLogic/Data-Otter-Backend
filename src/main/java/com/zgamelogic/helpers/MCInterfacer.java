@@ -65,6 +65,11 @@ public abstract class MCInterfacer {
                 return mh;
             } catch (Exception e) {
                 tries++;
+                try {
+                    Thread.sleep(150);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         }
         mh.setStatus(false);
