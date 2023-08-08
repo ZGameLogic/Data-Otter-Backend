@@ -1,6 +1,7 @@
 package com.zgamelogic.application;
 
 import com.zgamelogic.controllers.WebController;
+import com.zgamelogic.controllers.iOSController;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,7 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@Import({WebController.class})
+@Import({WebController.class, iOSController.class})
 @Slf4j
 @EnableScheduling
 public class App {
