@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.zgamelogic.data.serializable.*;
+import com.zgamelogic.data.serializable.events.Events;
 import com.zgamelogic.data.serializable.monitors.APIMonitor;
 import com.zgamelogic.data.serializable.monitors.MinecraftMonitor;
 import com.zgamelogic.data.serializable.monitors.Monitor;
@@ -22,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -34,6 +36,7 @@ public class WebController {
     private final static int NON_EXTENDED_HOURS = 8;
     private static final String MONITORS_CONFIG = "monitors.json";
     private static final String HISTORY_DIR = "history";
+    private static final String EVENTS_DIR = "events";
 
     private HashMap<String, Class> classMap;
 
@@ -74,16 +77,26 @@ public class WebController {
     }
 
     private void updateAllMonitorStatusHistory() {
-        loadMonitors().forEach(monitor ->
-                new Thread(() -> updateMonitorStatusHistory(monitor)).start()
-        );
+        Events events = new Events();
+        LinkedList<Thread> threads = new LinkedList<>();
+        loadMonitors().forEach(monitor -> {
+            Thread thread = new Thread(() -> updateMonitorStatusHistory(monitor).ifPresent(events::addEvent));
+            threads.add(thread);
+            thread.start();
+        });
+        while(!threads.isEmpty()) threads.removeIf(thread -> !thread.isAlive());
+        if(events.hasEvents()) {
+            events.getEvents().forEach(event -> log.info(event.toString()));
+            saveEvents(events);
+        }
     }
 
     /**
      * Gets the new current data for a monitor and saves it to its history
+     * Creates and saves events if something is fishy
      * @param monitor Monitor to get the new data for
      */
-    private void updateMonitorStatusHistory(Monitor monitor){
+    private Optional<Events.Event> updateMonitorStatusHistory(Monitor monitor){
         LinkedList<Status> historyData = loadMonitorHistory(monitor, true, true);
         Status status = runMonitorCheck(monitor);
         historyData.add(status);
@@ -91,6 +104,13 @@ public class WebController {
         Date xHoursAgo = Date.from(LocalDateTime.now().minusHours(HOURS_TO_KEEP).toInstant(ZoneOffset.ofHours(0)));
         historyData.removeIf(h -> h.getTaken() == null || h.getTaken().before(xHoursAgo));
         saveMonitorHistory(monitor, historyData);
+        // compare the last two entries
+        if(!historyData.isEmpty()) {
+            if (historyData.get(0).isStatus() != historyData.get(1).isStatus()) {
+                return Optional.of(new Events.Event(monitor.getName(), historyData.get(0).isStatus()));
+            }
+        }
+        return Optional.empty();
     }
 
     /**
@@ -113,6 +133,20 @@ public class WebController {
             }
         } catch (Exception e){
             return new LinkedList<>();
+        }
+    }
+
+    private void saveEvents(Events events){
+        SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy_HH-mm-ss");
+        File eventsFile = new File(EVENTS_DIR + "/" + formatter.format(events.getTime()) + ".json");
+        eventsFile.getParentFile().mkdirs();
+
+        ObjectWriter writer = new ObjectMapper().writer(new DefaultPrettyPrinter());
+        try {
+            eventsFile.createNewFile();
+            writer.writeValue(eventsFile, events);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
