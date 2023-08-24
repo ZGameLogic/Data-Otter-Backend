@@ -1,4 +1,4 @@
-package com.zgamelogic.data.serializable;
+package com.zgamelogic.data.serializable.iOS;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

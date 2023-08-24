@@ -46,10 +46,4 @@
   "port" : 8085,
   "regex" : "Build dashboard",
   "id" : 6
-}, {
-  "name" : "test",
-  "type" : "minecraft",
-  "url" : "zgamelogic.com",
-  "port" : 25565,
-  "id" : 7
-} ]
+}]
