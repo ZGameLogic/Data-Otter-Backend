@@ -14,8 +14,15 @@ public class iOSNotification {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class APS {
-        private String title;
-        private String subtitle;
-        private String body;
+        private Alert alert;
+
+        @Getter
+        @AllArgsConstructor
+        @NoArgsConstructor
+        public static class Alert {
+            private String title;
+            private String subtitle;
+            private String body;
+        }
     }
 }
