@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -67,8 +68,21 @@ public class WebController {
             m.setStatus(loadMonitorHistory(m, history, extended));
         }
 
-
         return monitors;
+    }
+
+    @GetMapping("events")
+    private LinkedList<Events> getEvents(
+            @RequestParam(required = false) Long startDate,
+            @RequestParam(required = false) Long endDate
+    ){
+        if(startDate != null && endDate != null){
+            return loadEvents(new Date(startDate), new Date(endDate));
+        } else if(startDate != null){
+            return loadEvents(new Date(startDate));
+        } else {
+            return loadEvents();
+        }
     }
 
     @Scheduled(cron = "0 */1 * * * *")
@@ -105,7 +119,7 @@ public class WebController {
         historyData.removeIf(h -> h.getTaken() == null || h.getTaken().before(xHoursAgo));
         saveMonitorHistory(monitor, historyData);
         // compare the last two entries
-        if(!historyData.isEmpty()) {
+        if(historyData.size() >= 2) {
             if (historyData.get(0).isStatus() != historyData.get(1).isStatus()) {
                 return Optional.of(new Events.Event(monitor.getName(), historyData.get(0).isStatus()));
             }
@@ -137,8 +151,9 @@ public class WebController {
     }
 
     private void saveEvents(Events events){
-        SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy_HH-mm-ss");
-        File eventsFile = new File(EVENTS_DIR + "/" + formatter.format(events.getTime()) + ".json");
+        SimpleDateFormat dayFormatter = new SimpleDateFormat("MM-dd-yyyy");
+        SimpleDateFormat timeFormatter = new SimpleDateFormat("HH-mm-ss");
+        File eventsFile = new File(EVENTS_DIR + "/" + dayFormatter.format(events.getTime()) + "/" + timeFormatter.format(events.getTime()) + ".json");
         eventsFile.getParentFile().mkdirs();
 
         ObjectWriter writer = new ObjectMapper().writer(new DefaultPrettyPrinter());
@@ -147,6 +162,54 @@ public class WebController {
             writer.writeValue(eventsFile, events);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private LinkedList<Events> loadEvents(){
+        return loadEvents(new Date());
+    }
+
+    private LinkedList<Events> loadEvents(Date start){
+        return loadEvents(start, new Date());
+    }
+
+    private LinkedList<Events> loadEvents(Date start, Date end){
+        Calendar startTime = Calendar.getInstance();
+        startTime.setTime(start);
+        startTime.set(Calendar.HOUR_OF_DAY, 0);
+        startTime.set(Calendar.MINUTE, 0);
+        startTime.set(Calendar.SECOND, 0);
+
+        Calendar endTime = Calendar.getInstance();
+        endTime.setTime(start);
+        endTime.set(Calendar.HOUR_OF_DAY, 23);
+        endTime.set(Calendar.MINUTE, 59);
+        endTime.set(Calendar.SECOND, 59);
+        LinkedList<Events> eventsList = new LinkedList<>();
+
+        File eventsDir = new File(EVENTS_DIR);
+        Arrays.asList(eventsDir.listFiles(file -> {
+            SimpleDateFormat dayFormatter = new SimpleDateFormat("MM-dd-yyyy");
+            try {
+                Date date = dayFormatter.parse(file.getName());
+                Calendar day = Calendar.getInstance();
+                day.setTime(date);
+                day.set(Calendar.MINUTE, 1);
+                return day.after(startTime) && day.before(endTime);
+            } catch (ParseException e) {
+                return false;
+            }
+        })).forEach(directory -> Arrays.asList(directory.listFiles()).forEach(file -> eventsList.add(loadEvents(file))));
+
+        return eventsList;
+    }
+
+    private Events loadEvents(File file){
+        ObjectMapper om = new ObjectMapper();
+        try {
+            return om.readValue(file, Events.class);
+        } catch (IOException e) {
+            return null;
         }
     }
 
