@@ -188,18 +188,19 @@ public class WebController {
         LinkedList<Events> eventsList = new LinkedList<>();
 
         File eventsDir = new File(EVENTS_DIR);
-        Arrays.asList(eventsDir.listFiles(file -> {
-            SimpleDateFormat dayFormatter = new SimpleDateFormat("MM-dd-yyyy");
-            try {
-                Date date = dayFormatter.parse(file.getName());
-                Calendar day = Calendar.getInstance();
-                day.setTime(date);
-                day.set(Calendar.MINUTE, 1);
-                return day.after(startTime) && day.before(endTime);
-            } catch (ParseException e) {
-                return false;
-            }
-        })).forEach(directory -> Arrays.asList(directory.listFiles()).forEach(file -> eventsList.add(loadEvents(file))));
+        if(eventsDir.exists())
+            Arrays.asList(eventsDir.listFiles(file -> {
+                SimpleDateFormat dayFormatter = new SimpleDateFormat("MM-dd-yyyy");
+                try {
+                    Date date = dayFormatter.parse(file.getName());
+                    Calendar day = Calendar.getInstance();
+                    day.setTime(date);
+                    day.set(Calendar.MINUTE, 1);
+                    return day.after(startTime) && day.before(endTime);
+                } catch (ParseException e) {
+                    return false;
+                }
+            })).forEach(directory -> Arrays.asList(directory.listFiles()).forEach(file -> eventsList.add(loadEvents(file))));
 
         return eventsList;
     }
