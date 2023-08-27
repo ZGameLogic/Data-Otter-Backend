@@ -63,8 +63,11 @@ public class WebController {
         LinkedList<Monitor> monitors = loadMonitors();
 
         if(id != null){ monitors.removeIf(m -> m.getId() != id); }
-        for(Monitor m: monitors){
-            m.setStatus(loadMonitorHistory(m, history, extended, uncondensed));
+
+        if(history || extended) {
+            for (Monitor m : monitors) {
+                m.setStatus(loadMonitorHistory(m, history, extended, uncondensed));
+            }
         }
 
         return monitors;
