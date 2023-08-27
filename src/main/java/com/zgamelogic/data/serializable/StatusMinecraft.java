@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 public class StatusMinecraft extends Status {
@@ -33,5 +34,19 @@ public class StatusMinecraft extends Status {
         }
         version = json.getJSONObject("version").getString("name");
         motd = json.getJSONObject("description").getString("text");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof StatusMinecraft)) return false;
+        if (!super.equals(o)) return false;
+        StatusMinecraft that = (StatusMinecraft) o;
+        return online == that.online && Objects.equals(onlinePlayers, that.onlinePlayers);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), online, onlinePlayers);
     }
 }

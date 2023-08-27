@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import java.util.Date;
+import java.util.Objects;
 
 @Getter
 @NoArgsConstructor
@@ -28,4 +29,16 @@ public class Status {
         completedInMilliseconds = System.currentTimeMillis() - completedInMilliseconds;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Status)) return false;
+        Status status1 = (Status) o;
+        return status == status1.status;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(status);
+    }
 }

@@ -56,16 +56,15 @@ public class WebController {
     @GetMapping("monitors")
     private LinkedList<Monitor> getMonitors(
             @RequestParam(required = false) Integer id,
-            @RequestParam(required = false) Boolean history,
-            @RequestParam(required = false) Boolean extended
+            @RequestParam(required = false) boolean history,
+            @RequestParam(required = false) boolean extended,
+            @RequestParam(required = false) boolean uncondensed
     ){
         LinkedList<Monitor> monitors = loadMonitors();
 
-        if(history == null) history = false;
-        if(extended == null) extended = false;
         if(id != null){ monitors.removeIf(m -> m.getId() != id); }
         for(Monitor m: monitors){
-            m.setStatus(loadMonitorHistory(m, history, extended));
+            m.setStatus(loadMonitorHistory(m, history, extended, uncondensed));
         }
 
         return monitors;
@@ -111,7 +110,7 @@ public class WebController {
      * @param monitor Monitor to get the new data for
      */
     private Optional<Events.Event> updateMonitorStatusHistory(Monitor monitor){
-        LinkedList<Status> historyData = loadMonitorHistory(monitor, true, true);
+        LinkedList<Status> historyData = loadMonitorHistory(monitor, true, true, true);
         Status status = runMonitorCheck(monitor);
         historyData.add(status);
         historyData.sort(Comparator.comparing(Status::getTaken).reversed());
@@ -132,7 +131,7 @@ public class WebController {
      * @param monitor Monitor to load the history for
      * @return Linked list of history objects for the monitor
      */
-    private LinkedList<Status> loadMonitorHistory(Monitor monitor, boolean includeHistory, boolean extended){
+    private LinkedList<Status> loadMonitorHistory(Monitor monitor, boolean includeHistory, boolean extended, boolean uncondensed){
         File historyFile = new File(HISTORY_DIR + "/" + monitor.getId() + ".json");
         try {
             ObjectMapper om = new ObjectMapper();
@@ -140,7 +139,11 @@ public class WebController {
                 LinkedList<Status> historyData = new LinkedList<>(Arrays.asList((Status[]) om.readValue(historyFile, classMap.get(monitor.getType() + "_history"))));
                 Date xHoursAgo = Date.from(LocalDateTime.now().minusHours(extended ? HOURS_TO_KEEP: NON_EXTENDED_HOURS).toInstant(ZoneOffset.ofHours(0)));
                 historyData.removeIf(h -> h.getTaken() == null || h.getTaken().before(xHoursAgo));
-                return historyData;
+                if(uncondensed) {
+                    return historyData;
+                } else {
+                    return condense(historyData);
+                }
             } else {
                 LinkedList<Status> status = new LinkedList<>(Arrays.asList((Status[]) om.readValue(historyFile, classMap.get(monitor.getType() + "_history"))));
                 return new LinkedList<>(Collections.singletonList(status.getFirst()));
@@ -148,6 +151,17 @@ public class WebController {
         } catch (Exception e){
             return new LinkedList<>();
         }
+    }
+
+    private LinkedList<Status> condense(LinkedList<Status> statuses){
+        LinkedList<Status> condensed = new LinkedList<>();
+        for (int i = 0; i < statuses.size(); i++) {
+            Status status = statuses.get(i);
+            if(i == 0 || i == statuses.size() - 1 || !status.equals(condensed.getLast())){
+                condensed.add(status);
+            }
+        }
+        return condensed;
     }
 
     private void saveEvents(Events events){
