@@ -29,12 +29,19 @@ public class Status {
         completedInMilliseconds = System.currentTimeMillis() - completedInMilliseconds;
     }
 
+    public boolean softEquals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Status)) return false;
+        Status status1 = (Status) o;
+        return status == status1.status;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Status)) return false;
         Status status1 = (Status) o;
-        return status == status1.status;
+        return status == status1.status && taken.equals(status1.taken);
     }
 
     @Override

@@ -157,7 +157,10 @@ public class WebController {
         LinkedList<Status> condensed = new LinkedList<>();
         for (int i = 0; i < statuses.size(); i++) {
             Status status = statuses.get(i);
-            if(i == 0 || i == statuses.size() - 1 || !status.equals(condensed.getLast())){
+            if(i == 0 || i == statuses.size() - 1){
+                condensed.add(status);
+            } else if(!status.softEquals(statuses.get(i - 1))){
+                if(!condensed.contains(statuses.get(i - 1))) condensed.add(statuses.get(i - 1));
                 condensed.add(status);
             }
         }
