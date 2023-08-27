@@ -37,16 +37,11 @@ public class StatusMinecraft extends Status {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean softEquals(Object o){
         if (this == o) return true;
         if (!(o instanceof StatusMinecraft)) return false;
-        if (!super.equals(o)) return false;
         StatusMinecraft that = (StatusMinecraft) o;
+        System.out.println("" + (online == that.online && Objects.equals(onlinePlayers, that.onlinePlayers)));
         return online == that.online && Objects.equals(onlinePlayers, that.onlinePlayers);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), online, onlinePlayers);
     }
 }
