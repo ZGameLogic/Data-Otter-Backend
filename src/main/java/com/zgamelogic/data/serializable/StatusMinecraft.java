@@ -41,6 +41,6 @@ public class StatusMinecraft extends Status {
         if (this == o) return true;
         if (!(o instanceof StatusMinecraft)) return false;
         StatusMinecraft that = (StatusMinecraft) o;
-        return online == that.online && Objects.equals(onlinePlayers, that.onlinePlayers);
+        return online == that.online && Objects.equals(onlinePlayers, that.onlinePlayers) && super.softEquals(o);
     }
 }
