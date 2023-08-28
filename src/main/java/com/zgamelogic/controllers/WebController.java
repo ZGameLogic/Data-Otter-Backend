@@ -64,11 +64,10 @@ public class WebController {
 
         if(id != null){ monitors.removeIf(m -> m.getId() != id); }
 
-        if(history || extended) {
-            for (Monitor m : monitors) {
-                m.setStatus(loadMonitorHistory(m, history, extended, uncondensed));
-            }
+        for (Monitor m : monitors) {
+            m.setStatus(loadMonitorHistory(m, history, extended, uncondensed));
         }
+
 
         return monitors;
     }
@@ -138,7 +137,7 @@ public class WebController {
         File historyFile = new File(HISTORY_DIR + "/" + monitor.getId() + ".json");
         try {
             ObjectMapper om = new ObjectMapper();
-            if(includeHistory || extended) {
+            if(extended) {
                 LinkedList<Status> historyData = new LinkedList<>(Arrays.asList((Status[]) om.readValue(historyFile, classMap.get(monitor.getType() + "_history"))));
                 Date xHoursAgo = Date.from(LocalDateTime.now().minusHours(extended ? HOURS_TO_KEEP: NON_EXTENDED_HOURS).toInstant(ZoneOffset.ofHours(0)));
                 historyData.removeIf(h -> h.getTaken() == null || h.getTaken().before(xHoursAgo));
