@@ -137,7 +137,7 @@ public class WebController {
         File historyFile = new File(HISTORY_DIR + "/" + monitor.getId() + ".json");
         try {
             ObjectMapper om = new ObjectMapper();
-            if(extended) {
+            if(includeHistory || extended) {
                 LinkedList<Status> historyData = new LinkedList<>(Arrays.asList((Status[]) om.readValue(historyFile, classMap.get(monitor.getType() + "_history"))));
                 Date xHoursAgo = Date.from(LocalDateTime.now().minusHours(extended ? HOURS_TO_KEEP: NON_EXTENDED_HOURS).toInstant(ZoneOffset.ofHours(0)));
                 historyData.removeIf(h -> h.getTaken() == null || h.getTaken().before(xHoursAgo));
