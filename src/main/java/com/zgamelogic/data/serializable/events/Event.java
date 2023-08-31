@@ -1,6 +1,7 @@
 package com.zgamelogic.data.serializable.events;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.zgamelogic.data.serializable.monitors.Monitor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,6 +16,7 @@ import java.util.LinkedList;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Event {
     private long monitorId;
     private String monitor;
@@ -27,6 +29,11 @@ public class Event {
     public void addEntry(Entry entry){
         if(entries == null) entries = new LinkedList<>();
         entries.add(entry);
+    }
+
+    public void addEntries(LinkedList<Entry> entries){
+        if(entries == null) entries = new LinkedList<>();
+        this.entries.addAll(entries);
     }
 
     @Getter

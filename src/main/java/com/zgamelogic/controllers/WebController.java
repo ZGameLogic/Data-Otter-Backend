@@ -35,6 +35,7 @@ public class WebController {
     private final static int HOURS_TO_KEEP = 12;
     private final static int NON_EXTENDED_HOURS = 8;
     private final static int EVENT_COMBINE_MINUTE_THRESHOLD = 8;
+    private final static int MINUTES_TO_COMBINE_EVENTS = 60;
 
     private static final String MONITORS_CONFIG = "monitors.json";
     private static final String HISTORY_DIR = "history";
@@ -164,7 +165,8 @@ public class WebController {
     }
 
     private void saveEvent(Event event){
-        // TODO figure out if we have to add it to an existing event or not
+        Optional<Event> foundEvent = findExistingEvent(event);
+        foundEvent.ifPresent(value -> event.addEntries(value.getEntries()));
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy_HH-mm-ss");
         File eventsFile = new File(EVENTS_DIR + "/" + event.getMonitorId() + "_" + dateFormat.format(event.getStartTime()) + ".json");
         eventsFile.getParentFile().mkdirs();
@@ -176,6 +178,26 @@ public class WebController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Optional<Event> findExistingEvent(Event event){
+        Calendar eventStartTime = Calendar.getInstance();
+        eventStartTime.setTime(event.getStartTime());
+
+        for(File file: new File(EVENTS_DIR).listFiles()){
+            if(Long.parseLong(file.getName().split("_")[0]) != event.getMonitorId()) continue;
+            Event currentEvent = loadEvent(file);
+            if(currentEvent == null) continue;
+            Calendar currentEventEndTime = Calendar.getInstance();
+            currentEventEndTime.setTime(currentEvent.getEndTime());
+            currentEventEndTime.add(Calendar.HOUR, 1);
+
+            if(eventStartTime.before(currentEventEndTime)) {
+                return Optional.of(currentEvent);
+            }
+
+        }
+        return Optional.empty();
     }
 
     private LinkedList<Event> loadEvents(){
