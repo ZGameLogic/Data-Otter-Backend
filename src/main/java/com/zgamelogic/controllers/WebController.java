@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.zgamelogic.data.serializable.*;
-import com.zgamelogic.data.serializable.events.Events;
+import com.zgamelogic.data.serializable.events.Event;
 import com.zgamelogic.data.serializable.monitors.APIMonitor;
 import com.zgamelogic.data.serializable.monitors.MinecraftMonitor;
 import com.zgamelogic.data.serializable.monitors.Monitor;
@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -35,6 +34,9 @@ public class WebController {
 
     private final static int HOURS_TO_KEEP = 12;
     private final static int NON_EXTENDED_HOURS = 8;
+    private final static int EVENT_COMBINE_MINUTE_THRESHOLD = 8;
+    private final static int MINUTES_TO_COMBINE_EVENTS = 60;
+
     private static final String MONITORS_CONFIG = "monitors.json";
     private static final String HISTORY_DIR = "history";
     private static final String EVENTS_DIR = "events";
@@ -73,7 +75,7 @@ public class WebController {
     }
 
     @GetMapping("events")
-    private LinkedList<Events> getEvents(
+    private LinkedList<Event> getEvents(
             @RequestParam(required = false) Long startDate,
             @RequestParam(required = false) Long endDate
     ){
@@ -92,18 +94,9 @@ public class WebController {
     }
 
     private void updateAllMonitorStatusHistory() {
-        Events events = new Events();
-        LinkedList<Thread> threads = new LinkedList<>();
-        loadMonitors().forEach(monitor -> {
-            Thread thread = new Thread(() -> updateMonitorStatusHistory(monitor).ifPresent(events::addEvent));
-            threads.add(thread);
-            thread.start();
-        });
-        while(!threads.isEmpty()) threads.removeIf(thread -> !thread.isAlive());
-        if(events.hasEvents()) {
-            events.getEvents().forEach(event -> log.info(event.toString()));
-            saveEvents(events);
-        }
+        loadMonitors().forEach(monitor -> new Thread(() ->
+                    updateMonitorStatusHistory(monitor).ifPresent(this::saveEvent))
+                .start());
     }
 
     /**
@@ -111,7 +104,7 @@ public class WebController {
      * Creates and saves events if something is fishy
      * @param monitor Monitor to get the new data for
      */
-    private Optional<Events.Event> updateMonitorStatusHistory(Monitor monitor){
+    private Optional<Event> updateMonitorStatusHistory(Monitor monitor){
         LinkedList<Status> historyData = loadMonitorHistory(monitor, true, true, true);
         Status status = runMonitorCheck(monitor);
         historyData.add(status);
@@ -122,7 +115,9 @@ public class WebController {
         // compare the last two entries
         if(historyData.size() >= 2) {
             if (historyData.get(0).isStatus() != historyData.get(1).isStatus()) {
-                return Optional.of(new Events.Event(monitor.getName(), historyData.get(0).isStatus()));
+                Event event = new Event(monitor);
+                event.addEntry(new Event.Entry(historyData.get(0).isStatus()));
+                return Optional.of(event);
             }
         }
         return Optional.empty();
@@ -169,30 +164,51 @@ public class WebController {
         return condensed;
     }
 
-    private void saveEvents(Events events){
-        SimpleDateFormat dayFormatter = new SimpleDateFormat("MM-dd-yyyy");
-        SimpleDateFormat timeFormatter = new SimpleDateFormat("HH-mm-ss");
-        File eventsFile = new File(EVENTS_DIR + "/" + dayFormatter.format(events.getTime()) + "/" + timeFormatter.format(events.getTime()) + ".json");
+    private void saveEvent(Event event){
+        Optional<Event> foundEvent = findExistingEvent(event);
+        foundEvent.ifPresent(value -> event.addEntries(value.getEntries()));
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy_HH-mm-ss");
+        File eventsFile = new File(EVENTS_DIR + "/" + event.getMonitorId() + "_" + dateFormat.format(event.getStartTime()) + ".json");
         eventsFile.getParentFile().mkdirs();
 
         ObjectWriter writer = new ObjectMapper().writer(new DefaultPrettyPrinter());
         try {
             eventsFile.createNewFile();
-            writer.writeValue(eventsFile, events);
+            writer.writeValue(eventsFile, event);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private LinkedList<Events> loadEvents(){
+    private Optional<Event> findExistingEvent(Event event){
+        Calendar eventStartTime = Calendar.getInstance();
+        eventStartTime.setTime(event.getStartTime());
+
+        for(File file: new File(EVENTS_DIR).listFiles()){
+            if(Long.parseLong(file.getName().split("_")[0]) != event.getMonitorId()) continue;
+            Event currentEvent = loadEvent(file);
+            if(currentEvent == null) continue;
+            Calendar currentEventEndTime = Calendar.getInstance();
+            currentEventEndTime.setTime(currentEvent.getEndTime());
+            currentEventEndTime.add(Calendar.HOUR, 1);
+
+            if(eventStartTime.before(currentEventEndTime)) {
+                return Optional.of(currentEvent);
+            }
+
+        }
+        return Optional.empty();
+    }
+
+    private LinkedList<Event> loadEvents(){
         return loadEvents(new Date());
     }
 
-    private LinkedList<Events> loadEvents(Date start){
+    private LinkedList<Event> loadEvents(Date start){
         return loadEvents(start, new Date());
     }
 
-    private LinkedList<Events> loadEvents(Date start, Date end){
+    private LinkedList<Event> loadEvents(Date start, Date end){
         Calendar startTime = Calendar.getInstance();
         startTime.setTime(start);
         startTime.set(Calendar.HOUR_OF_DAY, 0);
@@ -205,31 +221,36 @@ public class WebController {
         endTime.set(Calendar.MINUTE, 59);
         endTime.set(Calendar.SECOND, 59);
 
-        LinkedList<Events> eventsList = new LinkedList<>();
+        LinkedList<Event> eventsList = new LinkedList<>();
 
         File eventsDir = new File(EVENTS_DIR);
-        if(eventsDir.exists())
-            Arrays.asList(eventsDir.listFiles(file -> {
-                SimpleDateFormat dayFormatter = new SimpleDateFormat("MM-dd-yyyy");
-                try {
-                    Date date = dayFormatter.parse(file.getName());
-                    Calendar day = Calendar.getInstance();
-                    day.setTime(date);
-                    day.set(Calendar.MINUTE, 1);
-                    return day.after(startTime) && day.before(endTime);
-                } catch (ParseException e) {
-                    return false;
-                }
-            })).forEach(directory -> Arrays.asList(directory.listFiles()).forEach(file -> eventsList.add(loadEvents(file))));
+        if(eventsDir.exists()) {
+            ObjectMapper om = new ObjectMapper();
+            for(File file: eventsDir.listFiles()){
+                Event event = loadEvent(file);
+                if(event == null) continue;
 
+                Calendar eventStartTime = Calendar.getInstance();
+                eventStartTime.setTime(event.getStartTime());
+
+                Calendar eventEndTime = Calendar.getInstance();
+                eventStartTime.setTime(event.getEndTime());
+
+                if((eventStartTime.after(startTime) && eventStartTime.before(endTime)) ||
+                        (eventEndTime.after(startTime) && eventEndTime.before(endTime))) {
+                    eventsList.add(event);
+                }
+            }
+        }
         return eventsList;
     }
 
-    private Events loadEvents(File file){
+    private Event loadEvent(File file){
         ObjectMapper om = new ObjectMapper();
         try {
-            return om.readValue(file, Events.class);
+            return om.readValue(file, Event.class);
         } catch (IOException e) {
+            log.error("Cannot read file: " + file.getName(), e);
             return null;
         }
     }
