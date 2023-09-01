@@ -51,6 +51,7 @@ public class Event {
         }
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     public Date getStartTime(){
         LinkedList<Date> dates = new LinkedList<>();
         for(Entry entry: entries){
@@ -63,6 +64,7 @@ public class Event {
         return new Date();
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     public Date getEndTime(){
         LinkedList<Date> dates = new LinkedList<>();
         for(Entry entry: entries){
