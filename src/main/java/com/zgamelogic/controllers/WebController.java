@@ -1,5 +1,6 @@
 package com.zgamelogic.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -43,6 +44,8 @@ public class WebController {
 
     private HashMap<String, Class> classMap;
 
+    private HashMap<Integer, LinkedList<Status>> reports;
+
     @PostConstruct
     private void init(){
         classMap = new HashMap<>();
@@ -52,6 +55,7 @@ public class WebController {
         classMap.put("api_history", Status[].class);
         classMap.put("web_history", Status[].class);
         classMap.put("minecraft_history", StatusMinecraft[].class);
+        reports = new HashMap<>();
         updateAllMonitorStatusHistory();
     }
 
@@ -70,7 +74,6 @@ public class WebController {
             m.setStatus(loadMonitorHistory(m, history, extended, uncondensed));
         }
 
-
         return monitors;
     }
 
@@ -88,9 +91,42 @@ public class WebController {
         }
     }
 
+    @PostMapping("/node/report")
+    private void nodeReport(@RequestBody String body) throws JsonProcessingException {
+        JSONArray jsonBody = new JSONArray(body);
+        LinkedList<Monitor> monitors = new LinkedList<>();
+        ObjectMapper om = new ObjectMapper();
+        for(int i = 0; i < jsonBody.length(); i++){
+            JSONObject monitor = jsonBody.getJSONObject(i);
+            Monitor m = (Monitor) om.readValue(monitor.toString(), classMap.get(monitor.getString("type")));
+            monitors.add(m);
+        }
+        addReport(monitors);
+    }
+
+    @Scheduled(cron = "58 */1 * * * *")
+    private void preOneMinuteTask(){
+        reports = new HashMap<>();
+    }
+
+    @Scheduled(cron = "30 */1 * * * *")
+    private void postOneMinuteTask(){
+        System.out.println(reports);
+    }
+
     @Scheduled(cron = "0 */1 * * * *")
     private void oneMinuteTask() {
         updateAllMonitorStatusHistory();
+    }
+
+    private synchronized void addReport(LinkedList<Monitor> monitors){
+        for(Monitor monitor: monitors){
+            if(reports.containsKey(monitor.getId())){
+                reports.get(monitor.getId()).addAll(monitor.getStatus());
+            } else {
+                reports.put(monitor.getId(), monitor.getStatus());
+            }
+        }
     }
 
     private void updateAllMonitorStatusHistory() {

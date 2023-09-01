@@ -8,6 +8,7 @@ import java.util.Objects;
 
 @Getter
 @NoArgsConstructor
+@ToString
 public class Status {
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER)
