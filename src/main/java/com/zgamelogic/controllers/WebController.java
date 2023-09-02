@@ -38,6 +38,8 @@ public class WebController {
     private final static int EVENT_COMBINE_MINUTE_THRESHOLD = 8;
     private final static int MINUTES_TO_COMBINE_EVENTS = 60;
 
+    private final static int ALERT_THRESHOLD = 1;
+
     private static final String MONITORS_CONFIG = "monitors.json";
     private static final String HISTORY_DIR = "history";
     private static final String EVENTS_DIR = "events";
@@ -98,6 +100,10 @@ public class WebController {
         for(int i = 0; i < jsonBody.length(); i++){
             JSONObject monitor = jsonBody.getJSONObject(i);
             Monitor m = (Monitor) om.readValue(monitor.toString(), classMap.get(monitor.getString("type")));
+            if(monitor.getString("type").equals("minecraft")){
+                LinkedList<Status> s = new LinkedList<>(Arrays.asList(om.readValue(monitor.getJSONArray("status").toString(), StatusMinecraft[].class)));
+                m.setStatus(s);
+            }
             monitors.add(m);
         }
         addReport(monitors);
@@ -116,6 +122,7 @@ public class WebController {
             for(Monitor m: monitors){
                 if(m.getId() == key){
                     m.addMonitorStatus(masterStatus);
+                    break;
                 }
             }
         });
@@ -138,7 +145,33 @@ public class WebController {
     }
 
     private Status combineStatuses(LinkedList<Status> statuses){
-        // TODO implement
+        LinkedList<Status> goodStatuses = (LinkedList<Status>) statuses.clone();
+        goodStatuses.removeIf(status -> !status.isStatus());
+
+        LinkedList<Status> badStatuses = (LinkedList<Status>) statuses.clone();
+        badStatuses.removeIf(Status::isStatus);
+
+        if(badStatuses.size() >= ALERT_THRESHOLD){
+            LinkedList<String> nodesReported = new LinkedList<>();
+            badStatuses.forEach(status -> {
+                if(status.getNodes() != null) {
+                    nodesReported.addAll(status.getNodes());
+                }
+            });
+            Status masterStatus = badStatuses.getFirst();
+            masterStatus.setNodes(nodesReported);
+            return masterStatus;
+        } else {
+            LinkedList<String> nodesReported = new LinkedList<>();
+            goodStatuses.forEach(status -> {
+                if (status.getNodes() != null) {
+                    nodesReported.addAll(status.getNodes());
+                }
+            });
+            Status masterStatus = goodStatuses.getFirst();
+            masterStatus.setNodes(nodesReported);
+            return masterStatus;
+        }
     }
 
     private LinkedList<Monitor> pingMonitors(){
@@ -147,6 +180,7 @@ public class WebController {
         loadMonitors().forEach(monitor -> {
             Thread thread = new Thread(() -> {
                 Status monitorStatus = runMonitorCheck(monitor);
+                monitorStatus.addNode("root");
                 monitor.addMonitorStatus(monitorStatus);
                 synchronized(this) {
                     monitors.add(monitor);
@@ -160,6 +194,7 @@ public class WebController {
     }
 
     private void updateAllMonitorStatusHistory(LinkedList<Monitor> monitors) {
+        monitors.removeIf(monitor -> monitor.getStatus() == null || monitor.getStatus().isEmpty());
         monitors.forEach(monitor -> new Thread(() ->
             updateMonitorStatusHistory(monitor).ifPresent(this::saveEvent))
         .start());
