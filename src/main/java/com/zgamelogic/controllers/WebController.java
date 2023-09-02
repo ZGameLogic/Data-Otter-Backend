@@ -56,7 +56,6 @@ public class WebController {
         classMap.put("web_history", Status[].class);
         classMap.put("minecraft_history", StatusMinecraft[].class);
         reports = new HashMap<>();
-        updateAllMonitorStatusHistory();
     }
 
     @GetMapping("monitors")
@@ -111,12 +110,21 @@ public class WebController {
 
     @Scheduled(cron = "30 */1 * * * *")
     private void postOneMinuteTask(){
-        System.out.println(reports);
+        LinkedList<Monitor> monitors = loadMonitors();
+        reports.forEach((key, statuses) -> {
+            Status masterStatus = combineStatuses(statuses);
+            for(Monitor m: monitors){
+                if(m.getId() == key){
+                    m.addMonitorStatus(masterStatus);
+                }
+            }
+        });
+        updateAllMonitorStatusHistory(monitors);
     }
 
     @Scheduled(cron = "0 */1 * * * *")
     private void oneMinuteTask() {
-        updateAllMonitorStatusHistory();
+        addReport(pingMonitors());
     }
 
     private synchronized void addReport(LinkedList<Monitor> monitors){
@@ -129,10 +137,32 @@ public class WebController {
         }
     }
 
-    private void updateAllMonitorStatusHistory() {
-        loadMonitors().forEach(monitor -> new Thread(() ->
-                    updateMonitorStatusHistory(monitor).ifPresent(this::saveEvent))
-                .start());
+    private Status combineStatuses(LinkedList<Status> statuses){
+        // TODO implement
+    }
+
+    private LinkedList<Monitor> pingMonitors(){
+        LinkedList<Monitor> monitors = new LinkedList<>();
+        LinkedList<Thread> threads = new LinkedList<>();
+        loadMonitors().forEach(monitor -> {
+            Thread thread = new Thread(() -> {
+                Status monitorStatus = runMonitorCheck(monitor);
+                monitor.addMonitorStatus(monitorStatus);
+                synchronized(this) {
+                    monitors.add(monitor);
+                }
+            });
+            threads.add(thread);
+            thread.start();
+        });
+        while(!threads.isEmpty()) threads.removeIf(thread -> !thread.isAlive());
+        return monitors;
+    }
+
+    private void updateAllMonitorStatusHistory(LinkedList<Monitor> monitors) {
+        monitors.forEach(monitor -> new Thread(() ->
+            updateMonitorStatusHistory(monitor).ifPresent(this::saveEvent))
+        .start());
     }
 
     /**
@@ -142,8 +172,7 @@ public class WebController {
      */
     private Optional<Event> updateMonitorStatusHistory(Monitor monitor){
         LinkedList<Status> historyData = loadMonitorHistory(monitor, true, true, true);
-        Status status = runMonitorCheck(monitor);
-        historyData.add(status);
+        historyData.add(monitor.getStatus().getFirst());
         historyData.sort(Comparator.comparing(Status::getTaken).reversed());
         Date xHoursAgo = Date.from(LocalDateTime.now().minusHours(HOURS_TO_KEEP).toInstant(ZoneOffset.ofHours(0)));
         historyData.removeIf(h -> h.getTaken() == null || h.getTaken().before(xHoursAgo));
