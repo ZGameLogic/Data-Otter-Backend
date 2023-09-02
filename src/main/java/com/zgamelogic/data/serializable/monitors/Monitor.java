@@ -1,5 +1,7 @@
 package com.zgamelogic.data.serializable.monitors;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.zgamelogic.data.serializable.Status;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

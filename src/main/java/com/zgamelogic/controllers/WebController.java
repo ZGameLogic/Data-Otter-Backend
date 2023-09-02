@@ -1,5 +1,6 @@
 package com.zgamelogic.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -37,11 +38,15 @@ public class WebController {
     private final static int EVENT_COMBINE_MINUTE_THRESHOLD = 8;
     private final static int MINUTES_TO_COMBINE_EVENTS = 60;
 
+    private final static int ALERT_THRESHOLD = 1;
+
     private static final String MONITORS_CONFIG = "monitors.json";
     private static final String HISTORY_DIR = "history";
     private static final String EVENTS_DIR = "events";
 
     private HashMap<String, Class> classMap;
+
+    private HashMap<Integer, LinkedList<Status>> reports;
 
     @PostConstruct
     private void init(){
@@ -52,7 +57,7 @@ public class WebController {
         classMap.put("api_history", Status[].class);
         classMap.put("web_history", Status[].class);
         classMap.put("minecraft_history", StatusMinecraft[].class);
-        updateAllMonitorStatusHistory();
+        reports = new HashMap<>();
     }
 
     @GetMapping("monitors")
@@ -69,7 +74,6 @@ public class WebController {
         for (Monitor m : monitors) {
             m.setStatus(loadMonitorHistory(m, history, extended, uncondensed));
         }
-
 
         return monitors;
     }
@@ -88,15 +92,112 @@ public class WebController {
         }
     }
 
-    @Scheduled(cron = "0 */1 * * * *")
-    private void oneMinuteTask() {
-        updateAllMonitorStatusHistory();
+    @PostMapping("/node/report")
+    private void nodeReport(@RequestBody String body) throws JsonProcessingException {
+        JSONArray jsonBody = new JSONArray(body);
+        LinkedList<Monitor> monitors = new LinkedList<>();
+        ObjectMapper om = new ObjectMapper();
+        for(int i = 0; i < jsonBody.length(); i++){
+            JSONObject monitor = jsonBody.getJSONObject(i);
+            Monitor m = (Monitor) om.readValue(monitor.toString(), classMap.get(monitor.getString("type")));
+            if(monitor.getString("type").equals("minecraft")){
+                LinkedList<Status> s = new LinkedList<>(Arrays.asList(om.readValue(monitor.getJSONArray("status").toString(), StatusMinecraft[].class)));
+                m.setStatus(s);
+            }
+            monitors.add(m);
+        }
+        addReport(monitors);
     }
 
-    private void updateAllMonitorStatusHistory() {
-        loadMonitors().forEach(monitor -> new Thread(() ->
-                    updateMonitorStatusHistory(monitor).ifPresent(this::saveEvent))
-                .start());
+    @Scheduled(cron = "58 */1 * * * *")
+    private void preOneMinuteTask(){
+        reports = new HashMap<>();
+    }
+
+    @Scheduled(cron = "30 */1 * * * *")
+    private void postOneMinuteTask(){
+        LinkedList<Monitor> monitors = loadMonitors();
+        reports.forEach((key, statuses) -> {
+            Status masterStatus = combineStatuses(statuses);
+            for(Monitor m: monitors){
+                if(m.getId() == key){
+                    m.addMonitorStatus(masterStatus);
+                    break;
+                }
+            }
+        });
+        updateAllMonitorStatusHistory(monitors);
+    }
+
+    @Scheduled(cron = "0 */1 * * * *")
+    private void oneMinuteTask() {
+        addReport(pingMonitors());
+    }
+
+    private synchronized void addReport(LinkedList<Monitor> monitors){
+        for(Monitor monitor: monitors){
+            if(reports.containsKey(monitor.getId())){
+                reports.get(monitor.getId()).addAll(monitor.getStatus());
+            } else {
+                reports.put(monitor.getId(), monitor.getStatus());
+            }
+        }
+    }
+
+    private Status combineStatuses(LinkedList<Status> statuses){
+        LinkedList<Status> goodStatuses = (LinkedList<Status>) statuses.clone();
+        goodStatuses.removeIf(status -> !status.isStatus());
+
+        LinkedList<Status> badStatuses = (LinkedList<Status>) statuses.clone();
+        badStatuses.removeIf(Status::isStatus);
+
+        if(badStatuses.size() >= ALERT_THRESHOLD){
+            LinkedList<String> nodesReported = new LinkedList<>();
+            badStatuses.forEach(status -> {
+                if(status.getNodes() != null) {
+                    nodesReported.addAll(status.getNodes());
+                }
+            });
+            Status masterStatus = badStatuses.getFirst();
+            masterStatus.setNodes(nodesReported);
+            return masterStatus;
+        } else {
+            LinkedList<String> nodesReported = new LinkedList<>();
+            goodStatuses.forEach(status -> {
+                if (status.getNodes() != null) {
+                    nodesReported.addAll(status.getNodes());
+                }
+            });
+            Status masterStatus = goodStatuses.getFirst();
+            masterStatus.setNodes(nodesReported);
+            return masterStatus;
+        }
+    }
+
+    private LinkedList<Monitor> pingMonitors(){
+        LinkedList<Monitor> monitors = new LinkedList<>();
+        LinkedList<Thread> threads = new LinkedList<>();
+        loadMonitors().forEach(monitor -> {
+            Thread thread = new Thread(() -> {
+                Status monitorStatus = runMonitorCheck(monitor);
+                monitorStatus.addNode("root");
+                monitor.addMonitorStatus(monitorStatus);
+                synchronized(this) {
+                    monitors.add(monitor);
+                }
+            });
+            threads.add(thread);
+            thread.start();
+        });
+        while(!threads.isEmpty()) threads.removeIf(thread -> !thread.isAlive());
+        return monitors;
+    }
+
+    private void updateAllMonitorStatusHistory(LinkedList<Monitor> monitors) {
+        monitors.removeIf(monitor -> monitor.getStatus() == null || monitor.getStatus().isEmpty());
+        monitors.forEach(monitor -> new Thread(() ->
+            updateMonitorStatusHistory(monitor).ifPresent(this::saveEvent))
+        .start());
     }
 
     /**
@@ -106,8 +207,7 @@ public class WebController {
      */
     private Optional<Event> updateMonitorStatusHistory(Monitor monitor){
         LinkedList<Status> historyData = loadMonitorHistory(monitor, true, true, true);
-        Status status = runMonitorCheck(monitor);
-        historyData.add(status);
+        historyData.add(monitor.getStatus().getFirst());
         historyData.sort(Comparator.comparing(Status::getTaken).reversed());
         Date xHoursAgo = Date.from(LocalDateTime.now().minusHours(HOURS_TO_KEEP).toInstant(ZoneOffset.ofHours(0)));
         historyData.removeIf(h -> h.getTaken() == null || h.getTaken().before(xHoursAgo));
