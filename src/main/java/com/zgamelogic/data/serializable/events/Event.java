@@ -44,10 +44,17 @@ public class Event {
         private boolean status;
         @JsonFormat(shape = JsonFormat.Shape.NUMBER)
         private Date time;
+        private LinkedList<String> nodes;
 
-        public Entry(boolean status){
+        public Entry(boolean status, LinkedList<String> nodes){
             this.status = status;
+            this.nodes = nodes;
             time = new Date();
+        }
+
+        public void addNode(String node){
+            if(nodes == null) nodes = new LinkedList<>();
+            nodes.add(node);
         }
     }
 

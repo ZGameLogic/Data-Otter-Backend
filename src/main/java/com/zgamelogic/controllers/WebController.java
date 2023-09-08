@@ -216,7 +216,7 @@ public class WebController {
         if(historyData.size() >= 2) {
             if (historyData.get(0).isStatus() != historyData.get(1).isStatus()) {
                 Event event = new Event(monitor);
-                event.addEntry(new Event.Entry(historyData.get(0).isStatus()));
+                event.addEntry(new Event.Entry(historyData.get(0).isStatus(), historyData.get(0).getNodes()));
                 return Optional.of(event);
             }
         }
