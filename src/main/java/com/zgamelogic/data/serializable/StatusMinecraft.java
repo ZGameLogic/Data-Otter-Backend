@@ -33,7 +33,10 @@ public class StatusMinecraft extends Status {
             }
         }
         version = json.getJSONObject("version").getString("name");
-        motd = json.getJSONObject("description").getString("text");
+        try {
+            motd = json.getJSONObject("description").getString("text");
+        } catch (Exception e){}
+
     }
 
     @Override
