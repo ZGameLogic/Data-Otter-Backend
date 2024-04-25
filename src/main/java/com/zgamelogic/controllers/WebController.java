@@ -13,13 +13,13 @@ import com.zgamelogic.data.serializable.monitors.WebMonitor;
 import com.zgamelogic.helpers.APIInterfacer;
 import com.zgamelogic.helpers.MCInterfacer;
 import com.zgamelogic.helpers.WebInterfacer;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
