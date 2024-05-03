@@ -41,3 +41,5 @@ build/
 /history/
 /events/
 /data/
+data.mv.db
+data.trace.db
