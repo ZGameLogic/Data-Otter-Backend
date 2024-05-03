@@ -1,9 +1,12 @@
 package com.zgamelogic.data.monitorConfiguration;
 
+import com.zgamelogic.data.MonitorStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -21,4 +24,8 @@ public class MonitorConfiguration {
     private int port;
     private String url;
     private String regex;
+
+    @ElementCollection
+    @CollectionTable(name="status_history")
+    private List<MonitorStatus> statusHistory;
 }
