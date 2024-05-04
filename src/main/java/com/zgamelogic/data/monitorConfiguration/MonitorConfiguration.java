@@ -1,17 +1,12 @@
 package com.zgamelogic.data.monitorConfiguration;
 
-import com.zgamelogic.data.MonitorStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "monitor_configurations")
 public class MonitorConfiguration {
     public enum Type { WEB, API }
@@ -19,13 +14,18 @@ public class MonitorConfiguration {
     @Id
     @GeneratedValue
     private Long id;
+    private String name;
     @Enumerated(EnumType.STRING)
     private Type type;
     private int port;
     private String url;
     private String regex;
 
-    @ElementCollection
-    @CollectionTable(name="status_history")
-    private List<MonitorStatus> statusHistory;
+    public MonitorConfiguration(String name, Type type, int port, String url, String regex) {
+        this.name = name;
+        this.type = type;
+        this.port = port;
+        this.url = url;
+        this.regex = regex;
+    }
 }
