@@ -1,6 +1,9 @@
 package com.zgamelogic.data.monitorHistory;
 
+import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.*;
 
 import java.util.Date;
@@ -12,6 +15,8 @@ import java.util.Date;
 @EqualsAndHashCode
 @ToString
 public class MonitorStatusId {
-    private long monitorId;
+    @ManyToOne
+    @JoinColumn(name = "MONITOR_ID", referencedColumnName = "ID")
+    private MonitorConfiguration monitor;
     private Date date;
 }

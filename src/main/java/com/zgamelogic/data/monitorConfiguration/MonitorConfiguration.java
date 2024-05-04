@@ -3,11 +3,13 @@ package com.zgamelogic.data.monitorConfiguration;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @Table(name = "monitor_configurations")
+@ToString
 public class MonitorConfiguration {
     public enum Type { WEB, API }
 
@@ -27,5 +29,9 @@ public class MonitorConfiguration {
         this.port = port;
         this.url = url;
         this.regex = regex;
+    }
+
+    public MonitorConfiguration(long id){
+        this.id = id;
     }
 }
