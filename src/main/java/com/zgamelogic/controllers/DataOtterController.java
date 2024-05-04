@@ -5,8 +5,8 @@ import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 
-@Controller
 @Slf4j
+@Controller
 public class DataOtterController {
     private final MonitorConfigurationRepository monitorConfigurationRepository;
     private final MonitorStatusRepository monitorStatusRepository;
@@ -15,4 +15,6 @@ public class DataOtterController {
         this.monitorConfigurationRepository = monitorConfigurationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
     }
+
+
 }

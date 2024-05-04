@@ -31,7 +31,7 @@ public class MonitorConfiguration {
         this.regex = regex;
     }
 
-    public MonitorConfiguration(long id){
+    public MonitorConfiguration(Long id){
         this.id = id;
     }
 }
