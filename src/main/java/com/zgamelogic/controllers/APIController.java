@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -35,16 +36,16 @@ public class APIController {
     }
 
     @PostMapping("monitors")
-    private ResponseEntity<?> createMonitor(@RequestBody MonitorConfiguration monitorConfiguration) {
-        MonitorStatusReport status = monitorService.getMonitorStatus(monitorConfiguration);
+    private ResponseEntity<?> createMonitor(@RequestBody MonitorConfiguration monitorConfiguration) throws ExecutionException, InterruptedException {
+        MonitorStatusReport status = monitorService.getMonitorStatus(monitorConfiguration).get();
         if(!status.status()) return ResponseEntity.status(400).body(status);
         MonitorConfiguration m = monitorConfigurationRepository.save(monitorConfiguration);
         return ResponseEntity.ok(m);
     }
 
     @PostMapping("monitors/test")
-    private ResponseEntity<MonitorStatusReport> createMonitorTest(@RequestBody MonitorConfiguration monitorConfiguration) {
-        MonitorStatusReport status = monitorService.getMonitorStatus(monitorConfiguration);
+    private ResponseEntity<MonitorStatusReport> createMonitorTest(@RequestBody MonitorConfiguration monitorConfiguration) throws ExecutionException, InterruptedException {
+        MonitorStatusReport status = monitorService.getMonitorStatus(monitorConfiguration).get();
         if(!status.status()) return ResponseEntity.status(400).body(status);
         return ResponseEntity.ok(status);
     }

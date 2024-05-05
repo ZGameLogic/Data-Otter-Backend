@@ -2,6 +2,7 @@ package com.zgamelogic.data.nodeMonitorReport;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
+import com.zgamelogic.services.monitors.MonitorStatusReport;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -24,6 +25,10 @@ public class NodeMonitorReport {
     private boolean status;
     private int attempts;
     private int statusCode;
+
+    public NodeMonitorReport(MonitorConfiguration id, long nodeId, MonitorStatusReport report) {
+        this(id, nodeId, report.milliseconds(), report.status(), report.attempts(), report.statusCode());
+    }
 
     public NodeMonitorReport(long id, long nodeId, long milliseconds, boolean status, int attempts, int statusCode) {
         this(new MonitorConfiguration(id), nodeId, milliseconds, status, attempts, statusCode);
