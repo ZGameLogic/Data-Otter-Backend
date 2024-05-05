@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.zgamelogic.data.monitorHistory.MonitorStatus;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 
 public class MonitorStatusSerialization extends JsonSerializer<MonitorStatus> {
     @Override
@@ -15,8 +16,10 @@ public class MonitorStatusSerialization extends JsonSerializer<MonitorStatus> {
             if(monitorStatus.getId().getMonitor() != null){
                 if(monitorStatus.getId().getMonitor().getId() != null)
                     jsonGenerator.writeNumberField("monitor id", monitorStatus.getId().getMonitor().getId());
-                if(monitorStatus.getId().getDate() != null)
-                    jsonGenerator.writeNumberField("date", monitorStatus.getId().getDate().toInstant().toEpochMilli());
+                if(monitorStatus.getId().getDate() != null) {
+                    String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(monitorStatus.getId().getDate());
+                    jsonGenerator.writeStringField("date", date);
+                }
             }
         }
         jsonGenerator.writeNumberField("milliseconds", monitorStatus.getMilliseconds());
