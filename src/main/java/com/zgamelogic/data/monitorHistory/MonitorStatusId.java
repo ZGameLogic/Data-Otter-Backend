@@ -2,6 +2,7 @@ package com.zgamelogic.data.monitorHistory;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -16,7 +17,7 @@ import java.util.Date;
 @EqualsAndHashCode
 @ToString
 public class MonitorStatusId {
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "MONITOR_ID", referencedColumnName = "ID")
     private MonitorConfiguration monitor;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")

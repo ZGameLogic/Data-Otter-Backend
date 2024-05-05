@@ -19,7 +19,7 @@ public class MonitorConfigStatusSerialization extends JsonSerializer<MonitorConf
         jsonGenerator.writeStringField("url", data.monitorConfiguration().getUrl());
         jsonGenerator.writeStringField("regex", data.monitorConfiguration().getRegex());
         if(data.monitorStatus() != null){
-            jsonGenerator.writeObjectFieldStart("recent status");
+            jsonGenerator.writeObjectFieldStart("status");
             String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(data.monitorStatus().getId().getDate());
             jsonGenerator.writeStringField("date recorded", date);
             jsonGenerator.writeNumberField("milliseconds", data.monitorStatus().getMilliseconds());

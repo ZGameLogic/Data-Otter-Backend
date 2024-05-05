@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Slf4j
 @RestController
@@ -44,30 +46,69 @@ public class APIController {
     }
 
     @GetMapping("monitors")
-    private ResponseEntity<List<MonitorConfigurationAndStatus>> getAllMonitors() {
+    private ResponseEntity<List<MonitorConfigurationAndStatus>> getAllMonitors(
+            @RequestParam(required = false, name = "include-status") Boolean includeStatus
+    ) {
         List<MonitorConfigurationAndStatus> payload = new ArrayList<>();
         monitorConfigurationRepository.findAll().forEach(monitorConfiguration -> {
-            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTop1ById_MonitorIdOrderById_DateDesc(monitorConfiguration.getId());
-            payload.add(new MonitorConfigurationAndStatus(
-                    monitorConfiguration,
-                    mostRecentStatus.orElse(null)
-            ));
+            if(includeStatus != null && includeStatus) {
+                Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTop1ById_MonitorIdOrderById_DateDesc(monitorConfiguration.getId());
+                payload.add(new MonitorConfigurationAndStatus(
+                        monitorConfiguration,
+                        mostRecentStatus.orElse(null)
+                ));
+            } else {
+                payload.add(new MonitorConfigurationAndStatus(
+                        monitorConfiguration,
+                        null
+                ));
+            }
         });
         List<MonitorConfigurationAndStatus> sortedPayload = payload.stream().sorted(Comparator.comparing(c -> c.monitorConfiguration().getId())).toList();
         return ResponseEntity.ok(sortedPayload);
     }
 
     @GetMapping("monitors/{id}")
-    private ResponseEntity<MonitorConfigurationAndStatus> getMonitorStatus(@PathVariable long id) {
+    private ResponseEntity<MonitorConfigurationAndStatus> getMonitorStatus(
+            @PathVariable long id,
+            @RequestParam(required = false, name = "include-status") Boolean includeStatus
+    ) {
         Optional<MonitorConfiguration> oMonitor = monitorConfigurationRepository.findById(id);
         if(oMonitor.isEmpty()) return ResponseEntity.notFound().build();
         MonitorConfiguration monitor = oMonitor.get();
-        Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTop1ById_MonitorIdOrderById_DateDesc(id);
-        MonitorConfigurationAndStatus payload = new MonitorConfigurationAndStatus(
-                monitor,
-                mostRecentStatus.orElse(null)
-        );
-        return ResponseEntity.ok(payload);
+        if(includeStatus != null && includeStatus) {
+            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTop1ById_MonitorIdOrderById_DateDesc(id);
+            MonitorConfigurationAndStatus payload = new MonitorConfigurationAndStatus(
+                    monitor,
+                    mostRecentStatus.orElse(null)
+            );
+            return ResponseEntity.ok(payload);
+        } else {
+            return ResponseEntity.ok(new MonitorConfigurationAndStatus(
+                    monitor,
+                    null
+            ));
+        }
+    }
+
+    @DeleteMapping("monitors/{id}")
+    private ResponseEntity<?> deleteMonitor(@PathVariable long id) {
+        if(!monitorConfigurationRepository.existsById(id)) return ResponseEntity.notFound().build();
+        monitorStatusRepository.deleteAllByMonitorId(id);
+        monitorConfigurationRepository.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("monitors/{id}")
+    private ResponseEntity<MonitorConfiguration> updateMonitor(
+            @PathVariable long id,
+            @RequestBody MonitorConfiguration updatedConfiguration
+    ) {
+        if(!monitorConfigurationRepository.existsById(id)) return ResponseEntity.notFound().build();
+        MonitorConfiguration original  = monitorConfigurationRepository.findById(id).get();
+        original.update(updatedConfiguration);
+        MonitorConfiguration saved = monitorConfigurationRepository.save(original);
+        return ResponseEntity.ok(saved);
     }
 
     @GetMapping("monitors/{id}/history")
@@ -78,12 +119,29 @@ public class APIController {
             Date start,
             @RequestParam(required = false)
             @DateTimeFormat(pattern = "yyyy-dd-MM HH:mm:ss")
-            Date end
+            Date end,
+            @RequestParam(required = false)
+            Boolean condensed
     ) {
         if(!monitorConfigurationRepository.existsById(id)) return ResponseEntity.notFound().build();
         if (end == null) end = new Date();
         if (start == null) start = Date.from(end.toInstant().minus(7, ChronoUnit.DAYS));
         List<MonitorStatus> history = monitorStatusRepository.findByMonitorIdAndDateBetween(id, start, end);
+        if(condensed != null && condensed && !history.isEmpty()) {
+            List<Integer> changeIndices = IntStream.range(0, history.size())
+                    .filter(
+                            i -> (i == 0 || i == history.size() - 1 ||
+                                    history.get(i).isStatus() != history.get(i - 1).isStatus() ||
+                                    history.get(i).isStatus() != history.get(i + 1).isStatus())
+                    )
+                    .boxed()
+                    .toList();
+            List<MonitorStatus> condensedList = changeIndices.stream()
+                    .flatMap(idx -> Stream.of(history.get(idx)))
+                    .distinct()
+                    .toList();
+            return ResponseEntity.ok(condensedList);
+        }
         return ResponseEntity.ok(history);
     }
 
