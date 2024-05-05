@@ -5,7 +5,9 @@ import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationAndStatus;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
 import com.zgamelogic.data.monitorHistory.MonitorStatus;
 import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
-import com.zgamelogic.services.MonitorService;
+import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
+import com.zgamelogic.services.monitors.MonitorService;
+import com.zgamelogic.services.monitors.MonitorStatusReport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -22,26 +24,28 @@ import java.util.stream.Stream;
 public class APIController {
     private final MonitorConfigurationRepository monitorConfigurationRepository;
     private final MonitorStatusRepository monitorStatusRepository;
+    private final NodeMonitorReportRepository nodeMonitorReportRepository;
     private final MonitorService monitorService;
 
-    public APIController(MonitorConfigurationRepository monitorConfigurationRepository, MonitorStatusRepository monitorStatusRepository, MonitorService monitorService) {
+    public APIController(MonitorConfigurationRepository monitorConfigurationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService) {
         this.monitorConfigurationRepository = monitorConfigurationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
+        this.nodeMonitorReportRepository = nodeMonitorReportRepository;
         this.monitorService = monitorService;
     }
 
     @PostMapping("monitors")
     private ResponseEntity<?> createMonitor(@RequestBody MonitorConfiguration monitorConfiguration) {
-        MonitorStatus status = monitorService.getMonitorStatus(monitorConfiguration);
-        if(!status.isStatus()) return ResponseEntity.status(400).body(status);
+        MonitorStatusReport status = monitorService.getMonitorStatus(monitorConfiguration);
+        if(!status.status()) return ResponseEntity.status(400).body(status);
         MonitorConfiguration m = monitorConfigurationRepository.save(monitorConfiguration);
         return ResponseEntity.ok(m);
     }
 
     @PostMapping("monitors/test")
-    private ResponseEntity<MonitorStatus> createMonitorTest(@RequestBody MonitorConfiguration monitorConfiguration) {
-        MonitorStatus status = monitorService.getMonitorStatus(monitorConfiguration);
-        if(!status.isStatus()) return ResponseEntity.status(400).body(status);
+    private ResponseEntity<MonitorStatusReport> createMonitorTest(@RequestBody MonitorConfiguration monitorConfiguration) {
+        MonitorStatusReport status = monitorService.getMonitorStatus(monitorConfiguration);
+        if(!status.status()) return ResponseEntity.status(400).body(status);
         return ResponseEntity.ok(status);
     }
 
@@ -95,6 +99,7 @@ public class APIController {
     private ResponseEntity<?> deleteMonitor(@PathVariable long id) {
         if(!monitorConfigurationRepository.existsById(id)) return ResponseEntity.notFound().build();
         monitorStatusRepository.deleteAllByMonitorId(id);
+        nodeMonitorReportRepository.deleteAllByMonitorId(id);
         monitorConfigurationRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }
