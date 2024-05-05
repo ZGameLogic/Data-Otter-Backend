@@ -24,7 +24,7 @@ public class MonitorStatusSerialization extends JsonSerializer<MonitorStatus> {
         }
         jsonGenerator.writeNumberField("milliseconds", monitorStatus.getMilliseconds());
         jsonGenerator.writeBooleanField("status", monitorStatus.isStatus());
-        jsonGenerator.writeNumberField("retries", monitorStatus.getRetries());
+        jsonGenerator.writeNumberField("attempts", monitorStatus.getAttempts());
         jsonGenerator.writeEndObject();
     }
 }

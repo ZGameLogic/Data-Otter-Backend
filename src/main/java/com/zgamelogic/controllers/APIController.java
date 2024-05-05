@@ -13,9 +13,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -30,7 +28,7 @@ public class APIController {
         this.monitorService = monitorService;
     }
 
-    @PostMapping("monitor")
+    @PostMapping("monitors")
     private ResponseEntity<?> createMonitor(@RequestBody MonitorConfiguration monitorConfiguration) {
         MonitorStatus status = monitorService.getMonitorStatus(monitorConfiguration);
         if(!status.isStatus()) return ResponseEntity.status(400).body(status);
@@ -38,14 +36,28 @@ public class APIController {
         return ResponseEntity.ok(m);
     }
 
-    @PostMapping("monitor/test")
+    @PostMapping("monitors/test")
     private ResponseEntity<MonitorStatus> createMonitorTest(@RequestBody MonitorConfiguration monitorConfiguration) {
         MonitorStatus status = monitorService.getMonitorStatus(monitorConfiguration);
         if(!status.isStatus()) return ResponseEntity.status(400).body(status);
         return ResponseEntity.ok(status);
     }
 
-    @GetMapping("monitor/{id}")
+    @GetMapping("monitors")
+    private ResponseEntity<List<MonitorConfigurationAndStatus>> getAllMonitors() {
+        List<MonitorConfigurationAndStatus> payload = new ArrayList<>();
+        monitorConfigurationRepository.findAll().forEach(monitorConfiguration -> {
+            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTop1ById_MonitorIdOrderById_DateDesc(monitorConfiguration.getId());
+            payload.add(new MonitorConfigurationAndStatus(
+                    monitorConfiguration,
+                    mostRecentStatus.orElse(null)
+            ));
+        });
+        List<MonitorConfigurationAndStatus> sortedPayload = payload.stream().sorted(Comparator.comparing(c -> c.monitorConfiguration().getId())).toList();
+        return ResponseEntity.ok(sortedPayload);
+    }
+
+    @GetMapping("monitors/{id}")
     private ResponseEntity<MonitorConfigurationAndStatus> getMonitorStatus(@PathVariable long id) {
         Optional<MonitorConfiguration> oMonitor = monitorConfigurationRepository.findById(id);
         if(oMonitor.isEmpty()) return ResponseEntity.notFound().build();
@@ -58,7 +70,7 @@ public class APIController {
         return ResponseEntity.ok(payload);
     }
 
-    @GetMapping("monitor/{id}/history")
+    @GetMapping("monitors/{id}/history")
     private ResponseEntity<List<MonitorStatus>> getMonitorHistory(
             @PathVariable long id,
             @RequestParam(required = false)

@@ -25,16 +25,19 @@ public class MonitorStatus {
     private MonitorStatusId id;
     private long milliseconds;
     private boolean status;
-    private int retries;
+    private int attempts;
+    private int statusCode;
 
     /**
      * User this when we have only the monitor id
      * @param id ID of the monitor configuration
      * @param milliseconds Milliseconds it took to get this request
      * @param status Status of the monitor
+     * @param attempts Number of retries it took
+     * @param statusCode Status code of the call
      */
-    public MonitorStatus(Long id, long milliseconds, boolean status, int retries){
-        this(new MonitorConfiguration(id), milliseconds, status, retries);
+    public MonitorStatus(Long id, long milliseconds, boolean status, int attempts, int statusCode){
+        this(new MonitorConfiguration(id), milliseconds, status, attempts, statusCode);
     }
 
     /**
@@ -42,11 +45,14 @@ public class MonitorStatus {
      * @param monitor Monitor configuration the status data point is associated with
      * @param milliseconds Milliseconds it took to get this request
      * @param status Status of the monitor
+     * @param attempts Number of retries it took
+     * @param statusCode Status code of the call
      */
-    public MonitorStatus(MonitorConfiguration monitor, long milliseconds, boolean status, int retries) {
+    public MonitorStatus(MonitorConfiguration monitor, long milliseconds, boolean status, int attempts, int statusCode) {
         this.id = new MonitorStatusId(monitor, new Date());
         this.milliseconds = milliseconds;
         this.status = status;
-        this.retries = retries;
+        this.attempts = attempts;
+        this.statusCode = statusCode;
     }
 }
