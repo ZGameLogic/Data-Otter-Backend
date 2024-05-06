@@ -2,6 +2,7 @@ package com.zgamelogic.data.monitorHistory;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
+import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReport;
 import com.zgamelogic.serialization.MonitorStatusSerialization;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -52,5 +53,13 @@ public class MonitorStatus {
         this.status = status;
         this.attempts = attempts;
         this.statusCode = statusCode;
+    }
+
+    public MonitorStatus(MonitorConfiguration monitor, NodeMonitorReport report){
+        this.id = new MonitorStatusId(monitor, new Date());
+        this.milliseconds = report.getMilliseconds();
+        this.status = report.isStatus();
+        this.attempts = report.getAttempts();
+        this.statusCode = report.getStatusCode();
     }
 }

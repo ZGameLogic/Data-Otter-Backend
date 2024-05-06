@@ -1,6 +1,7 @@
 package com.zgamelogic.controllers;
 
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
+import com.zgamelogic.data.monitorHistory.MonitorStatus;
 import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
 import com.zgamelogic.data.nodeConfiguration.NodeConfiguration;
 import com.zgamelogic.data.nodeConfiguration.NodeConfigurationRepository;
@@ -11,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 import static com.zgamelogic.data.Constants.MASTER_NODE_NAME;
@@ -36,7 +39,7 @@ public class DataOtterController {
         this.nodeMonitorReportRepository = nodeMonitorReportRepository;
         this.monitorService = monitorService;
         Optional<NodeConfiguration> nodeConfig = nodeConfigurationRepository.findByName(MASTER_NODE_NAME);
-        masterNode = nodeConfig.orElse(nodeConfigurationRepository.save(new NodeConfiguration(MASTER_NODE_NAME)));
+        masterNode = nodeConfig.orElseGet(() -> nodeConfigurationRepository.save(new NodeConfiguration(MASTER_NODE_NAME)));
         log.info("Master node id: {}", masterNode.getId());
     }
 
@@ -47,8 +50,9 @@ public class DataOtterController {
     public void dataOtterTasks(){
         monitorConfigurationRepository.findAll().forEach(monitorConfiguration ->
                 monitorService.getMonitorStatus(monitorConfiguration).thenAccept(report ->
-                        nodeMonitorReportRepository.save(new NodeMonitorReport(monitorConfiguration, masterNode, report))
+                    nodeMonitorReportRepository.save(new NodeMonitorReport(monitorConfiguration, masterNode, report)
                 )
+            )
         );
     }
 
@@ -57,6 +61,18 @@ public class DataOtterController {
      */
     @Scheduled(cron = "0 * * * * *")
     public void minuteJobs(){
-        // TODO go through all the node reports, consolidate them to make one Status History, and save that. Then delete all the node reports
+        monitorConfigurationRepository.findAll().forEach(configuration -> {
+            List<NodeMonitorReport> reports = nodeMonitorReportRepository.findAllById_MonitorId(configuration.getId());
+            if(reports.stream().anyMatch(report -> !report.isStatus())){
+                NodeMonitorReport badReport = reports.stream().filter(report -> !report.isStatus()).min(Comparator.comparingLong(NodeMonitorReport::getMilliseconds)
+                        .thenComparingInt(NodeMonitorReport::getAttempts)).get();
+                monitorStatusRepository.save(new MonitorStatus(configuration, badReport));
+            } else {
+                NodeMonitorReport topReport = reports.stream().min(Comparator.comparingLong(NodeMonitorReport::getMilliseconds)
+                        .thenComparingInt(NodeMonitorReport::getAttempts)).get();
+                monitorStatusRepository.save(new MonitorStatus(configuration, topReport));
+            }
+        });
+        nodeMonitorReportRepository.deleteAll();
     }
 }

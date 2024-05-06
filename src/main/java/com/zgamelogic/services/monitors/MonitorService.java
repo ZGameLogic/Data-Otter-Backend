@@ -29,7 +29,7 @@ public class MonitorService {
         executor.setCorePoolSize(5);
         executor.setMaxPoolSize(5);
         executor.setQueueCapacity(5000);
-        executor.setThreadNamePrefix("Monitor Service-");
+        executor.setThreadNamePrefix("Mon Serv-");
         executor.initialize();
         return executor;
     }
