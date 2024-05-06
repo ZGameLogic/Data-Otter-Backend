@@ -29,7 +29,7 @@ public class NodeController {
     }
 
     @PostMapping("nodes/{nodeId}/report/{monitorId}")
-    private ResponseEntity<?> report(
+    private ResponseEntity<NodeMonitorReport> report(
             @PathVariable("nodeId") long nodeId,
             @PathVariable("monitorId") long monitorId,
             @RequestBody NodeMonitorReport nodeMonitorReport
