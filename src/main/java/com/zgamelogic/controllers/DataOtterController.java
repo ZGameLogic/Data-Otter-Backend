@@ -43,8 +43,8 @@ public class DataOtterController {
     /**
      * Run all the monitor configurations through and get their statuses, create node records of each
      */
-    @Scheduled(cron = "55 * * * * *")
-    public void preMinuteJobs(){
+    @Scheduled(cron = "5 * * * * *")
+    public void dataOtterTasks(){
         monitorConfigurationRepository.findAll().forEach(monitorConfiguration ->
                 monitorService.getMonitorStatus(monitorConfiguration).thenAccept(report ->
                         nodeMonitorReportRepository.save(new NodeMonitorReport(monitorConfiguration, masterNode, report))
