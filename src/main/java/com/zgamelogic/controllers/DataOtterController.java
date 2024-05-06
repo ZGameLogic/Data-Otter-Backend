@@ -2,12 +2,18 @@ package com.zgamelogic.controllers;
 
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
 import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
+import com.zgamelogic.data.nodeConfiguration.NodeConfiguration;
+import com.zgamelogic.data.nodeConfiguration.NodeConfigurationRepository;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReport;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
 import com.zgamelogic.services.monitors.MonitorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
+
+import java.util.Optional;
+
+import static com.zgamelogic.data.Constants.MASTER_NODE_NAME;
 
 @Slf4j
 @Controller
@@ -16,12 +22,22 @@ public class DataOtterController {
     private final MonitorStatusRepository monitorStatusRepository;
     private final NodeMonitorReportRepository nodeMonitorReportRepository;
     private final MonitorService monitorService;
+    private final NodeConfiguration masterNode;
 
-    public DataOtterController(MonitorConfigurationRepository monitorConfigurationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService) {
+    public DataOtterController(
+            MonitorConfigurationRepository monitorConfigurationRepository,
+            MonitorStatusRepository monitorStatusRepository,
+            NodeMonitorReportRepository nodeMonitorReportRepository,
+            NodeConfigurationRepository nodeConfigurationRepository,
+            MonitorService monitorService
+    ) {
         this.monitorConfigurationRepository = monitorConfigurationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
         this.nodeMonitorReportRepository = nodeMonitorReportRepository;
         this.monitorService = monitorService;
+        Optional<NodeConfiguration> nodeConfig = nodeConfigurationRepository.findByName(MASTER_NODE_NAME);
+        masterNode = nodeConfig.orElse(nodeConfigurationRepository.save(new NodeConfiguration(MASTER_NODE_NAME)));
+        log.info("Master node id: {}", masterNode.getId());
     }
 
     /**
@@ -29,10 +45,9 @@ public class DataOtterController {
      */
     @Scheduled(cron = "55 * * * * *")
     public void preMinuteJobs(){
-        // TODO idk if the node id for this master app will be 0, ill be sure to figure that out though
         monitorConfigurationRepository.findAll().forEach(monitorConfiguration ->
                 monitorService.getMonitorStatus(monitorConfiguration).thenAccept(report ->
-                        nodeMonitorReportRepository.save(new NodeMonitorReport(monitorConfiguration, 0, report))
+                        nodeMonitorReportRepository.save(new NodeMonitorReport(monitorConfiguration, masterNode, report))
                 )
         );
     }

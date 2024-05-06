@@ -28,7 +28,7 @@ public class MonitorService {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(5);
         executor.setMaxPoolSize(5);
-        executor.setQueueCapacity(500);
+        executor.setQueueCapacity(5000);
         executor.setThreadNamePrefix("Monitor Service-");
         executor.initialize();
         return executor;
