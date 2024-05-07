@@ -8,7 +8,6 @@ import com.zgamelogic.data.nodeConfiguration.NodeConfigurationRepository;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReport;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
 import com.zgamelogic.services.monitors.MonitorService;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
@@ -44,14 +43,10 @@ public class DataOtterController {
         log.info("Master node id: {}", masterNode.getId());
     }
 
-    @PostConstruct
-    public void init() {
-        dataOtterTasks();
-    }
     /**
      * Run all the monitor configurations through and get their statuses, create node records of each
      */
-//    @Scheduled(cron = "5 * * * * *")
+    @Scheduled(cron = "5 * * * * *")
     public void dataOtterTasks(){
         monitorConfigurationRepository.findAll().forEach(monitorConfiguration ->
                 monitorService.getMonitorStatus(monitorConfiguration).thenAccept(report ->

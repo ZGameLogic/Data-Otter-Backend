@@ -33,7 +33,7 @@ public class MonitorService {
                 response = restTemplate.exchange(monitorConfiguration.getUrl(), HttpMethod.GET, null, String.class);
                 endTime = System.currentTimeMillis();
                 if(response.getStatusCode().is2xxSuccessful() && response.getBody().contains(monitorConfiguration.getRegex())){
-                    return CompletableFuture.completedFuture(new MonitorStatusReport(endTime - startTime, true, attempts, 0));
+                    return CompletableFuture.completedFuture(new MonitorStatusReport(endTime - startTime, true, attempts, response.getStatusCode().value()));
                 }
             } catch (Exception ignored) {
                 return CompletableFuture.completedFuture(new MonitorStatusReport(0, false, attempts, 0));

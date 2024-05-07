@@ -1,0 +1,123 @@
+openapi: 3.0.0
+info:
+    title: Monitor API
+    version: 1.0.0
+paths:
+    /monitors:
+        get:
+            tags:
+                - monitors
+            summary: Retrieve all monitor configurations
+            parameters:
+                - name: include-status
+                  in: query
+                  description: Include current status information
+                  required: false
+                  schema:
+                      type: boolean
+            responses:
+                '200':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    oneOf:
+                                        - $ref: '#/components/schemas/MonitorConfigurationWithId'
+                                        - $ref: '#/components/schemas/MonitorConfigurationAndStatus'
+
+        post:
+            tags:
+                - monitors
+            summary: Create a new monitor configuration
+            requestBody:
+                description: Monitor configuration object
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/MonitorConfiguration'
+            responses:
+                '200':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/MonitorConfigurationWithId'
+                400:
+                    description: Bad request
+
+components:
+    schemas:
+        MonitorConfiguration:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: 'ZGameLogic API'
+                type:
+                    type: string
+                    example: 'API'
+                url:
+                    type: string
+                    example: 'https://zgamelogic.com/health'
+                regex:
+                    type: string
+                    example: 'Healthy'
+        MonitorConfigurationWithId:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    example: 1
+                name:
+                    type: string
+                    example: 'ZGameLogic API'
+                type:
+                    type: string
+                    example: 'API'
+                url:
+                    type: string
+                    example: 'https://zgamelogic.com/health'
+                regex:
+                    type: string
+                    example: 'Healthy'
+        MonitorConfigurationAndStatus:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    example: 2
+                name:
+                    type: string
+                    example: 'ZGameLogic Website'
+                type:
+                    type: string
+                    example: 'WEB'
+                url:
+                    type: string
+                    example: 'https://zgamelogic.com/'
+                regex:
+                    type: string
+                    example: 'Welcome'
+                status:
+                    type: object
+                    properties:
+                        date_recorded:
+                            type: string
+                            example: '2024-05-07 14:00:00'
+                        milliseconds:
+                            type: integer
+                            example: 2
+                        status:
+                            type: boolean
+                            example: true
+                        attempts:
+                            type: integer
+                            example: 1
+                        status_code:
+                            type: integer
+                            example: 200
