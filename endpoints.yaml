@@ -169,23 +169,7 @@ components:
                     type: string
                     example: 'Welcome'
                 status:
-                    type: object
-                    properties:
-                        date_recorded:
-                            type: string
-                            example: '2024-05-07 14:00:00'
-                        milliseconds:
-                            type: integer
-                            example: 2
-                        status:
-                            type: boolean
-                            example: true
-                        attempts:
-                            type: integer
-                            example: 1
-                        status_code:
-                            type: integer
-                            example: 200
+                    $ref: '#/components/schemas/status'
         status:
             type: object
             properties:
