@@ -8,6 +8,7 @@ import com.zgamelogic.data.nodeConfiguration.NodeConfigurationRepository;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReport;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
 import com.zgamelogic.services.monitors.MonitorService;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
@@ -43,10 +44,14 @@ public class DataOtterController {
         log.info("Master node id: {}", masterNode.getId());
     }
 
+    @PostConstruct
+    public void init() {
+        dataOtterTasks();
+    }
     /**
      * Run all the monitor configurations through and get their statuses, create node records of each
      */
-    @Scheduled(cron = "5 * * * * *")
+//    @Scheduled(cron = "5 * * * * *")
     public void dataOtterTasks(){
         monitorConfigurationRepository.findAll().forEach(monitorConfiguration ->
                 monitorService.getMonitorStatus(monitorConfiguration).thenAccept(report ->
@@ -63,7 +68,10 @@ public class DataOtterController {
     public void minuteJobs(){
         monitorConfigurationRepository.findAll().forEach(configuration -> {
             List<NodeMonitorReport> reports = nodeMonitorReportRepository.findAllById_MonitorId(configuration.getId());
-            if(reports.stream().anyMatch(report -> !report.isStatus())){
+            if(reports.isEmpty()) return;
+            if(reports.size() == 1){
+                monitorStatusRepository.save(new MonitorStatus(configuration, reports.get(0)));
+            } else if(reports.stream().anyMatch(report -> !report.isStatus())){
                 NodeMonitorReport badReport = reports.stream().filter(report -> !report.isStatus()).min(Comparator.comparingLong(NodeMonitorReport::getMilliseconds)
                         .thenComparingInt(NodeMonitorReport::getAttempts)).get();
                 monitorStatusRepository.save(new MonitorStatus(configuration, badReport));

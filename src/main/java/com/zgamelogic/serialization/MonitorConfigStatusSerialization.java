@@ -15,7 +15,6 @@ public class MonitorConfigStatusSerialization extends JsonSerializer<MonitorConf
         jsonGenerator.writeNumberField("id", data.monitorConfiguration().getId());
         jsonGenerator.writeStringField("name", data.monitorConfiguration().getName());
         jsonGenerator.writeStringField("type", data.monitorConfiguration().getType().name());
-        jsonGenerator.writeNumberField("port", data.monitorConfiguration().getPort());
         jsonGenerator.writeStringField("url", data.monitorConfiguration().getUrl());
         jsonGenerator.writeStringField("regex", data.monitorConfiguration().getRegex());
         if(data.monitorStatus() != null){
