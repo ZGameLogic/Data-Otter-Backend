@@ -49,6 +49,71 @@ paths:
                                     $ref: '#/components/schemas/MonitorConfigurationWithId'
                 400:
                     description: Bad request
+    /monitors/test:
+        post:
+            tags:
+                - monitors
+            summary: Test a monitor on the Data Otter backend
+            responses:
+              200:
+                description: New response
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/status'
+    /monitors/{id}:
+        get:
+            tags:
+                - monitors
+            summary: Fetch a specific monitor with or without a status
+            parameters:
+              - in: path
+                name: id
+                description: Monitor id
+                required: true
+                schema:
+                  type: integer
+              - name: include-status
+                in: query
+                description: Include current status information
+                required: false
+                schema:
+                    type: boolean
+            description: Get a single monitor
+            responses:
+                '200':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    -   $ref: '#/components/schemas/MonitorConfigurationWithId'
+                                    -   $ref: '#/components/schemas/MonitorConfigurationAndStatus'
+        put:
+            tags:
+                - monitors
+            summary: Update a specific monitor
+            parameters:
+                -   in: path
+                    name: id
+                    description: Monitor id
+                    required: true
+                    schema:
+                        type: integer
+            requestBody:
+                description: Monitor configuration object
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/MonitorConfiguration'
+            responses:
+                200:
+                    description: New response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MonitorConfigurationWithId"
 
 components:
     schemas:
@@ -121,3 +186,21 @@ components:
                         status_code:
                             type: integer
                             example: 200
+        status:
+            type: object
+            properties:
+                date_recorded:
+                    type: string
+                    example: '2024-05-07 14:00:00'
+                milliseconds:
+                    type: integer
+                    example: 2
+                status:
+                    type: boolean
+                    example: true
+                attempts:
+                    type: integer
+                    example: 1
+                status_code:
+                    type: integer
+                    example: 200
