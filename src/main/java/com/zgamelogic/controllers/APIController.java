@@ -99,8 +99,8 @@ public class APIController {
     @DeleteMapping("monitors/{id}")
     private ResponseEntity<?> deleteMonitor(@PathVariable long id) {
         if(!monitorConfigurationRepository.existsById(id)) return ResponseEntity.notFound().build();
-        monitorStatusRepository.deleteAllByMonitorId(id);
-        nodeMonitorReportRepository.deleteAllByMonitorId(id);
+        monitorStatusRepository.deleteAllById_MonitorId(id);
+        nodeMonitorReportRepository.deleteAllById_MonitorId(id);
         monitorConfigurationRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }

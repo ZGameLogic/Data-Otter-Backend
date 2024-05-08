@@ -44,9 +44,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                type: array
-                                items:
-                                    $ref: '#/components/schemas/MonitorConfigurationWithId'
+                                $ref: '#/components/schemas/MonitorConfigurationWithId'
                 400:
                     description: Bad request
     /monitors/test:

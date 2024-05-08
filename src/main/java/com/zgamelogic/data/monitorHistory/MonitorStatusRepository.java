@@ -18,6 +18,5 @@ public interface MonitorStatusRepository extends JpaRepository<MonitorStatus, Mo
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM MonitorStatus where id.monitor.id = :monitorId")
-    void deleteAllByMonitorId(long monitorId);
+    void deleteAllById_MonitorId(long monitorId);
 }

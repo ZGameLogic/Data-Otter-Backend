@@ -1,0 +1,42 @@
+GET http://localhost:8080/monitors
+###
+GET http://localhost:8080/monitors/1
+###
+GET http://localhost:8080/monitors?include-status=true
+###
+GET http://localhost:8080/monitors/1?include-status=true
+###
+GET http://localhost:8080/monitors/1/history
+###
+GET http://localhost:8080/monitors/1/history?condensed=true
+###
+POST http://localhost:8080/monitors
+Content-Type: application/json
+
+{
+    "name": "Test",
+    "type": "WEB",
+    "url": "https://zgamelogic.com/health",
+    "regex": "Healthy"
+}
+###
+POST http://localhost:8080/monitors/test
+Content-Type: application/json
+
+{
+  "name": "Test",
+  "type": "WEB",
+  "url": "https://zgamelogic.com/health",
+  "regex": "Healthy"
+}
+###
+@put_id = 1
+PUT http://localhost:8080/monitors/{{put_id}}
+Content-Type: application/json
+
+{
+  "name": "Ben"
+}
+###
+@delete_id = 1
+DELETE http://localhost:8080/monitors/{{delete_id}}
