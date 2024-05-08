@@ -167,7 +167,7 @@ paths:
                 - monitors
             responses:
                 200:
-                    description: New response
+                    description: Successful call
                     content:
                         application/json:
                             schema:
@@ -176,9 +176,103 @@ paths:
                                     $ref: "#/components/schemas/status"
                 404:
                     description: Monitor configuration not found
+    /nodes:
+        post:
+            tags:
+                - nodes
+            summary: Register a node to get its ID.
+            requestBody:
+                description: Node configuration
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/NodeConfigurationWithNoId'
+            responses:
+                200:
+                    description: Successful
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NodeConfiguration"
+                400:
+                    description: Bad request. Name cannot be null or equal to 'master'.
+
+    /nodes/{nodeId}/report/{monitorId}:
+        post:
+            tags:
+                - nodes
+            summary: Post a node record to the database to be evaluated
+            parameters:
+                -   in: path
+                    name: nodeId
+                    description: Node id
+                    required: true
+                    schema:
+                        type: integer
+                -   in: path
+                    name: monitorId
+                    description: Monitor id
+                    required: true
+                    schema:
+                        type: integer
+            requestBody:
+                description: Monitor status object
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/nodeReport"
+            responses:
+                200:
+                    description: Successful
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NodeMonitorReport"
+                404:
+                    description: Monitor ID or Node ID does not exist
+
+
 
 components:
     schemas:
+        NodeMonitorReport:
+            type: object
+            properties:
+                monitor_id:
+                    type: number
+                    example: 1
+                node_id:
+                    type: number
+                    example: 1
+                milliseconds:
+                    type: number
+                    example: 3
+                status:
+                    type: boolean
+                    example: true
+                attempts:
+                    type: number
+                    example: 1
+                statusCode:
+                    type: number
+                    example: 200
+        NodeConfigurationWithNoId:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: "Node 1"
+        NodeConfiguration:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: "Node 1"
+                id:
+                    type: number
+                    example: 1
         MonitorConfiguration:
             type: object
             properties:
@@ -238,6 +332,21 @@ components:
                 date_recorded:
                     type: string
                     example: '2024-05-07 14:00:00'
+                milliseconds:
+                    type: integer
+                    example: 2
+                status:
+                    type: boolean
+                    example: true
+                attempts:
+                    type: integer
+                    example: 1
+                status_code:
+                    type: integer
+                    example: 200
+        nodeReport:
+            type: object
+            properties:
                 milliseconds:
                     type: integer
                     example: 2

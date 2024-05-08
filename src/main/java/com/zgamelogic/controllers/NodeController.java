@@ -35,6 +35,7 @@ public class NodeController {
             @RequestBody NodeMonitorReport nodeMonitorReport
     ) {
         if(!monitorConfigurationRepository.existsById(monitorId)) return ResponseEntity.notFound().build();
+        if(!nodeConfigurationRepository.existsById(nodeId)) return ResponseEntity.notFound().build();
         nodeMonitorReport.setId(new NodeMonitorReportId(monitorId, nodeId));
         NodeMonitorReport report = nodeMonitorReportRepository.save(nodeMonitorReport);
         return ResponseEntity.ok(report);
