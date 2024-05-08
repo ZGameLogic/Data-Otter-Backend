@@ -81,7 +81,7 @@ paths:
                     type: boolean
             description: Get a single monitor
             responses:
-                '200':
+                200:
                     description: Successful operation
                     content:
                         application/json:
@@ -89,6 +89,8 @@ paths:
                                 oneOf:
                                     -   $ref: '#/components/schemas/MonitorConfigurationWithId'
                                     -   $ref: '#/components/schemas/MonitorConfigurationAndStatus'
+                404:
+                    description: Monitor configuration not found
         put:
             tags:
                 - monitors
@@ -114,6 +116,66 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/MonitorConfigurationWithId"
+                404:
+                    description: Monitor configuration not found
+        delete:
+            tags:
+                - monitors
+            summary: Delete a specific monitor configuration
+            parameters:
+                -   in: path
+                    name: id
+                    description: Monitor id
+                    required: true
+                    schema:
+                        type: integer
+            responses:
+                200:
+                    description: Successful
+                404:
+                    description: Monitor configuration not found
+
+    /monitors/{id}/history:
+        get:
+            summary: Get a history of statuses for a specific monitor
+            parameters:
+                -   in: path
+                    name: id
+                    description: Monitor id
+                    required: true
+                    schema:
+                        type: integer
+                -   in: query
+                    name: end
+                    description: Specifies an end date. If note included, will be set to the current time.
+                    required: false
+                    example: '2024-05-08 11:38:00'
+                    schema:
+                        type: string
+                -   in: query
+                    name: start
+                    required: false
+                    example: '2024-05-08 11:38:00'
+                    description: Specifies a start date. If not included, will place this one week before the end date.
+                -   in: query
+                    name: condensed
+                    required: false
+                    schema:
+                        type: boolean
+                    description: Set to true if you want condensed data. This removes datapoints where the status is the same and only includes differing data points as well as the point right before.
+            tags:
+                - monitors
+            responses:
+                200:
+                    description: New response
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/status"
+                404:
+                    description: Monitor configuration not found
 
 components:
     schemas:
