@@ -11,6 +11,7 @@ import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
 import com.zgamelogic.services.monitors.MonitorService;
 import com.zgamelogic.services.monitors.MonitorStatusReport;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,21 +30,21 @@ import static com.zgamelogic.data.Constants.MASTER_NODE_NAME;
 class DataOtterControllerTest {
 
     @MockBean
-    private static MonitorConfigurationRepository monitorConfigurationRepository;
+    private MonitorConfigurationRepository monitorConfigurationRepository;
     @MockBean
-    private static MonitorStatusRepository monitorStatusRepository;
+    private MonitorStatusRepository monitorStatusRepository;
     @MockBean
-    private static NodeMonitorReportRepository nodeMonitorReportRepository;
+    private NodeMonitorReportRepository nodeMonitorReportRepository;
     @MockBean
-    private static MonitorService monitorService;
+    private MonitorService monitorService;
     @MockBean
-    private static NodeConfigurationRepository nodeConfigurationRepository;
+    private NodeConfigurationRepository nodeConfigurationRepository;
 
     @Autowired
     private DataOtterController dataOtterController;
 
-    @BeforeAll
-    static void setUp() {
+    @BeforeEach
+    void setUp() {
         MonitorConfiguration config = new MonitorConfiguration(1L, "test", MonitorConfiguration.Type.API, "https://zgamelogic.com/health", "Healthy");
         Mockito.when(monitorConfigurationRepository.findAll()).thenReturn(List.of(config));
         Mockito.when(monitorService.getMonitorStatus(Mockito.any())).thenReturn(CompletableFuture.completedFuture(new MonitorStatusReport(3, true, 1, 200)));
