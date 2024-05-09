@@ -1,6 +1,7 @@
 package com.zgamelogic.data.monitorConfiguration;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -8,6 +9,7 @@ import lombok.ToString;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "monitor_configurations")
 @ToString
 public class MonitorConfiguration {
