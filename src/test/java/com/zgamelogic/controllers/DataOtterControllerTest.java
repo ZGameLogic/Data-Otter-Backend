@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -40,6 +41,9 @@ class DataOtterControllerTest {
     @MockBean
     private NodeConfiguration masterNode;
 
+    @Autowired
+    private DataOtterController dataOtterController;
+
     @BeforeEach
     void setUp() {
         MonitorConfiguration config = new MonitorConfiguration(1L, "test", MonitorConfiguration.Type.API, "https://zgamelogic.com/health", "Healthy");
@@ -50,7 +54,6 @@ class DataOtterControllerTest {
 
     @Test
     void testDataOtterTasks() {
-        DataOtterController dataOtterController = new DataOtterController(monitorConfigurationRepository, monitorStatusRepository, nodeMonitorReportRepository, monitorService, masterNode);
         dataOtterController.dataOtterTasks();
         Mockito.verify(nodeMonitorReportRepository).save(Mockito.any(NodeMonitorReport.class));
     }
