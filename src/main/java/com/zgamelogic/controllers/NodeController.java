@@ -7,11 +7,14 @@ import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReport;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportId;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 import static com.zgamelogic.data.Constants.MASTER_NODE_NAME;
 
@@ -46,5 +49,13 @@ public class NodeController {
         if(nodeConfiguration.getName() == null && !nodeConfiguration.getName().equals(MASTER_NODE_NAME)) return ResponseEntity.badRequest().build();
         NodeConfiguration saved = nodeConfigurationRepository.save(nodeConfiguration);
         return ResponseEntity.ok(saved);
+    }
+
+    @Bean("master-node")
+    public NodeConfiguration masterNode(NodeConfigurationRepository nodeConfigurationRepository) {
+        Optional<NodeConfiguration> nodeConfig = nodeConfigurationRepository.findByName(MASTER_NODE_NAME);
+        NodeConfiguration masterNode = nodeConfig.orElseGet(() -> nodeConfigurationRepository.save(new NodeConfiguration(MASTER_NODE_NAME)));
+        log.info("Master node id: {}", masterNode.getId());
+        return masterNode;
     }
 }
