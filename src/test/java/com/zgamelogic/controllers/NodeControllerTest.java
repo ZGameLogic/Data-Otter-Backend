@@ -11,7 +11,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Optional;
+
+import static com.zgamelogic.data.Constants.MASTER_NODE_NAME;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -20,21 +25,25 @@ class NodeControllerTest {
 
     @MockBean
     private NodeConfigurationRepository nodeConfigurationRepository;
+    @MockBean
+    private NodeConfiguration masterNode;
 
     @Autowired
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        Mockito.when(nodeConfigurationRepository.save(Mockito.any())).thenReturn(new NodeConfiguration(1L, "Test"));
+        Mockito.when(masterNode.getName()).thenReturn(MASTER_NODE_NAME);
+        Mockito.when(masterNode.getId()).thenReturn(1L);
+        Mockito.when(nodeConfigurationRepository.save(Mockito.any(NodeConfiguration.class))).thenReturn(new NodeConfiguration(2L, "test"));
     }
 
     @Test
     void registerNode() throws Exception {
+        NodeConfiguration test = new NodeConfiguration("test");
         mockMvc.perform(
-                post("/nodes").content("{\"name\":\"test\"}").contentType(MediaType.APPLICATION_JSON)
+                post("/nodes").content(test).contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(content().json(""));
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 }
