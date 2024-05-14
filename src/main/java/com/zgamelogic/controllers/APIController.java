@@ -121,10 +121,10 @@ public class APIController {
     private ResponseEntity<List<MonitorStatus>> getMonitorHistory(
             @PathVariable long id,
             @RequestParam(required = false)
-            @DateTimeFormat(pattern = "yyyy-dd-MM HH:mm:ss")
+            @DateTimeFormat(pattern = "MM-dd-yyyy HH:mm:ss")
             Date start,
             @RequestParam(required = false)
-            @DateTimeFormat(pattern = "yyyy-dd-MM HH:mm:ss")
+            @DateTimeFormat(pattern = "MM-dd-yyyy HH:mm:ss")
             Date end,
             @RequestParam(required = false)
             Boolean condensed

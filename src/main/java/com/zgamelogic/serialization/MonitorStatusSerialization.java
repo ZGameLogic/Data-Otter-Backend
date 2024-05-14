@@ -15,7 +15,7 @@ public class MonitorStatusSerialization extends JsonSerializer<MonitorStatus> {
         if(monitorStatus.getId() != null) {
             if(monitorStatus.getId().getMonitor() != null){
                 if(monitorStatus.getId().getDate() != null) {
-                    String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(monitorStatus.getId().getDate());
+                    String date = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(monitorStatus.getId().getDate());
                     jsonGenerator.writeStringField("date recorded", date);
                 }
             }

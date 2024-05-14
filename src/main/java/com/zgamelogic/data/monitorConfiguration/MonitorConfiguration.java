@@ -24,7 +24,7 @@ public class MonitorConfiguration {
     private String url;
     private String regex;
 
-    public MonitorConfiguration(String name, Type type,  String url, String regex) {
+    public MonitorConfiguration(String name, Type type, String url, String regex) {
         this.name = name;
         this.type = type;
         this.url = url;
