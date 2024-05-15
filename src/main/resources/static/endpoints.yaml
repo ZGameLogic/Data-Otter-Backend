@@ -327,7 +327,7 @@ components:
         status:
             type: object
             properties:
-                date_recorded:
+                "date recorded":
                     type: string
                     example: '2024-05-07 14:00:00'
                 milliseconds:
@@ -339,7 +339,7 @@ components:
                 attempts:
                     type: integer
                     example: 1
-                status_code:
+                "status code":
                     type: integer
                     example: 200
         nodeReport:
