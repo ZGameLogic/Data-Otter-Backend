@@ -34,7 +34,7 @@ jobs:
         env:
           DATA_OTTER_KEY: ${{ secrets.DATA_OTTER_KEY }}
         run: |
-          scp -i private_key.pem -o StrictHostKeyChecking=no target/Monitors-1.0.0.jar azureuser@20.40.218.161:/monitor/Monitors.jar
+          scp -i private_key.pem -o StrictHostKeyChecking=no target/Monitors-1.0.0.jar azureuser@20.40.218.161:/home/azureuser/monitor/Monitors.jar
 
       - name: Start Monitors Service
         env:
