@@ -1,6 +1,10 @@
 package com.zgamelogic.controllers;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.zgamelogic.data.groupConfiguration.MonitorGroup;
+import com.zgamelogic.data.groupConfiguration.MonitorGroupRepository;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationAndStatus;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
@@ -24,26 +28,29 @@ import java.util.stream.Stream;
 
 @Slf4j
 @RestController
-public class APIController {
+public class MonitorController {
     private final MonitorConfigurationRepository monitorConfigurationRepository;
     private final MonitorStatusRepository monitorStatusRepository;
     private final NodeMonitorReportRepository nodeMonitorReportRepository;
+    private final MonitorGroupRepository monitorGroupRepository;
     private final MonitorService monitorService;
 
-    public APIController(MonitorConfigurationRepository monitorConfigurationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService) {
+    public MonitorController(MonitorConfigurationRepository monitorConfigurationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, MonitorGroupRepository monitorGroupRepository, MonitorService monitorService) {
         this.monitorConfigurationRepository = monitorConfigurationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
         this.nodeMonitorReportRepository = nodeMonitorReportRepository;
+        this.monitorGroupRepository = monitorGroupRepository;
         this.monitorService = monitorService;
     }
 
     @PostMapping("monitors")
-    @JsonSerialize(using = MonitorNoGroupSerialization.class)
-    private ResponseEntity<?> createMonitor(@RequestBody MonitorConfiguration monitorConfiguration) throws ExecutionException, InterruptedException {
+    private ResponseEntity<?> createMonitor(@RequestBody MonitorConfiguration monitorConfiguration) throws ExecutionException, InterruptedException, JsonProcessingException {
         MonitorStatusReport status = monitorService.getMonitorStatus(monitorConfiguration).get();
         if(!status.status()) return ResponseEntity.status(400).body(status);
         MonitorConfiguration m = monitorConfigurationRepository.save(monitorConfiguration);
-        return ResponseEntity.ok(m);
+        ObjectMapper om = new ObjectMapper();
+        om.registerModule(new SimpleModule().addSerializer(MonitorConfiguration.class, new MonitorNoGroupSerialization()));
+        return ResponseEntity.ok(om.writeValueAsString(m));
     }
 
     @PostMapping("monitors/test")
@@ -152,6 +159,35 @@ public class APIController {
             return ResponseEntity.ok(condensedList);
         }
         return ResponseEntity.ok(history);
+    }
+
+    @PostMapping("monitors/{monitorId}/group/{groupId}")
+    public ResponseEntity<MonitorGroup> addToGroup(
+            @PathVariable Long monitorId,
+            @PathVariable Long groupId
+    ){
+        Optional<MonitorGroup> group = monitorGroupRepository.findById(groupId);
+        if(group.isEmpty()) return ResponseEntity.badRequest().build();
+        Optional<MonitorConfiguration> configuration = monitorConfigurationRepository.findById(monitorId);
+        if(configuration.isEmpty()) return ResponseEntity.badRequest().build();
+        group.get().getMonitors().add(configuration.get());
+        MonitorGroup savedGroup = monitorGroupRepository.save(group.get());
+        return ResponseEntity.ok(savedGroup);
+    }
+
+
+    @DeleteMapping("monitors/{monitorId}/group/{groupId}")
+    public ResponseEntity<MonitorGroup> removeFromGroup(
+            @PathVariable Long monitorId,
+            @PathVariable Long groupId
+    ){
+        Optional<MonitorGroup> group = monitorGroupRepository.findById(groupId);
+        if(group.isEmpty()) return ResponseEntity.badRequest().build();
+        Optional<MonitorConfiguration> configuration = monitorConfigurationRepository.findById(monitorId);
+        if(configuration.isEmpty()) return ResponseEntity.badRequest().build();
+        group.get().getMonitors().remove(configuration.get());
+        MonitorGroup savedGroup = monitorGroupRepository.save(group.get());
+        return ResponseEntity.ok(savedGroup);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

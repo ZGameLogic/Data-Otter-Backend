@@ -1,10 +1,11 @@
 package com.zgamelogic.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.zgamelogic.data.groupConfiguration.MonitorGroup;
 import com.zgamelogic.data.groupConfiguration.MonitorGroupRepository;
-import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
-import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
 import com.zgamelogic.serialization.GroupNoMonitorsSerialization;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +18,9 @@ import java.util.Optional;
 @Slf4j
 public class GroupController {
     private final MonitorGroupRepository monitorGroupRepository;
-    private final MonitorConfigurationRepository monitorConfigurationRepository;
 
-    public GroupController(MonitorGroupRepository monitorGroupRepository, MonitorConfigurationRepository monitorConfigurationRepository) {
+    public GroupController(MonitorGroupRepository monitorGroupRepository) {
         this.monitorGroupRepository = monitorGroupRepository;
-        this.monitorConfigurationRepository = monitorConfigurationRepository;
     }
 
     @GetMapping("groups")
@@ -31,9 +30,11 @@ public class GroupController {
 
     @PostMapping("groups")
     @JsonSerialize(using = GroupNoMonitorsSerialization.class)
-    public ResponseEntity<MonitorGroup> createGroup(@RequestBody MonitorGroup monitorGroup){
+    public ResponseEntity<String> createGroup(@RequestBody MonitorGroup monitorGroup) throws JsonProcessingException {
         MonitorGroup group = monitorGroupRepository.save(monitorGroup);
-        return ResponseEntity.ok(group);
+        ObjectMapper om = new ObjectMapper();
+        om.registerModule(new SimpleModule().addSerializer(MonitorGroup.class, new GroupNoMonitorsSerialization()));
+        return ResponseEntity.ok(om.writeValueAsString(group));
     }
 
     @DeleteMapping("groups/{groupId}")
@@ -42,34 +43,5 @@ public class GroupController {
         if(group.isEmpty()) return ResponseEntity.badRequest().build();
         monitorGroupRepository.delete(group.get());
         return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("monitors/{monitorId}/group/{groupId}")
-    public ResponseEntity<MonitorGroup> addToGroup(
-            @PathVariable Long monitorId,
-            @PathVariable Long groupId
-    ){
-        Optional<MonitorGroup> group = monitorGroupRepository.findById(groupId);
-        if(group.isEmpty()) return ResponseEntity.badRequest().build();
-        Optional<MonitorConfiguration> configuration = monitorConfigurationRepository.findById(monitorId);
-        if(configuration.isEmpty()) return ResponseEntity.badRequest().build();
-        group.get().getMonitors().add(configuration.get());
-        MonitorGroup savedGroup = monitorGroupRepository.save(group.get());
-        return ResponseEntity.ok(savedGroup);
-    }
-
-
-    @DeleteMapping("monitors/{monitorId}/group/{groupId}")
-    public ResponseEntity<MonitorGroup> removeFromGroup(
-            @PathVariable Long monitorId,
-            @PathVariable Long groupId
-    ){
-        Optional<MonitorGroup> group = monitorGroupRepository.findById(groupId);
-        if(group.isEmpty()) return ResponseEntity.badRequest().build();
-        Optional<MonitorConfiguration> configuration = monitorConfigurationRepository.findById(monitorId);
-        if(configuration.isEmpty()) return ResponseEntity.badRequest().build();
-        group.get().getMonitors().remove(configuration.get());
-        MonitorGroup savedGroup = monitorGroupRepository.save(group.get());
-        return ResponseEntity.ok(savedGroup);
     }
 }
