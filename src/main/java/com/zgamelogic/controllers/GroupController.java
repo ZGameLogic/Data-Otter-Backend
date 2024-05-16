@@ -29,7 +29,6 @@ public class GroupController {
     }
 
     @PostMapping("groups")
-    @JsonSerialize(using = GroupNoMonitorsSerialization.class)
     public ResponseEntity<String> createGroup(@RequestBody MonitorGroup monitorGroup) throws JsonProcessingException {
         MonitorGroup group = monitorGroupRepository.save(monitorGroup);
         ObjectMapper om = new ObjectMapper();
