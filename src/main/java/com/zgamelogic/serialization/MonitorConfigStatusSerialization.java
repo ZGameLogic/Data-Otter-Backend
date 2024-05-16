@@ -3,11 +3,14 @@ package com.zgamelogic.serialization;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.zgamelogic.data.groupConfiguration.MonitorGroup;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationAndStatus;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 
+@Slf4j
 public class MonitorConfigStatusSerialization extends JsonSerializer<MonitorConfigurationAndStatus> {
     @Override
     public void serialize(MonitorConfigurationAndStatus data, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
@@ -27,6 +30,13 @@ public class MonitorConfigStatusSerialization extends JsonSerializer<MonitorConf
             jsonGenerator.writeNumberField("status code", data.monitorStatus().getStatusCode());
             jsonGenerator.writeEndObject();
         }
+        jsonGenerator.writeArrayFieldStart("group ids");
+        if(data.monitorConfiguration().getGroups() != null){
+            for(MonitorGroup group: data.monitorConfiguration().getGroups()){
+                jsonGenerator.writeNumber(group.getId());
+            }
+        }
+        jsonGenerator.writeEndArray();
         jsonGenerator.writeEndObject();
     }
 }

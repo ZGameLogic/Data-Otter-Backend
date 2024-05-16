@@ -1,11 +1,13 @@
 package com.zgamelogic.controllers;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationAndStatus;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
 import com.zgamelogic.data.monitorHistory.MonitorStatus;
 import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
+import com.zgamelogic.serialization.MonitorNoGroupSerialization;
 import com.zgamelogic.services.monitors.MonitorService;
 import com.zgamelogic.services.monitors.MonitorStatusReport;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,7 @@ public class APIController {
     }
 
     @PostMapping("monitors")
+    @JsonSerialize(using = MonitorNoGroupSerialization.class)
     private ResponseEntity<?> createMonitor(@RequestBody MonitorConfiguration monitorConfiguration) throws ExecutionException, InterruptedException {
         MonitorStatusReport status = monitorService.getMonitorStatus(monitorConfiguration).get();
         if(!status.status()) return ResponseEntity.status(400).body(status);

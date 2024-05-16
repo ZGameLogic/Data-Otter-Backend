@@ -1,10 +1,14 @@
 package com.zgamelogic.data.monitorConfiguration;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.zgamelogic.data.groupConfiguration.MonitorGroup;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -12,6 +16,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @Table(name = "monitor_configurations")
 @ToString
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MonitorConfiguration {
     public enum Type { WEB, API }
 
@@ -23,6 +28,10 @@ public class MonitorConfiguration {
     private Type type;
     private String url;
     private String regex;
+
+    @ManyToMany(mappedBy = "monitors")
+    @ToString.Exclude
+    private List<MonitorGroup> groups;
 
     public MonitorConfiguration(String name, Type type, String url, String regex) {
         this.name = name;
