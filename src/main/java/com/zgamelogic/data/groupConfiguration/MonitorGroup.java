@@ -8,6 +8,7 @@ import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.io.IOException;
@@ -27,11 +28,21 @@ public class MonitorGroup {
 
     @ToString.Exclude
     @ManyToMany
+    @Setter
     @JoinTable(name = "monitor_group_connections")
     private List<MonitorConfiguration> monitors;
 
     public MonitorGroup(String name){
         this.name = name;
+    }
+
+    public MonitorGroup(String name, List<Long> monitors) {
+        this.name = name;
+        this.monitors = monitors.stream().map(MonitorConfiguration::new).toList();
+    }
+
+    public MonitorGroup(long id){
+        this.id = id;
     }
 
     public static class MonitorGroupSerialization extends JsonSerializer<MonitorGroup> {
@@ -41,7 +52,7 @@ public class MonitorGroup {
             jsonGenerator.writeStartObject();
             jsonGenerator.writeNumberField("id", monitorGroup.getId());
             jsonGenerator.writeStringField("name", monitorGroup.getName());
-            jsonGenerator.writeArrayFieldStart("monitor ids");
+            jsonGenerator.writeArrayFieldStart("monitors");
             if(monitorGroup.getMonitors() != null){
                 for(MonitorConfiguration monitor : monitorGroup.getMonitors()){
                     jsonGenerator.writeNumber(monitor.getId());

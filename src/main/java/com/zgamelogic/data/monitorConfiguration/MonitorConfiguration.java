@@ -2,16 +2,13 @@ package com.zgamelogic.data.monitorConfiguration;
 
 import com.zgamelogic.data.groupConfiguration.MonitorGroup;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "monitor_configurations")
 @ToString
@@ -29,6 +26,7 @@ public class MonitorConfiguration {
 
     @ToString.Exclude
     @ManyToMany(mappedBy = "monitors")
+    @Setter
     private List<MonitorGroup> groups;
 
     public MonitorConfiguration(String name, Type type, String url, String regex) {
@@ -36,10 +34,23 @@ public class MonitorConfiguration {
         this.type = type;
         this.url = url;
         this.regex = regex;
+        groups = new ArrayList<>();
+    }
+
+    public MonitorConfiguration(String name, Type type, String url, String regex, List<Long> groups) {
+        this.name = name;
+        this.type = type;
+        this.url = url;
+        this.regex = regex;
+        this.groups = groups.stream().map(MonitorGroup::new).toList();
     }
 
     public MonitorConfiguration(Long id){
         this.id = id;
+    }
+
+    public MonitorConfiguration(){
+        groups = new ArrayList<>();
     }
 
     public void update(MonitorConfiguration monitorConfiguration) {

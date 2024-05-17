@@ -1,11 +1,9 @@
 package com.zgamelogic.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.zgamelogic.data.groupConfiguration.MonitorGroup;
 import com.zgamelogic.data.groupConfiguration.MonitorGroupRepository;
-import com.zgamelogic.serialization.GroupNoMonitorsSerialization;
+import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
+import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +15,11 @@ import java.util.Optional;
 @Slf4j
 public class GroupController {
     private final MonitorGroupRepository monitorGroupRepository;
+    private final MonitorConfigurationRepository monitorConfigurationRepository;
 
-    public GroupController(MonitorGroupRepository monitorGroupRepository) {
+    public GroupController(MonitorGroupRepository monitorGroupRepository, MonitorConfigurationRepository monitorConfigurationRepository) {
         this.monitorGroupRepository = monitorGroupRepository;
+        this.monitorConfigurationRepository = monitorConfigurationRepository;
     }
 
     @GetMapping("groups")
@@ -28,11 +28,14 @@ public class GroupController {
     }
 
     @PostMapping("groups")
-    public ResponseEntity<String> createGroup(@RequestBody MonitorGroup monitorGroup) throws JsonProcessingException {
+    public ResponseEntity<MonitorGroup> createGroup(@RequestBody MonitorGroup monitorGroup) {
         MonitorGroup group = monitorGroupRepository.save(monitorGroup);
-        ObjectMapper om = new ObjectMapper();
-        om.registerModule(new SimpleModule().addSerializer(MonitorGroup.class, new GroupNoMonitorsSerialization()));
-        return ResponseEntity.ok(om.writeValueAsString(group));
+        if(monitorGroup.getMonitors() != null) {
+            List<MonitorConfiguration> monitors = monitorConfigurationRepository.findAllById(monitorGroup.getMonitors().stream().map(MonitorConfiguration::getId).toList());
+            monitors.forEach(monitor -> monitor.getGroups().add(group));
+            group.setMonitors(monitors);
+        }
+        return ResponseEntity.ok(group);
     }
 
     @DeleteMapping("groups/{groupId}")

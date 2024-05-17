@@ -1,8 +1,5 @@
 package com.zgamelogic.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.zgamelogic.data.groupConfiguration.MonitorGroup;
 import com.zgamelogic.data.groupConfiguration.MonitorGroupRepository;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
@@ -11,7 +8,6 @@ import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
 import com.zgamelogic.data.monitorHistory.MonitorStatus;
 import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
-import com.zgamelogic.serialization.MonitorNoGroupSerialization;
 import com.zgamelogic.services.monitors.MonitorService;
 import com.zgamelogic.services.monitors.MonitorStatusReport;
 import lombok.extern.slf4j.Slf4j;
@@ -44,13 +40,16 @@ public class MonitorController {
     }
 
     @PostMapping("monitors")
-    private ResponseEntity<?> createMonitor(@RequestBody MonitorConfiguration monitorConfiguration) throws ExecutionException, InterruptedException, JsonProcessingException {
+    private ResponseEntity<?> createMonitor(@RequestBody MonitorConfiguration monitorConfiguration) throws ExecutionException, InterruptedException {
         MonitorStatusReport status = monitorService.getMonitorStatus(monitorConfiguration).get();
         if(!status.status()) return ResponseEntity.status(400).body(status);
+        if(monitorConfiguration.getGroups() != null) {
+            List<MonitorGroup> groups = monitorGroupRepository.findAllById(monitorConfiguration.getGroups().stream().map(MonitorGroup::getId).toList());
+            groups.forEach(group -> group.getMonitors().add(monitorConfiguration));
+            monitorConfiguration.setGroups(groups);
+        }
         MonitorConfiguration m = monitorConfigurationRepository.save(monitorConfiguration);
-        ObjectMapper om = new ObjectMapper();
-        om.registerModule(new SimpleModule().addSerializer(MonitorConfiguration.class, new MonitorNoGroupSerialization()));
-        return ResponseEntity.ok(om.writeValueAsString(m));
+        return ResponseEntity.ok(m);
     }
 
     @PostMapping("monitors/test")
@@ -123,6 +122,11 @@ public class MonitorController {
         if(!monitorConfigurationRepository.existsById(id)) return ResponseEntity.notFound().build();
         MonitorConfiguration original  = monitorConfigurationRepository.findById(id).get();
         original.update(updatedConfiguration);
+        if(updatedConfiguration.getGroups() != null) {
+            List<MonitorGroup> groups = monitorGroupRepository.findAllById(updatedConfiguration.getGroups().stream().map(MonitorGroup::getId).toList());
+            groups.forEach(group -> group.getMonitors().add(updatedConfiguration));
+            updatedConfiguration.setGroups(groups);
+        }
         MonitorConfiguration saved = monitorConfigurationRepository.save(original);
         return ResponseEntity.ok(saved);
     }
