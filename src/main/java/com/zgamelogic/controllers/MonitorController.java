@@ -122,11 +122,6 @@ public class MonitorController {
         if(!monitorConfigurationRepository.existsById(id)) return ResponseEntity.notFound().build();
         MonitorConfiguration original  = monitorConfigurationRepository.findById(id).get();
         original.update(updatedConfiguration);
-        if(updatedConfiguration.getGroups() != null) {
-            List<MonitorGroup> groups = monitorGroupRepository.findAllById(updatedConfiguration.getGroups().stream().map(MonitorGroup::getId).toList());
-            groups.forEach(group -> group.getMonitors().add(updatedConfiguration));
-            updatedConfiguration.setGroups(groups);
-        }
         MonitorConfiguration saved = monitorConfigurationRepository.save(original);
         return ResponseEntity.ok(saved);
     }
