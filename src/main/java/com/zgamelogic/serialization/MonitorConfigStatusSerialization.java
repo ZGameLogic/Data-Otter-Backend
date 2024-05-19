@@ -30,7 +30,7 @@ public class MonitorConfigStatusSerialization extends JsonSerializer<MonitorConf
             jsonGenerator.writeNumberField("status code", data.monitorStatus().getStatusCode());
             jsonGenerator.writeEndObject();
         }
-        jsonGenerator.writeArrayFieldStart("group ids");
+        jsonGenerator.writeArrayFieldStart("groups");
         if(data.monitorConfiguration().getGroups() != null){
             for(MonitorGroup group: data.monitorConfiguration().getGroups()){
                 jsonGenerator.writeNumber(group.getId());
