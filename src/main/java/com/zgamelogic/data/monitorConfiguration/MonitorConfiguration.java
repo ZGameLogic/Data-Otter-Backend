@@ -23,6 +23,9 @@ public class MonitorConfiguration {
     private Type type;
     private String url;
     private String regex;
+    @Setter
+    @Column(columnDefinition = "boolean default true")
+    private boolean active;
 
     @ToString.Exclude
     @ManyToMany(mappedBy = "monitors")
@@ -35,6 +38,7 @@ public class MonitorConfiguration {
         this.url = url;
         this.regex = regex;
         groups = new ArrayList<>();
+        active = true;
     }
 
     public MonitorConfiguration(String name, Type type, String url, String regex, List<Long> groups) {
@@ -43,14 +47,17 @@ public class MonitorConfiguration {
         this.url = url;
         this.regex = regex;
         this.groups = groups.stream().map(MonitorGroup::new).toList();
+        active = true;
     }
 
     public MonitorConfiguration(Long id){
         this.id = id;
+        active = true;
     }
 
     public MonitorConfiguration(){
         groups = new ArrayList<>();
+        active = true;
     }
 
     public void update(MonitorConfiguration monitorConfiguration) {

@@ -61,10 +61,12 @@ public class MonitorController {
 
     @GetMapping("monitors")
     private ResponseEntity<List<MonitorConfigurationAndStatus>> getAllMonitors(
-            @RequestParam(required = false, name = "include-status") Boolean includeStatus
+            @RequestParam(required = false, name = "include-status") Boolean includeStatus,
+            @RequestParam(required = false, name = "active") Boolean activeOnly
     ) {
         List<MonitorConfigurationAndStatus> payload = new ArrayList<>();
-        monitorConfigurationRepository.findAll().forEach(monitorConfiguration -> {
+        List<MonitorConfiguration> configurations = activeOnly != null && activeOnly ? monitorConfigurationRepository.findAllByActiveIsTrue() : monitorConfigurationRepository.findAll();
+        configurations.forEach(monitorConfiguration -> {
             if(includeStatus != null && includeStatus) {
                 Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTop1ById_MonitorIdOrderById_DateDesc(monitorConfiguration.getId());
                 payload.add(new MonitorConfigurationAndStatus(
@@ -174,6 +176,24 @@ public class MonitorController {
         return ResponseEntity.ok(savedGroup);
     }
 
+    @PostMapping("monitors/{monitorId}/disable")
+    public ResponseEntity<?> disableMonitor(@PathVariable long monitorId){
+        Optional<MonitorConfiguration> configuration = monitorConfigurationRepository.findById(monitorId);
+        if(configuration.isEmpty()) return ResponseEntity.badRequest().build();
+        configuration.get().setActive(false);
+        monitorConfigurationRepository.save(configuration.get());
+        nodeMonitorReportRepository.deleteAllById_MonitorId(monitorId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("monitors/{monitorId}/enable")
+    public ResponseEntity<?> enableMonitor(@PathVariable long monitorId){
+        Optional<MonitorConfiguration> configuration = monitorConfigurationRepository.findById(monitorId);
+        if(configuration.isEmpty()) return ResponseEntity.badRequest().build();
+        configuration.get().setActive(true);
+        monitorConfigurationRepository.save(configuration.get());
+        return ResponseEntity.ok().build();
+    }
 
     @DeleteMapping("monitors/{monitorId}/group/{groupId}")
     public ResponseEntity<MonitorGroup> removeFromGroup(

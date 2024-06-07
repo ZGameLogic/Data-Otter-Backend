@@ -43,7 +43,7 @@ public class DataOtterController {
      */
     @Scheduled(cron = "5 * * * * *")
     public void dataOtterTasks(){
-        monitorConfigurationRepository.findAll().forEach(monitorConfiguration ->
+        monitorConfigurationRepository.findAllByActiveIsTrue().forEach(monitorConfiguration ->
                 monitorService.getMonitorStatus(monitorConfiguration).thenAccept(report ->
                     nodeMonitorReportRepository.save(new NodeMonitorReport(monitorConfiguration, masterNode, report)
                 )
@@ -56,7 +56,7 @@ public class DataOtterController {
      */
     @Scheduled(cron = "0 * * * * *")
     public void minuteJobs(){
-        monitorConfigurationRepository.findAll().forEach(configuration -> {
+        monitorConfigurationRepository.findAllByActiveIsTrue().forEach(configuration -> {
             List<NodeMonitorReport> reports = nodeMonitorReportRepository.findAllById_MonitorId(configuration.getId());
             if(reports.isEmpty()) return;
             if(reports.size() == 1){
