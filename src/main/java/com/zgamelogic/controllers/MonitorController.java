@@ -176,22 +176,13 @@ public class MonitorController {
         return ResponseEntity.ok(savedGroup);
     }
 
-    @PostMapping("monitors/{monitorId}/disable")
-    public ResponseEntity<?> disableMonitor(@PathVariable long monitorId){
+    @PostMapping("monitors/{monitorId}/active/{active}")
+    public ResponseEntity<?> disableMonitor(@PathVariable long monitorId, @PathVariable boolean active){
         Optional<MonitorConfiguration> configuration = monitorConfigurationRepository.findById(monitorId);
         if(configuration.isEmpty()) return ResponseEntity.badRequest().build();
-        configuration.get().setActive(false);
+        configuration.get().setActive(active);
         monitorConfigurationRepository.save(configuration.get());
         nodeMonitorReportRepository.deleteAllById_MonitorId(monitorId);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("monitors/{monitorId}/enable")
-    public ResponseEntity<?> enableMonitor(@PathVariable long monitorId){
-        Optional<MonitorConfiguration> configuration = monitorConfigurationRepository.findById(monitorId);
-        if(configuration.isEmpty()) return ResponseEntity.badRequest().build();
-        configuration.get().setActive(true);
-        monitorConfigurationRepository.save(configuration.get());
         return ResponseEntity.ok().build();
     }
 
