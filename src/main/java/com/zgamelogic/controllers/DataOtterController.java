@@ -15,9 +15,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -66,6 +68,7 @@ public class DataOtterController {
      */
     @Scheduled(cron = "0 * * * * *")
     public void minuteJobs(){
+        List<MonitorStatus> changedMonitors = new ArrayList<>();
         monitorConfigurationRepository.findAllByActiveIsTrue().forEach(configuration -> {
             List<NodeMonitorReport> reports = nodeMonitorReportRepository.findAllById_MonitorId(configuration.getId());
             if(reports.isEmpty()) return;
@@ -84,13 +87,23 @@ public class DataOtterController {
             Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTop1ById_MonitorIdOrderById_DateDesc(monitorStatus.getId().getMonitor().getId());
             mostRecentStatus.ifPresent(previousStatus -> {
                 if(previousStatus.isStatus() == monitorStatus.isStatus()) return;
-                String subtitle = String.format("%s monitor is alerting", monitorStatus.getId().getMonitor().getName());
-                String body = String.format("Status: %s", monitorStatus.isStatus() ? "up":"down");
-                ApplePushNotification notification = new ApplePushNotification("Data Otter", subtitle, body);
-                deviceRepository.findAll().forEach(device -> apns.sendNotification(device.getId(), notification));
+                changedMonitors.add(monitorStatus);
             });
             monitorStatusRepository.save(monitorStatus);
         });
         nodeMonitorReportRepository.deleteAll();
+        if(changedMonitors.isEmpty()) return;
+        String subtitle;
+        if(changedMonitors.size() > 1){
+            subtitle = String.format("%s monitors are alerting", changedMonitors.stream()
+                    .map(monitor -> monitor.getId().getMonitor().getName())
+                    .collect(Collectors.joining(","))
+            );
+        } else {
+            subtitle = String.format("%s monitor is alerting", changedMonitors.get(0).getId().getMonitor().getName());
+        }
+        String body = changedMonitors.stream().map(monitor -> String.format("%s : %s", monitor.getId().getMonitor().getName(), monitor.isStatus() ? "up": "down")).collect(Collectors.joining("\n"));
+        ApplePushNotification notification = new ApplePushNotification("Data Otter", subtitle, body);
+        deviceRepository.findAll().forEach(device -> apns.sendNotification(device.getId(), notification));
     }
 }
