@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
-@PropertySource("File:APNS.properties")
+@PropertySource("File:/home/azureuser/monitor/APNS.properties")
 public class ApplePushNotificationService {
     @Value("${kid}")    private String kid;
     @Value("${org_id}") private String orgId;
@@ -48,7 +48,7 @@ public class ApplePushNotificationService {
 
     private String authJWT() {
         try {
-            String privateKeyPEM = new String(Files.readAllBytes(new File("AuthKey_" + kid + ".p8").toPath()));
+            String privateKeyPEM = new String(Files.readAllBytes(new File("/home/azureuser/monitor/AuthKey_" + kid + ".p8").toPath()));
             privateKeyPEM = privateKeyPEM.replace("-----BEGIN PRIVATE KEY-----", "")
                     .replace("-----END PRIVATE KEY-----", "")
                     .replaceAll("\\s", ""); // Remove any whitespaces or newlines
