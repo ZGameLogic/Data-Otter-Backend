@@ -17,14 +17,12 @@ public class DeviceController {
 
     @PostMapping("/devices/register/{deviceId}")
     public ResponseEntity<?> registerDevice(@PathVariable String deviceId) {
-        System.out.println("registering device " + deviceId);
         deviceRepository.save(new Device(deviceId));
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/devices/unregister/{deviceId}")
     public ResponseEntity<?> unregisterDevice(@PathVariable String deviceId) {
-        System.out.println("unregistering device " + deviceId);
         deviceRepository.deleteById(deviceId);
         return ResponseEntity.ok().build();
     }

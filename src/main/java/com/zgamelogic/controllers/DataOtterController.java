@@ -1,11 +1,14 @@
 package com.zgamelogic.controllers;
 
+import com.zgamelogic.data.devices.DeviceRepository;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
 import com.zgamelogic.data.monitorHistory.MonitorStatus;
 import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
 import com.zgamelogic.data.nodeConfiguration.NodeConfiguration;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReport;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
+import com.zgamelogic.services.apns.ApplePushNotification;
+import com.zgamelogic.services.apns.ApplePushNotificationService;
 import com.zgamelogic.services.monitors.MonitorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Controller;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Controller
@@ -23,19 +27,25 @@ public class DataOtterController {
     private final NodeMonitorReportRepository nodeMonitorReportRepository;
     private final MonitorService monitorService;
     private final NodeConfiguration masterNode;
+    private final ApplePushNotificationService apns;
+    private final DeviceRepository deviceRepository;
 
     public DataOtterController(
             MonitorConfigurationRepository monitorConfigurationRepository,
             MonitorStatusRepository monitorStatusRepository,
             NodeMonitorReportRepository nodeMonitorReportRepository,
             MonitorService monitorService,
-            @Qualifier("master-node") NodeConfiguration masterNode
+            @Qualifier("master-node") NodeConfiguration masterNode,
+            ApplePushNotificationService apns,
+            DeviceRepository deviceRepository
     ) {
         this.monitorConfigurationRepository = monitorConfigurationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
         this.nodeMonitorReportRepository = nodeMonitorReportRepository;
         this.monitorService = monitorService;
         this.masterNode = masterNode;
+        this.apns = apns;
+        this.deviceRepository = deviceRepository;
     }
 
     /**
@@ -59,17 +69,27 @@ public class DataOtterController {
         monitorConfigurationRepository.findAllByActiveIsTrue().forEach(configuration -> {
             List<NodeMonitorReport> reports = nodeMonitorReportRepository.findAllById_MonitorId(configuration.getId());
             if(reports.isEmpty()) return;
+            MonitorStatus monitorStatus;
             if(reports.size() == 1){
-                monitorStatusRepository.save(new MonitorStatus(configuration, reports.get(0)));
+                monitorStatus = new MonitorStatus(configuration, reports.get(0));
             } else if(reports.stream().anyMatch(report -> !report.isStatus())){
                 NodeMonitorReport badReport = reports.stream().filter(report -> !report.isStatus()).min(Comparator.comparingLong(NodeMonitorReport::getMilliseconds)
                         .thenComparingInt(NodeMonitorReport::getAttempts)).get();
-                monitorStatusRepository.save(new MonitorStatus(configuration, badReport));
+                monitorStatus = new MonitorStatus(configuration, badReport);
             } else {
                 NodeMonitorReport topReport = reports.stream().min(Comparator.comparingLong(NodeMonitorReport::getMilliseconds)
                         .thenComparingInt(NodeMonitorReport::getAttempts)).get();
-                monitorStatusRepository.save(new MonitorStatus(configuration, topReport));
+                monitorStatus = new MonitorStatus(configuration, topReport);
             }
+            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTop1ById_MonitorIdOrderById_DateDesc(monitorStatus.getId().getMonitor().getId());
+            mostRecentStatus.ifPresent(previousStatus -> {
+                if(previousStatus.isStatus() == monitorStatus.isStatus()) return;
+                String subtitle = String.format("%s monitor is alerting", monitorStatus.getId().getMonitor().getName());
+                String body = String.format("Status: %s", previousStatus.isStatus() ? "up":"down");
+                ApplePushNotification notification = new ApplePushNotification("Data Otter", subtitle, body);
+                deviceRepository.findAll().forEach(device -> apns.sendNotification(device.getId(), notification));
+            });
+            monitorStatusRepository.save(monitorStatus);
         });
         nodeMonitorReportRepository.deleteAll();
     }

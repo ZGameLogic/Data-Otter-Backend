@@ -43,3 +43,5 @@ build/
 /data/
 data.mv.db
 data.trace.db
+APNS.properties
+AuthKey_DR4XM76JWJ.p8
