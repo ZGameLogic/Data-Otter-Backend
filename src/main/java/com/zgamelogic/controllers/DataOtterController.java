@@ -85,7 +85,7 @@ public class DataOtterController {
             mostRecentStatus.ifPresent(previousStatus -> {
                 if(previousStatus.isStatus() == monitorStatus.isStatus()) return;
                 String subtitle = String.format("%s monitor is alerting", monitorStatus.getId().getMonitor().getName());
-                String body = String.format("Status: %s", previousStatus.isStatus() ? "up":"down");
+                String body = String.format("Status: %s", monitorStatus.isStatus() ? "up":"down");
                 ApplePushNotification notification = new ApplePushNotification("Data Otter", subtitle, body);
                 deviceRepository.findAll().forEach(device -> apns.sendNotification(device.getId(), notification));
             });
