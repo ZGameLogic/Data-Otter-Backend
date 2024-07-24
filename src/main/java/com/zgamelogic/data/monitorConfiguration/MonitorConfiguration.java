@@ -1,10 +1,8 @@
 package com.zgamelogic.data.monitorConfiguration;
 
-import com.zgamelogic.data.groupConfiguration.MonitorGroup;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,17 +25,11 @@ public class MonitorConfiguration {
     @Column(columnDefinition = "boolean default true")
     private boolean active;
 
-    @ToString.Exclude
-    @ManyToMany(mappedBy = "monitors")
-    @Setter
-    private List<MonitorGroup> groups;
-
     public MonitorConfiguration(String name, Type type, String url, String regex) {
         this.name = name;
         this.type = type;
         this.url = url;
         this.regex = regex;
-        groups = new ArrayList<>();
         active = true;
     }
 
@@ -46,7 +38,6 @@ public class MonitorConfiguration {
         this.type = type;
         this.url = url;
         this.regex = regex;
-        this.groups = groups.stream().map(MonitorGroup::new).toList();
         active = true;
     }
 
@@ -56,7 +47,6 @@ public class MonitorConfiguration {
     }
 
     public MonitorConfiguration(){
-        groups = new ArrayList<>();
         active = true;
     }
 

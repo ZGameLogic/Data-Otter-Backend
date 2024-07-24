@@ -1,16 +1,16 @@
-GET http://localhost:8080/monitors
+GET {{base_url}}/monitors
 ###
-GET http://localhost:8080/monitors/1
+GET {{base_url}}/monitors/1
 ###
-GET http://localhost:8080/monitors?include-status=true
+GET {{base_url}}/monitors?include-status=true
 ###
-GET http://localhost:8080/monitors/1?include-status=true
+GET {{base_url}}/monitors/1?include-status=true
 ###
-GET http://localhost:8080/monitors/1/history
+GET {{base_url}}/monitors/1/history
 ###
-GET http://localhost:8080/monitors/1/history?condensed=true
+GET {{base_url}}/monitors/1/history?condensed=true
 ###
-POST http://localhost:8080/monitors
+POST {{base_url}}/monitors
 Content-Type: application/json
 
 {
@@ -20,7 +20,7 @@ Content-Type: application/json
     "regex": "Healthy"
 }
 ###
-POST http://localhost:8080/monitors/test
+POST {{base_url}}/monitors/test
 Content-Type: application/json
 
 {
@@ -31,7 +31,7 @@ Content-Type: application/json
 }
 ###
 @put_id = 1
-PUT http://localhost:8080/monitors/{{put_id}}
+PUT {{base_url}}/monitors/{{put_id}}
 Content-Type: application/json
 
 {
@@ -39,4 +39,4 @@ Content-Type: application/json
 }
 ###
 @delete_id = 1
-DELETE http://localhost:8080/monitors/{{delete_id}}
+DELETE {{base_url}}/monitors/{{delete_id}}

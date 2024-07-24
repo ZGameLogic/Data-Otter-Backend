@@ -1,7 +1,5 @@
 package com.zgamelogic.controllers;
 
-import com.zgamelogic.data.groupConfiguration.MonitorGroup;
-import com.zgamelogic.data.groupConfiguration.MonitorGroupRepository;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationAndStatus;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
@@ -28,14 +26,12 @@ public class MonitorController {
     private final MonitorConfigurationRepository monitorConfigurationRepository;
     private final MonitorStatusRepository monitorStatusRepository;
     private final NodeMonitorReportRepository nodeMonitorReportRepository;
-    private final MonitorGroupRepository monitorGroupRepository;
     private final MonitorService monitorService;
 
-    public MonitorController(MonitorConfigurationRepository monitorConfigurationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, MonitorGroupRepository monitorGroupRepository, MonitorService monitorService) {
+    public MonitorController(MonitorConfigurationRepository monitorConfigurationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService) {
         this.monitorConfigurationRepository = monitorConfigurationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
         this.nodeMonitorReportRepository = nodeMonitorReportRepository;
-        this.monitorGroupRepository = monitorGroupRepository;
         this.monitorService = monitorService;
     }
 
@@ -43,11 +39,6 @@ public class MonitorController {
     private ResponseEntity<?> createMonitor(@RequestBody MonitorConfiguration monitorConfiguration) throws ExecutionException, InterruptedException {
         MonitorStatusReport status = monitorService.getMonitorStatus(monitorConfiguration).get();
         if(!status.status()) return ResponseEntity.status(400).body(status);
-        if(monitorConfiguration.getGroups() != null) {
-            List<MonitorGroup> groups = monitorGroupRepository.findAllById(monitorConfiguration.getGroups().stream().map(MonitorGroup::getId).toList());
-            groups.forEach(group -> group.getMonitors().add(monitorConfiguration));
-            monitorConfiguration.setGroups(groups);
-        }
         MonitorConfiguration m = monitorConfigurationRepository.save(monitorConfiguration);
         return ResponseEntity.ok(m);
     }
@@ -162,20 +153,6 @@ public class MonitorController {
         return ResponseEntity.ok(history);
     }
 
-    @PostMapping("monitors/{monitorId}/group/{groupId}")
-    public ResponseEntity<MonitorGroup> addToGroup(
-            @PathVariable Long monitorId,
-            @PathVariable Long groupId
-    ){
-        Optional<MonitorGroup> group = monitorGroupRepository.findById(groupId);
-        if(group.isEmpty()) return ResponseEntity.badRequest().build();
-        Optional<MonitorConfiguration> configuration = monitorConfigurationRepository.findById(monitorId);
-        if(configuration.isEmpty()) return ResponseEntity.badRequest().build();
-        group.get().getMonitors().add(configuration.get());
-        MonitorGroup savedGroup = monitorGroupRepository.save(group.get());
-        return ResponseEntity.ok(savedGroup);
-    }
-
     @PostMapping("monitors/{monitorId}/active/{active}")
     public ResponseEntity<?> disableMonitor(@PathVariable long monitorId, @PathVariable boolean active){
         Optional<MonitorConfiguration> configuration = monitorConfigurationRepository.findById(monitorId);
@@ -184,20 +161,6 @@ public class MonitorController {
         monitorConfigurationRepository.save(configuration.get());
         nodeMonitorReportRepository.deleteAllById_MonitorId(monitorId);
         return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("monitors/{monitorId}/group/{groupId}")
-    public ResponseEntity<MonitorGroup> removeFromGroup(
-            @PathVariable Long monitorId,
-            @PathVariable Long groupId
-    ){
-        Optional<MonitorGroup> group = monitorGroupRepository.findById(groupId);
-        if(group.isEmpty()) return ResponseEntity.badRequest().build();
-        Optional<MonitorConfiguration> configuration = monitorConfigurationRepository.findById(monitorId);
-        if(configuration.isEmpty()) return ResponseEntity.badRequest().build();
-        group.get().getMonitors().remove(configuration.get());
-        MonitorGroup savedGroup = monitorGroupRepository.save(group.get());
-        return ResponseEntity.ok(savedGroup);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
