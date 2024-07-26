@@ -59,7 +59,7 @@ public class MonitorController {
         List<MonitorConfiguration> configurations = activeOnly != null && activeOnly ? monitorConfigurationRepository.findAllByActiveIsTrue() : monitorConfigurationRepository.findAll();
         configurations.forEach(monitorConfiguration -> {
             if(includeStatus != null && includeStatus) {
-                Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTop1ById_MonitorIdOrderById_DateDesc(monitorConfiguration.getId());
+                Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTop1ById_MonitorIdOrderById_DateDesc(monitorConfiguration.getId().getMonitorConfigurationId());
                 payload.add(new MonitorConfigurationAndStatus(
                         monitorConfiguration,
                         mostRecentStatus.orElse(null)
@@ -71,7 +71,7 @@ public class MonitorController {
                 ));
             }
         });
-        List<MonitorConfigurationAndStatus> sortedPayload = payload.stream().sorted(Comparator.comparing(c -> c.monitorConfiguration().getId())).toList();
+        List<MonitorConfigurationAndStatus> sortedPayload = payload.stream().sorted(Comparator.comparing(c -> c.monitorConfiguration().getId().getMonitorConfigurationId())).toList();
         return ResponseEntity.ok(sortedPayload);
     }
 

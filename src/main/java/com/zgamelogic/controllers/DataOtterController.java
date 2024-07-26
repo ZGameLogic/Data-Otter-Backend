@@ -70,7 +70,7 @@ public class DataOtterController {
     public void minuteJobs(){
         List<MonitorStatus> changedMonitors = new ArrayList<>();
         monitorConfigurationRepository.findAllByActiveIsTrue().forEach(configuration -> {
-            List<NodeMonitorReport> reports = nodeMonitorReportRepository.findAllById_MonitorId(configuration.getId());
+            List<NodeMonitorReport> reports = nodeMonitorReportRepository.findAllById_MonitorId(configuration.getId().getMonitorConfigurationId());
             if(reports.isEmpty()) return;
             MonitorStatus monitorStatus;
             if(reports.size() == 1){
@@ -84,7 +84,7 @@ public class DataOtterController {
                         .thenComparingInt(NodeMonitorReport::getAttempts)).get();
                 monitorStatus = new MonitorStatus(configuration, topReport);
             }
-            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTop1ById_MonitorIdOrderById_DateDesc(monitorStatus.getId().getMonitor().getId());
+            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTop1ById_MonitorIdOrderById_DateDesc(monitorStatus.getId().getMonitor().getId().getMonitorConfigurationId());
             mostRecentStatus.ifPresent(previousStatus -> {
                 if(previousStatus.isStatus() == monitorStatus.isStatus()) return;
                 changedMonitors.add(monitorStatus);

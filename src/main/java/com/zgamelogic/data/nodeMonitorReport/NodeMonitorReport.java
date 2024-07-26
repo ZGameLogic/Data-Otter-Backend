@@ -32,7 +32,7 @@ public class NodeMonitorReport {
     }
 
     public NodeMonitorReport(long id, long nodeId, long milliseconds, boolean status, int attempts, int statusCode) {
-        this(new MonitorConfiguration(id), new NodeConfiguration(nodeId), milliseconds, status, attempts, statusCode);
+        this(new MonitorConfiguration(id, 0L), new NodeConfiguration(nodeId), milliseconds, status, attempts, statusCode);
     }
 
     public NodeMonitorReport(MonitorConfiguration id, NodeConfiguration nodeId, long milliseconds, boolean status, int attempts, int statusCode) {

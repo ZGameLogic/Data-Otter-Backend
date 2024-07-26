@@ -36,7 +36,7 @@ public class MonitorStatus {
      * @param statusCode Status code of the call
      */
     public MonitorStatus(Long id, long milliseconds, boolean status, int attempts, int statusCode){
-        this(new MonitorConfiguration(id), milliseconds, status, attempts, statusCode);
+        this(new MonitorConfiguration(id, 0L), milliseconds, status, attempts, statusCode);
     }
 
     /**

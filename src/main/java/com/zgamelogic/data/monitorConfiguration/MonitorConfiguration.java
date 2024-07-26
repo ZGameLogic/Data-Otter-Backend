@@ -1,5 +1,6 @@
 package com.zgamelogic.data.monitorConfiguration;
 
+import com.zgamelogic.data.application.Application;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,10 +13,8 @@ import java.util.List;
 @ToString
 public class MonitorConfiguration {
     public enum Type { WEB, API }
-
-    @Id
-    @GeneratedValue
-    private Long id;
+    @EmbeddedId
+    private MonitorConfigurationId id;
     private String name;
     @Enumerated(EnumType.STRING)
     private Type type;
@@ -41,8 +40,8 @@ public class MonitorConfiguration {
         active = true;
     }
 
-    public MonitorConfiguration(Long id){
-        this.id = id;
+    public MonitorConfiguration(long id, long applicationId){
+        this.id = new MonitorConfigurationId(id, new Application(applicationId));
         active = true;
     }
 
@@ -55,5 +54,20 @@ public class MonitorConfiguration {
         if(monitorConfiguration.getType() != null) type = monitorConfiguration.getType();
         if(monitorConfiguration.getUrl() != null) url = monitorConfiguration.getUrl();
         if(monitorConfiguration.getRegex() != null) regex = monitorConfiguration.getRegex();
+    }
+
+    @Embeddable
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @EqualsAndHashCode
+    @Getter
+    public static class MonitorConfigurationId {
+        @GeneratedValue
+        @Column(name = "MONITOR_CONFIGURATION_ID")
+        private Long monitorConfigurationId;
+
+        @ManyToOne(cascade = CascadeType.REMOVE)
+        @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "ID")
+        private Application application;
     }
 }

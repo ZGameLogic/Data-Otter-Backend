@@ -1,5 +1,4 @@
 package com.zgamelogic.data.nodeMonitorReport;
-
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
 import com.zgamelogic.data.nodeConfiguration.NodeConfiguration;
 import jakarta.persistence.CascadeType;
@@ -16,7 +15,7 @@ import lombok.*;
 @ToString
 public class NodeMonitorReportId {
     @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "MONITOR_ID", referencedColumnName = "ID")
+    @JoinColumn(name = "MONITOR_ID", referencedColumnName = "MONITOR_CONFIGURATION_ID")
     private MonitorConfiguration monitor;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
@@ -24,7 +23,7 @@ public class NodeMonitorReportId {
     private NodeConfiguration node;
 
     public NodeMonitorReportId(long monitorId, long nodeId){
-        monitor = new MonitorConfiguration(monitorId);
-        node = new NodeConfiguration(nodeId);
+        monitor = new MonitorConfiguration(monitorId, 0L); // Ensure this constructor exists in MonitorConfiguration
+        node = new NodeConfiguration(nodeId); // Ensure this constructor exists in NodeConfiguration
     }
 }

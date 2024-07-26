@@ -14,7 +14,7 @@ public class MonitorConfigStatusSerialization extends JsonSerializer<MonitorConf
     @Override
     public void serialize(MonitorConfigurationAndStatus data, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeStartObject();
-        jsonGenerator.writeNumberField("id", data.monitorConfiguration().getId());
+        jsonGenerator.writeNumberField("id", data.monitorConfiguration().getId().getMonitorConfigurationId());
         jsonGenerator.writeStringField("name", data.monitorConfiguration().getName());
         jsonGenerator.writeStringField("type", data.monitorConfiguration().getType().name());
         jsonGenerator.writeStringField("url", data.monitorConfiguration().getUrl());

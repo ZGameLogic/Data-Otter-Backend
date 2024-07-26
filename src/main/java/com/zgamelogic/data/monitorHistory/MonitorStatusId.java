@@ -18,7 +18,7 @@ import java.util.Date;
 @ToString
 public class MonitorStatusId {
     @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "MONITOR_ID", referencedColumnName = "ID")
+    @JoinColumn(name = "MONITOR_ID", referencedColumnName = "MONITOR_CONFIGURATION_ID")
     private MonitorConfiguration monitor;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date date;
