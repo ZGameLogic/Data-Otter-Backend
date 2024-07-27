@@ -1,11 +1,12 @@
 package com.zgamelogic.data.application;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import com.zgamelogic.data.tags.Tag;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.Set;
 
 @Entity
 @Getter
@@ -15,4 +16,18 @@ public class Application {
     @Id
     @GeneratedValue
     private Long id;
+    private String name;
+    private String description;
+
+    @ManyToMany
+    @JoinTable(
+        name = "APPLICATION_TAGS",
+        joinColumns = @JoinColumn(name = "application_id"),
+        inverseJoinColumns = @JoinColumn(name = "tag_name")
+    )
+    private Set<Tag> tags;
+
+    public Application(long id){
+        this.id = id;
+    }
 }
