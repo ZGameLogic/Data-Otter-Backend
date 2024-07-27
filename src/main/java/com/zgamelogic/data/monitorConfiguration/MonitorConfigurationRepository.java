@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface MonitorConfigurationRepository extends JpaRepository<MonitorConfiguration, Long> {
     List<MonitorConfiguration> findAllByActiveIsTrue();
-    Optional<MonitorConfiguration> findById_Id(Long id);
+    Optional<MonitorConfiguration> findById_MonitorConfigurationId(Long id);
 }

@@ -1,10 +1,7 @@
 package com.zgamelogic.data.nodeMonitorReport;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
 import com.zgamelogic.data.nodeConfiguration.NodeConfiguration;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Embeddable
@@ -14,8 +11,12 @@ import lombok.*;
 @EqualsAndHashCode
 @ToString
 public class NodeMonitorReportId {
+    @MapsId
     @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "MONITOR_ID", referencedColumnName = "MONITOR_CONFIGURATION_ID")
+    @JoinColumns({
+            @JoinColumn(name = "MONITOR_CONFIGURATION_ID", referencedColumnName = "MONITOR_CONFIGURATION_ID"),
+            @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "APPLICATION_ID")
+    })
     private MonitorConfiguration monitor;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
