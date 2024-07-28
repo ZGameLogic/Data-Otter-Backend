@@ -1,5 +1,6 @@
+### Get application 103
 GET {{base_url}}/applications/103
-###
+### Create a new application
 POST {{base_url}}/applications
 Content-Type: application/json
 
