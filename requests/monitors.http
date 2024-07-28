@@ -14,6 +14,7 @@ POST {{base_url}}/monitors
 Content-Type: application/json
 
 {
+    "application id": 1,
     "name": "Test",
     "type": "WEB",
     "url": "https://zgamelogic.com/health",

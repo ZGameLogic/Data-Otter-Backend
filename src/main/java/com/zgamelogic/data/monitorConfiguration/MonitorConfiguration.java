@@ -1,16 +1,24 @@
 package com.zgamelogic.data.monitorConfiguration;
 
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.zgamelogic.data.application.Application;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
+import java.io.IOException;
 
 @Entity
 @Getter
+@Setter
 @AllArgsConstructor
 @Table(name = "monitor_configurations")
 @ToString
+@JsonDeserialize(using = MonitorConfiguration.MonitorConfigurationDeserialization.class)
 public class MonitorConfiguration {
     public enum Type { WEB, API }
     @EmbeddedId
@@ -24,15 +32,8 @@ public class MonitorConfiguration {
     @Column(columnDefinition = "boolean default true")
     private boolean active;
 
-    public MonitorConfiguration(String name, Type type, String url, String regex) {
-        this.name = name;
-        this.type = type;
-        this.url = url;
-        this.regex = regex;
-        active = true;
-    }
-
-    public MonitorConfiguration(String name, Type type, String url, String regex, List<Long> groups) {
+    public MonitorConfiguration(long applicationId, String name, Type type, String url, String regex) {
+        id = new MonitorConfigurationId(applicationId, 0L);
         this.name = name;
         this.type = type;
         this.url = url;
@@ -61,6 +62,8 @@ public class MonitorConfiguration {
     @NoArgsConstructor
     @EqualsAndHashCode
     @Getter
+    @Setter
+    @ToString
     public static class MonitorConfigurationId {
         @GeneratedValue
         @Column(name = "MONITOR_CONFIGURATION_ID")
@@ -69,5 +72,23 @@ public class MonitorConfiguration {
         @ManyToOne(cascade = CascadeType.REMOVE)
         @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "ID")
         private Application application;
+
+        public MonitorConfigurationId(long applicationId, long monitorConfigurationId) {
+            this.monitorConfigurationId = monitorConfigurationId;
+            application = new Application(applicationId);
+        }
+    }
+
+    public static class MonitorConfigurationDeserialization extends JsonDeserializer<MonitorConfiguration> {
+        @Override
+        public MonitorConfiguration deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+            JsonNode node = p.getCodec().readTree(p);
+            long applicationId = node.get("application id").asLong();
+            String name = node.get("name").asText();
+            MonitorConfiguration.Type type = MonitorConfiguration.Type.valueOf(node.get("type").asText());
+            String url = node.get("url").asText();
+            String regex = node.get("regex").asText();
+            return new MonitorConfiguration(applicationId, name, type, url, regex);
+        }
     }
 }

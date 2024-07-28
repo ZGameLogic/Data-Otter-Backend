@@ -39,6 +39,7 @@ public class MonitorController {
     private ResponseEntity<?> createMonitor(@RequestBody MonitorConfiguration monitorConfiguration) throws ExecutionException, InterruptedException {
         MonitorStatusReport status = monitorService.getMonitorStatus(monitorConfiguration).get();
         if(!status.status()) return ResponseEntity.status(400).body(status);
+        System.out.println(monitorConfiguration);
         MonitorConfiguration m = monitorConfigurationRepository.save(monitorConfiguration);
         return ResponseEntity.ok(m);
     }

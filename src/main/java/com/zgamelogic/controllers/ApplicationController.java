@@ -38,6 +38,15 @@ public class ApplicationController {
         return ResponseEntity.ok(app);
     }
 
+    @PutMapping("/{applicationId}")
+    public ResponseEntity<Application> updateApplication(@PathVariable long applicationId, @RequestBody Application application){
+        Optional<Application> app = applicationRepository.findById(applicationId);
+        if(app.isEmpty()) return ResponseEntity.notFound().build();
+        app.get().update(application);
+        Application updated = applicationRepository.save(app.get());
+        return ResponseEntity.ok(updated);
+    }
+
     @DeleteMapping("/{applicationId}")
     public ResponseEntity<?> deleteApplication(@PathVariable long applicationId){
         if(!applicationRepository.existsById(applicationId)) return ResponseEntity.notFound().build();

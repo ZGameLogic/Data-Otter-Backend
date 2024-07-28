@@ -1,5 +1,6 @@
+@application_id = 1
 ### Get application 103
-GET {{base_url}}/applications/103
+GET {{base_url}}/applications/{{application_id}}
 ### Create a new application
 POST {{base_url}}/applications
 Content-Type: application/json
@@ -11,4 +12,11 @@ Content-Type: application/json
     "name": "Bep",
     "description": "Another tag?!"
   }]
+}
+### Update an existing application
+PUT {{base_url}}/applications/{{application_id}}
+Content-Type: application/json
+
+{
+  "description": "Crazy"
 }

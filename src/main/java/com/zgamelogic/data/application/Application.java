@@ -30,4 +30,9 @@ public class Application {
     public Application(long id){
         this.id = id;
     }
+
+    public void update(Application application){
+        if(application.getName() != null) this.name = application.getName();
+        if(application.getDescription() != null) this.description = application.getDescription();
+    }
 }
