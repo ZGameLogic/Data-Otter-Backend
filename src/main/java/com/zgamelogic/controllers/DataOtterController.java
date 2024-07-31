@@ -84,7 +84,7 @@ public class DataOtterController {
                         .thenComparingInt(NodeMonitorReport::getAttempts)).get();
                 monitorStatus = new MonitorStatus(configuration, topReport);
             }
-            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopStatusByMonitorId(monitorStatus.getId().getMonitor().getId().getMonitorConfigurationId());
+            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopStatusByMonitorId(monitorStatus.getId().getMonitor().getId().getMonitorConfigurationId(), monitorStatus.getId().getMonitor().getId().getApplication().getId());
             mostRecentStatus.ifPresent(previousStatus -> {
                 if(previousStatus.isStatus() == monitorStatus.isStatus()) return;
                 changedMonitors.add(monitorStatus);

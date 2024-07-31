@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MonitorStatusRepository extends JpaRepository<MonitorStatus, MonitorStatusId> {
-    @Query("SELECT ms from MonitorStatus ms where ms.id.monitor.id.monitorConfigurationId = :monitorId ORDER BY ms.id.date DESC")
-    Optional<MonitorStatus> findTopStatusByMonitorId(long monitorId);
+    @Query("SELECT ms from MonitorStatus ms where ms.id.monitor.id.monitorConfigurationId = :monitorId AND ms.id.monitor.id.application.id = :appId ORDER BY ms.id.date DESC")
+    Optional<MonitorStatus> findTopStatusByMonitorId(long monitorId, long appId);
 
-    @Query("SELECT ms FROM MonitorStatus ms WHERE ms.id.monitor.id.monitorConfigurationId = :monitorId AND ms.id.date BETWEEN :startDate AND :endDate ORDER BY ms.id.date DESC")
-    List<MonitorStatus> findByMonitorIdAndDateBetween(@Param("monitorId") Long monitorId, @Param("startDate") Date startDate, @Param("endDate") Date endDate);
+    @Query("SELECT ms FROM MonitorStatus ms WHERE ms.id.monitor.id.monitorConfigurationId = :monitorId AND ms.id.monitor.id.application.id = :appId AND ms.id.date BETWEEN :startDate AND :endDate ORDER BY ms.id.date DESC")
+    List<MonitorStatus> findByMonitorIdAndDateBetween(@Param("monitorId") Long monitorId, @Param("startDate") Date startDate, @Param("endDate") Date endDate, long appId);
 
     @Modifying
     @Transactional

@@ -51,8 +51,9 @@ public class MonitorController {
         return ResponseEntity.ok(status);
     }
 
-    @GetMapping("monitors")
+    @GetMapping("monitors/{appId}")
     private ResponseEntity<List<MonitorConfigurationAndStatus>> getAllMonitors(
+            @RequestParam long appId,
             @RequestParam(required = false, name = "include-status") Boolean includeStatus,
             @RequestParam(required = false, name = "active") Boolean activeOnly
     ) {
@@ -60,7 +61,7 @@ public class MonitorController {
         List<MonitorConfiguration> configurations = activeOnly != null && activeOnly ? monitorConfigurationRepository.findAllByActiveIsTrue() : monitorConfigurationRepository.findAll();
         configurations.forEach(monitorConfiguration -> {
             if(includeStatus != null && includeStatus) {
-                Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopStatusByMonitorId(monitorConfiguration.getId().getMonitorConfigurationId());
+                Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopStatusByMonitorId(monitorConfiguration.getId().getMonitorConfigurationId(), appId);
                 payload.add(new MonitorConfigurationAndStatus(
                         monitorConfiguration,
                         mostRecentStatus.orElse(null)
@@ -86,7 +87,7 @@ public class MonitorController {
         if(oMonitor.isEmpty()) return ResponseEntity.notFound().build();
         MonitorConfiguration monitor = oMonitor.get();
         if(includeStatus != null && includeStatus) {
-            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopStatusByMonitorId(id);
+            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopStatusByMonitorId(id, appId);
             MonitorConfigurationAndStatus payload = new MonitorConfigurationAndStatus(
                     monitor,
                     mostRecentStatus.orElse(null)
@@ -138,7 +139,7 @@ public class MonitorController {
         if(!monitorConfigurationRepository.existsById_MonitorConfigurationIdAndId_Application_Id(id, appId)) return ResponseEntity.notFound().build();
         if (end == null) end = new Date();
         if (start == null) start = Date.from(end.toInstant().minus(7, ChronoUnit.DAYS));
-        List<MonitorStatus> history = monitorStatusRepository.findByMonitorIdAndDateBetween(id, start, end);
+        List<MonitorStatus> history = monitorStatusRepository.findByMonitorIdAndDateBetween(id, start, end, appId);
         if(condensed != null && condensed && !history.isEmpty()) {
             List<Integer> changeIndices = IntStream.range(0, history.size())
                     .filter(
