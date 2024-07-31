@@ -9,7 +9,7 @@ import java.util.List;
 public interface NodeMonitorReportRepository extends JpaRepository<NodeMonitorReport, NodeMonitorReportId> {
     @Modifying
     @Transactional
-    void deleteAllById_MonitorId(long monitorId);
+    void deleteAllById_monitor_id_monitorConfigurationId(long monitorId);
 
-    List<NodeMonitorReport> findAllById_MonitorId(long monitorId);
+    List<NodeMonitorReport> findAllById_Monitor_Id_MonitorConfigurationId(long monitorId);
 }

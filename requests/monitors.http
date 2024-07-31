@@ -1,14 +1,21 @@
+@monitor_id = 1
+@application_id=1
+
 GET {{base_url}}/monitors
 ###
-GET {{base_url}}/monitors/1
+GET {{base_url}}/monitors/{{monitor_id}}
 ###
 GET {{base_url}}/monitors?include-status=true
 ###
-GET {{base_url}}/monitors/1?include-status=true
+GET {{base_url}}/monitors/{{monitor_id}}?include-status=true
 ###
-GET {{base_url}}/monitors/1/history
+GET {{base_url}}/monitors/{{monitor_id}}/history
+###
+DELETE {{base_url}}/monitors/{{monitor_id}}
 ###
 GET {{base_url}}/monitors/1/history?condensed=true
+###
+POST {{base_url}}/monitors/{{monitor_id}}/active/true
 ###
 POST {{base_url}}/monitors
 Content-Type: application/json

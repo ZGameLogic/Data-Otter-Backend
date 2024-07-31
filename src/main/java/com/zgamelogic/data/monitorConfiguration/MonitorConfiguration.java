@@ -1,11 +1,11 @@
 package com.zgamelogic.data.monitorConfiguration;
 
 import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.zgamelogic.data.application.Application;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,6 +19,7 @@ import java.io.IOException;
 @Table(name = "monitor_configurations")
 @ToString
 @JsonDeserialize(using = MonitorConfiguration.MonitorConfigurationDeserialization.class)
+@JsonSerialize(using = MonitorConfiguration.MonitorConfigurationSerialization.class)
 public class MonitorConfiguration {
     public enum Type { WEB, API }
     @EmbeddedId
@@ -34,6 +35,14 @@ public class MonitorConfiguration {
 
     public MonitorConfiguration(long applicationId, String name, Type type, String url, String regex) {
         id = new MonitorConfigurationId(applicationId, 0L);
+        this.name = name;
+        this.type = type;
+        this.url = url;
+        this.regex = regex;
+        active = true;
+    }
+
+    public MonitorConfiguration(String name, Type type, String url, String regex) {
         this.name = name;
         this.type = type;
         this.url = url;
@@ -83,12 +92,31 @@ public class MonitorConfiguration {
         @Override
         public MonitorConfiguration deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
             JsonNode node = p.getCodec().readTree(p);
-            long applicationId = node.get("application id").asLong();
+            JsonNode applicationId = node.get("application id");
             String name = node.get("name").asText();
             MonitorConfiguration.Type type = MonitorConfiguration.Type.valueOf(node.get("type").asText());
             String url = node.get("url").asText();
             String regex = node.get("regex").asText();
-            return new MonitorConfiguration(applicationId, name, type, url, regex);
+            if(applicationId != null) {
+                return new MonitorConfiguration(applicationId.asLong(), name, type, url, regex);
+            }
+            return new MonitorConfiguration(name, type, url, regex);
+        }
+    }
+
+    public static class MonitorConfigurationSerialization extends JsonSerializer<MonitorConfiguration> {
+
+        @Override
+        public void serialize(MonitorConfiguration value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            gen.writeStartObject();
+            gen.writeNumberField("monitor id", value.getId().getMonitorConfigurationId());
+            gen.writeNumberField("application id", value.getId().getApplication().getId());
+            gen.writeStringField("name", value.getName());
+            gen.writeStringField("type", value.getType().name());
+            gen.writeStringField("url", value.getUrl());
+            gen.writeStringField("regex", value.getRegex());
+            gen.writeBooleanField("active", value.isActive());
+            gen.writeEndObject();
         }
     }
 }

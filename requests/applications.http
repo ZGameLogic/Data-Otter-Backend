@@ -1,5 +1,5 @@
 @application_id = 1
-### Get application 103
+### Get application
 GET {{base_url}}/applications/{{application_id}}
 ### Create a new application
 POST {{base_url}}/applications
