@@ -19,7 +19,7 @@ public class TagController {
 
     @DeleteMapping("/{tagId}")
     public ResponseEntity<?> deleteTag(@PathVariable String tagId) {
-        if(tagRepository.existsById(tagId)) return ResponseEntity.notFound().build();
+        if(!tagRepository.existsById(tagId)) return ResponseEntity.notFound().build();
         tagRepository.deleteById(tagId);
         return ResponseEntity.ok().build();
     }

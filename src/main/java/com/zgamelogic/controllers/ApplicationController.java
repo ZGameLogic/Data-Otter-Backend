@@ -6,6 +6,7 @@ import com.zgamelogic.data.tags.TagRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -18,6 +19,11 @@ public class ApplicationController {
     public ApplicationController(ApplicationRepository applicationRepository, TagRepository tagRepository) {
         this.applicationRepository = applicationRepository;
         this.tagRepository = tagRepository;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Application>> getApplications() {
+        return ResponseEntity.ok(applicationRepository.findAll());
     }
 
     @GetMapping("/{applicationId}")

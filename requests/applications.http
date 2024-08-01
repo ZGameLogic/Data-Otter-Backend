@@ -1,5 +1,7 @@
-@application_id = 1
-### Get application
+@application_id = 452
+### Get all applications
+GET {{base_url}}/applications
+### Get specific application
 GET {{base_url}}/applications/{{application_id}}
 ### Create a new application
 POST {{base_url}}/applications
@@ -20,3 +22,5 @@ Content-Type: application/json
 {
   "description": "Crazy"
 }
+### Delete an application
+DELETE {{base_url}}/applications/{{application_id}}
