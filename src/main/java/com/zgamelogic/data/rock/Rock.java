@@ -1,17 +1,25 @@
 package com.zgamelogic.data.rock;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.zgamelogic.data.application.Application;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.IOException;
 import java.util.Date;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @Table(name = "Rocks")
+@JsonSerialize(using = Rock.RockSerializer.class)
 public class Rock {
     @EmbeddedId
     private RockId id;
@@ -37,6 +45,28 @@ public class Rock {
         public RockId(long appId){
             this.application = new Application(appId);
             date = new Date();
+        }
+    }
+
+    public static class RockSerializer extends JsonSerializer<Rock> {
+        @Override
+        public void serialize(Rock value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            gen.writeStartObject();
+            gen.writeNumberField("application id", value.getId().getApplication().getId());
+            gen.writeStringField("date", "This is the date");
+            ObjectMapper om = new ObjectMapper();
+            try {
+                JsonNode jsonNode = om.readTree(value.getPebble());
+                if (jsonNode.isObject()) {
+                    gen.writeFieldName("pebble");
+                    gen.writeTree(jsonNode);
+                } else {
+                    gen.writeStringField("pebble", value.getPebble());
+                }
+            } catch (Exception e) {
+                gen.writeStringField("pebble", value.getPebble());
+            }
+            gen.writeEndObject();
         }
     }
 }

@@ -1,0 +1,5 @@
+### Create rock
+POST {{base_url}}/rocks/1
+content-type: application/text
+
+This is a body
