@@ -30,7 +30,7 @@ public class Application {
     private String name;
     private String description;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "APPLICATION_TAGS",
         joinColumns = @JoinColumn(name = "application_id"),
@@ -38,7 +38,7 @@ public class Application {
     )
     private Set<Tag> tags;
 
-    @OneToMany(mappedBy = "id.application")
+    @OneToMany(mappedBy = "id.application", fetch = FetchType.EAGER)
     private Set<MonitorConfiguration> monitors;
 
     public Application(long id){
