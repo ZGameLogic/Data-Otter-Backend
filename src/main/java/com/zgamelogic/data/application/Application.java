@@ -11,7 +11,6 @@ import com.zgamelogic.data.tags.Tag;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.IOException;
@@ -70,7 +69,7 @@ public class Application {
             gen.writeNumberField("id", value.getId());
             gen.writeStringField("name", value.getName());
             gen.writeStringField("description", value.getDescription());
-            gen.writeArrayFieldStart("monitors");
+            gen.writeArrayFieldStart("monitor ids");
             for(MonitorConfiguration monitor : value.getMonitors()) gen.writeNumber(monitor.getId().getMonitorConfigurationId());
             gen.writeEndArray();
             gen.writeArrayFieldStart("tags");

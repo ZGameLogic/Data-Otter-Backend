@@ -2,6 +2,7 @@ package com.zgamelogic.controllers;
 
 import com.zgamelogic.App;
 import com.zgamelogic.data.application.Application;
+import com.zgamelogic.data.application.ApplicationRepository;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationAndStatus;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
@@ -29,12 +30,14 @@ public class MonitorController {
     private final MonitorStatusRepository monitorStatusRepository;
     private final NodeMonitorReportRepository nodeMonitorReportRepository;
     private final MonitorService monitorService;
+    private final ApplicationRepository applicationRepository;
 
-    public MonitorController(MonitorConfigurationRepository monitorConfigurationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService, App app) {
+    public MonitorController(MonitorConfigurationRepository monitorConfigurationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService, App app, ApplicationRepository applicationRepository, ApplicationRepository applicationRepository1) {
         this.monitorConfigurationRepository = monitorConfigurationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
         this.nodeMonitorReportRepository = nodeMonitorReportRepository;
         this.monitorService = monitorService;
+        this.applicationRepository = applicationRepository1;
     }
 
     @PostMapping("monitors/{appId}")
@@ -42,6 +45,7 @@ public class MonitorController {
             @PathVariable long appId,
             @RequestBody MonitorConfiguration monitorConfiguration
     ) throws ExecutionException, InterruptedException {
+        if(!applicationRepository.existsById(appId)) return ResponseEntity.notFound().build();
         MonitorStatusReport status = monitorService.getMonitorStatus(monitorConfiguration).get();
         if(!status.status()) return ResponseEntity.status(400).body(status);
         monitorConfiguration.getId().setApplication(new Application(appId));
@@ -66,7 +70,7 @@ public class MonitorController {
         List<MonitorConfiguration> configurations = activeOnly != null && activeOnly ? monitorConfigurationRepository.findAllByActiveIsTrue() : monitorConfigurationRepository.findAll();
         configurations.forEach(monitorConfiguration -> {
             if(includeStatus != null && includeStatus) {
-                Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopStatusByMonitorId(monitorConfiguration.getId().getMonitorConfigurationId(), appId);
+                Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_Date(monitorConfiguration.getId().getMonitorConfigurationId(), appId);
                 payload.add(new MonitorConfigurationAndStatus(
                         monitorConfiguration,
                         mostRecentStatus.orElse(null)
@@ -92,7 +96,7 @@ public class MonitorController {
         if(oMonitor.isEmpty()) return ResponseEntity.notFound().build();
         MonitorConfiguration monitor = oMonitor.get();
         if(includeStatus != null && includeStatus) {
-            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopStatusByMonitorId(id, appId);
+            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_Date(id, appId);
             MonitorConfigurationAndStatus payload = new MonitorConfigurationAndStatus(
                     monitor,
                     mostRecentStatus.orElse(null)

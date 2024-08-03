@@ -66,7 +66,7 @@ public class DataOtterController {
     /**
      * Go through all the node records, determine if a monitor is down, and then add it to the history
      */
-//    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 * * * * *")
     public void minuteJobs(){
         List<MonitorStatus> changedMonitors = new ArrayList<>();
         monitorConfigurationRepository.findAllByActiveIsTrue().forEach(configuration -> {
@@ -84,7 +84,7 @@ public class DataOtterController {
                         .thenComparingInt(NodeMonitorReport::getAttempts)).get();
                 monitorStatus = new MonitorStatus(configuration, topReport);
             }
-            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopStatusByMonitorId(monitorStatus.getId().getMonitor().getId().getMonitorConfigurationId(), monitorStatus.getId().getMonitor().getId().getApplication().getId());
+            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_Date(monitorStatus.getId().getMonitor().getId().getMonitorConfigurationId(), monitorStatus.getId().getMonitor().getId().getApplication().getId());
             mostRecentStatus.ifPresent(previousStatus -> {
                 if(previousStatus.isStatus() == monitorStatus.isStatus()) return;
                 changedMonitors.add(monitorStatus);

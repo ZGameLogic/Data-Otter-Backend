@@ -1,7 +1,7 @@
 @monitor_id = 152
 @application_id = 2
 
-GET {{base_url}}/monitors/{{application_id}}
+GET {{base_url}}/monitors/{{application_id}}?include-status=true
 ###
 GET {{base_url}}/monitors/{{monitor_id}}
 ###

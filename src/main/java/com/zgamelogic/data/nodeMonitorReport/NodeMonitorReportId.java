@@ -23,8 +23,8 @@ public class NodeMonitorReportId {
     @JoinColumn(name = "NODE_ID", referencedColumnName = "ID")
     private NodeConfiguration node;
 
-    public NodeMonitorReportId(long monitorId, long nodeId){
-        monitor = new MonitorConfiguration(monitorId, 0L); // Ensure this constructor exists in MonitorConfiguration
-        node = new NodeConfiguration(nodeId); // Ensure this constructor exists in NodeConfiguration
+    public NodeMonitorReportId(long applicationId, long monitorId, long nodeId){
+        monitor = new MonitorConfiguration(monitorId, applicationId);
+        node = new NodeConfiguration(nodeId);
     }
 }
