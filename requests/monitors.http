@@ -44,5 +44,4 @@ Content-Type: application/json
   "name": "Ben"
 }
 ###
-@delete_id = 1
-DELETE {{base_url}}/monitors/{{delete_id}}
+DELETE {{base_url}}/monitors/{{monitor_id}}
