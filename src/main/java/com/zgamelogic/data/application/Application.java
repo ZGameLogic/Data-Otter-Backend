@@ -12,6 +12,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -20,7 +21,7 @@ import java.util.Set;
 @Entity
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
+@Setter
 @JsonSerialize(using = Application.ApplicationSerializer.class)
 @JsonDeserialize(using = Application.ApplicationDeserializer.class)
 public class Application {
@@ -38,18 +39,23 @@ public class Application {
     )
     private Set<Tag> tags;
 
-    @OneToMany(mappedBy = "id.application", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "id.application", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private Set<MonitorConfiguration> monitors;
 
+    public Application(){
+        tags = new HashSet<>();
+        monitors = new HashSet<>();
+    }
+
     public Application(long id){
+        this();
         this.id = id;
     }
 
     public Application(String name, String description) {
+        this();
         this.name = name;
         this.description = description;
-        tags = new HashSet<>();
-        monitors = new HashSet<>();
     }
 
     public void update(Application application){
@@ -79,9 +85,9 @@ public class Application {
         @Override
         public Application deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             JsonNode node = p.getCodec().readTree(p);
-            String name = node.get("name").asText();
-            String description = node.get("description").asText();
-            Application application = new Application(name, description);
+            Application application = new Application();
+            if(node.has("name")) application.setName(node.get("name").asText());
+            if(node.has("description")) application.setDescription(node.get("description").asText());
             if(node.has("tags")){
                 ObjectMapper om = new ObjectMapper();
                 node.get("tags").elements().forEachRemaining(tagNode -> {

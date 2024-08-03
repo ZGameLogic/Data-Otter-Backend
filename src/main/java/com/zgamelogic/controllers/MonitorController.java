@@ -1,6 +1,7 @@
 package com.zgamelogic.controllers;
 
 import com.zgamelogic.App;
+import com.zgamelogic.data.application.Application;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationAndStatus;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
@@ -37,9 +38,13 @@ public class MonitorController {
     }
 
     @PostMapping("monitors/{appId}")
-    private ResponseEntity<?> createMonitor(@PathVariable long appId, @RequestBody MonitorConfiguration monitorConfiguration) throws ExecutionException, InterruptedException {
+    private ResponseEntity<?> createMonitor(
+            @PathVariable long appId,
+            @RequestBody MonitorConfiguration monitorConfiguration
+    ) throws ExecutionException, InterruptedException {
         MonitorStatusReport status = monitorService.getMonitorStatus(monitorConfiguration).get();
         if(!status.status()) return ResponseEntity.status(400).body(status);
+        monitorConfiguration.getId().setApplication(new Application(appId));
         MonitorConfiguration m = monitorConfigurationRepository.save(monitorConfiguration);
         return ResponseEntity.ok(monitorConfigurationRepository.findById_MonitorConfigurationIdAndId_Application_Id(m.getId().getMonitorConfigurationId(), appId).get());
     }
@@ -53,7 +58,7 @@ public class MonitorController {
 
     @GetMapping("monitors/{appId}")
     private ResponseEntity<List<MonitorConfigurationAndStatus>> getAllMonitors(
-            @RequestParam long appId,
+            @PathVariable long appId,
             @RequestParam(required = false, name = "include-status") Boolean includeStatus,
             @RequestParam(required = false, name = "active") Boolean activeOnly
     ) {
@@ -116,7 +121,7 @@ public class MonitorController {
             @PathVariable long appId,
             @RequestBody MonitorConfiguration updatedConfiguration
     ) {
-        if(!monitorConfigurationRepository.existsById(id)) return ResponseEntity.notFound().build();
+        if(!monitorConfigurationRepository.existsById_MonitorConfigurationIdAndId_Application_Id(id, appId)) return ResponseEntity.notFound().build();
         MonitorConfiguration original  = monitorConfigurationRepository.findById_MonitorConfigurationIdAndId_Application_Id(id, appId).get();
         original.update(updatedConfiguration);
         MonitorConfiguration saved = monitorConfigurationRepository.save(original);

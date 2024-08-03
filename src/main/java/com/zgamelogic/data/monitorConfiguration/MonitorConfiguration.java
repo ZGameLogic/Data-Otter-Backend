@@ -47,6 +47,7 @@ public class MonitorConfiguration {
         this.type = type;
         this.url = url;
         this.regex = regex;
+        this.id = new MonitorConfigurationId();
         active = true;
     }
 
@@ -56,6 +57,7 @@ public class MonitorConfiguration {
     }
 
     public MonitorConfiguration(){
+        id = new MonitorConfigurationId();
         active = true;
     }
 
@@ -92,15 +94,13 @@ public class MonitorConfiguration {
         @Override
         public MonitorConfiguration deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
             JsonNode node = p.getCodec().readTree(p);
-            JsonNode applicationId = node.get("application id");
-            String name = node.get("name").asText();
-            MonitorConfiguration.Type type = MonitorConfiguration.Type.valueOf(node.get("type").asText());
-            String url = node.get("url").asText();
-            String regex = node.get("regex").asText();
-            if(applicationId != null) {
-                return new MonitorConfiguration(applicationId.asLong(), name, type, url, regex);
-            }
-            return new MonitorConfiguration(name, type, url, regex);
+            MonitorConfiguration config = new MonitorConfiguration();
+            if(node.has("application id")) config.getId().setApplication(new Application(node.get("application id").asLong()));
+            if(node.has("name")) config.setName(node.get("name").asText());
+            if(node.has("type")) config.setType(Type.valueOf(node.get("type").asText()));
+            if(node.has("url")) config.setUrl(node.get("url").asText());
+            if(node.has("regex")) config.setRegex(node.get("regex").asText());
+            return config;
         }
     }
 

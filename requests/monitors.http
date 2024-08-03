@@ -1,7 +1,7 @@
-@monitor_id = 1
-@application_id=1
+@monitor_id = 152
+@application_id = 2
 
-GET {{base_url}}/monitors
+GET {{base_url}}/monitors/{{application_id}}
 ###
 GET {{base_url}}/monitors/{{monitor_id}}
 ###
@@ -9,7 +9,7 @@ GET {{base_url}}/monitors?include-status=true
 ###
 GET {{base_url}}/monitors/{{monitor_id}}?include-status=true
 ###
-GET {{base_url}}/monitors/{{monitor_id}}/history
+GET {{base_url}}/monitors/{{application_id}}/{{monitor_id}}/history
 ###
 DELETE {{base_url}}/monitors/{{monitor_id}}
 ###
@@ -17,11 +17,10 @@ GET {{base_url}}/monitors/1/history?condensed=true
 ###
 POST {{base_url}}/monitors/{{monitor_id}}/active/true
 ###
-POST {{base_url}}/monitors
+POST {{base_url}}/monitors/{{application_id}}
 Content-Type: application/json
 
 {
-    "application id": 1,
     "name": "Test",
     "type": "WEB",
     "url": "https://zgamelogic.com/health",
@@ -38,8 +37,7 @@ Content-Type: application/json
   "regex": "Healthy"
 }
 ###
-@put_id = 1
-PUT {{base_url}}/monitors/{{put_id}}
+PUT {{base_url}}/monitors/{{application_id}}/{{monitor_id}}
 Content-Type: application/json
 
 {
