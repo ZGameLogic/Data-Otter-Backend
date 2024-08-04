@@ -1,15 +1,15 @@
-@monitor_id = 152
-@application_id = 2
+@monitor_id = 202
+@application_id = 52
 
 GET {{base_url}}/monitors/{{application_id}}?include-status=true
 ###
-GET {{base_url}}/monitors/{{monitor_id}}
+GET {{base_url}}/monitors/{{application_id}}
 ###
 GET {{base_url}}/monitors?include-status=true
 ###
 GET {{base_url}}/monitors/{{monitor_id}}?include-status=true
 ###
-GET {{base_url}}/monitors/{{application_id}}/{{monitor_id}}/history
+GET {{base_url}}/monitors/{{application_id}}/{{monitor_id}}
 ###
 DELETE {{base_url}}/monitors/{{monitor_id}}
 ###

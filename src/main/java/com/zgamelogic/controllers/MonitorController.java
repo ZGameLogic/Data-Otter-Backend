@@ -60,17 +60,26 @@ public class MonitorController {
         return ResponseEntity.ok(status);
     }
 
+    @GetMapping("monitors")
+    private ResponseEntity<List<MonitorConfigurationAndStatus>> getAllMonitorsNoAppId(
+            @RequestParam(required = false, name = "include-status") Boolean includeStatus,
+            @RequestParam(required = false, name = "active") Boolean activeOnly
+    ) {
+        return getAllMonitors(null, includeStatus, activeOnly);
+    }
+
     @GetMapping("monitors/{appId}")
     private ResponseEntity<List<MonitorConfigurationAndStatus>> getAllMonitors(
-            @PathVariable long appId,
+            @PathVariable Long appId,
             @RequestParam(required = false, name = "include-status") Boolean includeStatus,
             @RequestParam(required = false, name = "active") Boolean activeOnly
     ) {
         List<MonitorConfigurationAndStatus> payload = new ArrayList<>();
         List<MonitorConfiguration> configurations = activeOnly != null && activeOnly ? monitorConfigurationRepository.findAllByActiveIsTrue() : monitorConfigurationRepository.findAll();
+        if(appId != null) configurations.removeIf(app -> app.getId().getApplication().getId() != appId.longValue());
         configurations.forEach(monitorConfiguration -> {
             if(includeStatus != null && includeStatus) {
-                Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_Date(monitorConfiguration.getId().getMonitorConfigurationId(), appId);
+                Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_Date(monitorConfiguration.getId().getMonitorConfigurationId(), monitorConfiguration.getId().getApplication().getId());
                 payload.add(new MonitorConfigurationAndStatus(
                         monitorConfiguration,
                         mostRecentStatus.orElse(null)
