@@ -1,7 +1,10 @@
 package com.zgamelogic.controllers;
 
 import com.zgamelogic.data.application.Application;
+import com.zgamelogic.data.application.ApplicationMonitorStatus;
 import com.zgamelogic.data.application.ApplicationRepository;
+import com.zgamelogic.data.monitorHistory.MonitorStatus;
+import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
 import com.zgamelogic.data.tags.TagRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +17,12 @@ import java.util.Optional;
 public class ApplicationController {
 
     private final ApplicationRepository applicationRepository;
+    private final MonitorStatusRepository monitorStatusRepository;
     private final TagRepository tagRepository;
 
-    public ApplicationController(ApplicationRepository applicationRepository, TagRepository tagRepository) {
+    public ApplicationController(ApplicationRepository applicationRepository, MonitorStatusRepository monitorStatusRepository, TagRepository tagRepository) {
         this.applicationRepository = applicationRepository;
+        this.monitorStatusRepository = monitorStatusRepository;
         this.tagRepository = tagRepository;
     }
 
@@ -27,9 +32,18 @@ public class ApplicationController {
     }
 
     @GetMapping("/{applicationId}")
-    public ResponseEntity<Application> getApplication(@PathVariable long applicationId) {
+    public ResponseEntity<ApplicationMonitorStatus> getApplication(
+            @PathVariable long applicationId,
+            @RequestParam(required = false, name = "include-status") Boolean includeStatus
+    ) {
         Optional<Application> application = applicationRepository.findById(applicationId);
-        return application.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        if(application.isEmpty()) return ResponseEntity.notFound().build();
+        List<MonitorStatus> statuses = null;
+        if(includeStatus != null && includeStatus){
+            statuses = monitorStatusRepository.findByApplicationIdAndTopOneForEachMonitor(application.get().getId());
+        }
+        ApplicationMonitorStatus returnObject = new ApplicationMonitorStatus(application.get(), statuses);
+        return ResponseEntity.ok(returnObject);
     }
 
     @PostMapping

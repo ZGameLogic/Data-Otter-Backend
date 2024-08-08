@@ -1,5 +1,5 @@
 @monitor_id = 202
-@application_id = 52
+@application_id = 1
 
 GET {{base_url}}/monitors/{{application_id}}?include-status=true
 ###

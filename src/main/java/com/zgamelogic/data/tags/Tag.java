@@ -61,7 +61,6 @@ public class Tag {
             JsonNode node = p.getCodec().readTree(p);
             if(node.getNodeType().equals(JsonNodeType.STRING)) return new Tag(node.asText());
             String name = node.get("name").asText();
-            System.out.println(name);
             JsonNode description = node.get("description");
             if(description == null) return new Tag(name);
             return new Tag(name, description.asText());
