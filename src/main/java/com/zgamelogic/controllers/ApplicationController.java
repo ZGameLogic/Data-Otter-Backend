@@ -7,6 +7,7 @@ import com.zgamelogic.data.monitorHistory.MonitorStatus;
 import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
 import com.zgamelogic.data.tags.TagRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("applications")
 public class ApplicationController {
