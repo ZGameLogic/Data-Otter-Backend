@@ -4,7 +4,6 @@ import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
 import com.zgamelogic.data.nodeConfiguration.NodeConfiguration;
 import com.zgamelogic.data.nodeConfiguration.NodeConfigurationRepository;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReport;
-import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportId;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -42,7 +41,7 @@ public class NodeController {
         if(!monitorConfigurationRepository.existsById_MonitorConfigurationIdAndId_Application_Id(monitorId, applicationId)) return ResponseEntity.notFound().build();
         if(!monitorConfigurationRepository.findById_MonitorConfigurationIdAndId_Application_Id(monitorId, applicationId).get().isActive()) return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         if(!nodeConfigurationRepository.existsById(nodeId)) return ResponseEntity.notFound().build();
-        nodeMonitorReport.setId(new NodeMonitorReportId(applicationId, monitorId, nodeId));
+        nodeMonitorReport.setId(new NodeMonitorReport.NodeMonitorReportId(applicationId, monitorId, nodeId));
         NodeMonitorReport report = nodeMonitorReportRepository.save(nodeMonitorReport);
         return ResponseEntity.ok(report);
     }

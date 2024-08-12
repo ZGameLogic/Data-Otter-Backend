@@ -1,15 +1,12 @@
 package com.zgamelogic.data.monitorHistory;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReport;
 import com.zgamelogic.serialization.MonitorStatusSerialization;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.Date;
 
@@ -61,5 +58,24 @@ public class MonitorStatus {
         this.status = report.isStatus();
         this.attempts = report.getAttempts();
         this.statusCode = report.getStatusCode();
+    }
+
+    @Embeddable
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @EqualsAndHashCode
+    @ToString
+    public static class MonitorStatusId {
+        @MapsId
+        @ManyToOne(cascade = CascadeType.ALL)
+        @JoinColumns({
+                @JoinColumn(name = "MONITOR_CONFIGURATION_ID", referencedColumnName = "MONITOR_CONFIGURATION_ID"),
+                @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "APPLICATION_ID")
+        })
+        private MonitorConfiguration monitor;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+        private Date date;
     }
 }

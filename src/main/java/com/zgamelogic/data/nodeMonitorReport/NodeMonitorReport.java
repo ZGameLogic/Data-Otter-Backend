@@ -4,13 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
 import com.zgamelogic.data.nodeConfiguration.NodeConfiguration;
 import com.zgamelogic.services.monitors.MonitorStatusReport;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @NoArgsConstructor
@@ -42,4 +37,30 @@ public class NodeMonitorReport {
         this.attempts = attempts;
         this.statusCode = statusCode;
     }
+
+    @Embeddable
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @EqualsAndHashCode
+    @ToString
+    public static class NodeMonitorReportId {
+        @MapsId
+        @ManyToOne(cascade = CascadeType.ALL)
+        @JoinColumns({
+                @JoinColumn(name = "MONITOR_CONFIGURATION_ID", referencedColumnName = "MONITOR_CONFIGURATION_ID"),
+                @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "APPLICATION_ID")
+        })
+        private MonitorConfiguration monitor;
+
+        @ManyToOne(cascade = CascadeType.ALL)
+        @JoinColumn(name = "NODE_ID", referencedColumnName = "ID")
+        private NodeConfiguration node;
+
+        public NodeMonitorReportId(long applicationId, long monitorId, long nodeId){
+            monitor = new MonitorConfiguration(monitorId, applicationId);
+            node = new NodeConfiguration(nodeId);
+        }
+    }
+
 }

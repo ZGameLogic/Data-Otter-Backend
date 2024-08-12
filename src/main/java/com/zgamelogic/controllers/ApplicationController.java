@@ -5,6 +5,7 @@ import com.zgamelogic.data.application.ApplicationMonitorStatus;
 import com.zgamelogic.data.application.ApplicationRepository;
 import com.zgamelogic.data.monitorHistory.MonitorStatus;
 import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
+import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
 import com.zgamelogic.data.tags.TagRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,11 +19,13 @@ public class ApplicationController {
 
     private final ApplicationRepository applicationRepository;
     private final MonitorStatusRepository monitorStatusRepository;
+    private final NodeMonitorReportRepository nodeMonitorReportRepository;
     private final TagRepository tagRepository;
 
-    public ApplicationController(ApplicationRepository applicationRepository, MonitorStatusRepository monitorStatusRepository, TagRepository tagRepository) {
+    public ApplicationController(ApplicationRepository applicationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, TagRepository tagRepository) {
         this.applicationRepository = applicationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
+        this.nodeMonitorReportRepository = nodeMonitorReportRepository;
         this.tagRepository = tagRepository;
     }
 
@@ -70,8 +73,9 @@ public class ApplicationController {
     @DeleteMapping("/{applicationId}")
     public ResponseEntity<?> deleteApplication(@PathVariable long applicationId){
         if(!applicationRepository.existsById(applicationId)) return ResponseEntity.notFound().build();
+        monitorStatusRepository.deleteAllById_Monitor_Id_Application_Id(applicationId);
+        nodeMonitorReportRepository.deleteAllById_Monitor_Id_Application_Id(applicationId);
         applicationRepository.deleteById(applicationId);
         return ResponseEntity.ok().build();
     }
-
 }

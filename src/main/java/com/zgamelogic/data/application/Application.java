@@ -38,7 +38,7 @@ public class Application {
     )
     private Set<Tag> tags;
 
-    @OneToMany(mappedBy = "id.application", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "id.application", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MonitorConfiguration> monitors;
 
     public Application(){

@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public interface MonitorStatusRepository extends JpaRepository<MonitorStatus, MonitorStatusId> {
+public interface MonitorStatusRepository extends JpaRepository<MonitorStatus, MonitorStatus.MonitorStatusId> {
     Optional<MonitorStatus> findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_Date(Long id_monitor_id_monitorConfigurationId, Long id_monitor_id_application_id);
 
     @Query("SELECT ms FROM MonitorStatus ms " +
@@ -24,4 +24,8 @@ public interface MonitorStatusRepository extends JpaRepository<MonitorStatus, Mo
     @Modifying
     @Transactional
     void deleteAllById_monitor_id_monitorConfigurationIdAndId_Monitor_Id_Application_Id(Long id_monitor_id_monitorConfigurationId, Long id_monitor_id_application_id);
+
+    @Modifying
+    @Transactional
+    void deleteAllById_Monitor_Id_Application_Id(Long id_monitor_id_application_id);
 }

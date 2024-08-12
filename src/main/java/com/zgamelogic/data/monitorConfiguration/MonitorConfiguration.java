@@ -80,7 +80,7 @@ public class MonitorConfiguration {
         @Column(name = "MONITOR_CONFIGURATION_ID")
         private Long monitorConfigurationId;
 
-        @ManyToOne(cascade = CascadeType.REMOVE)
+        @ManyToOne(cascade = CascadeType.ALL)
         @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "ID")
         private Application application;
 
