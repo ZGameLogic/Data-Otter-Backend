@@ -1,7 +1,7 @@
 @application_id = 1
 @include_status = true
 ### Get all applications
-GET {{base_url}}/applications
+GET {{base_url}}/applications?include-status={{include_status}}
 ### Get specific application
 GET {{base_url}}/applications/{{application_id}}?include-status={{include_status}}
 ### Create a new application

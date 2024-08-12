@@ -10,6 +10,7 @@ import com.zgamelogic.data.tags.TagRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,8 +31,17 @@ public class ApplicationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Application>> getApplications() {
-        return ResponseEntity.ok(applicationRepository.findAll());
+    public ResponseEntity<List<ApplicationMonitorStatus>> getApplications(@RequestParam(required = false, name = "include-status") Boolean includeStatus) {
+        List<Application> apps = applicationRepository.findAll();
+        List<ApplicationMonitorStatus> appMonitorStatuses = new ArrayList<>();
+        for(Application app : apps) {
+            List<MonitorStatus> statuses = null;
+            if(includeStatus != null && includeStatus){
+                statuses = monitorStatusRepository.findByApplicationIdAndTopOneForEachMonitor(app.getId());
+            }
+            appMonitorStatuses.add(new ApplicationMonitorStatus(app, statuses));
+        }
+        return ResponseEntity.ok(appMonitorStatuses);
     }
 
     @GetMapping("/{applicationId}")
