@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
 import com.zgamelogic.data.tags.Tag;
 import jakarta.persistence.*;
@@ -21,8 +19,6 @@ import java.util.Set;
 @Getter
 @AllArgsConstructor
 @Setter
-@JsonSerialize(using = Application.ApplicationSerializer.class)
-@JsonDeserialize(using = Application.ApplicationDeserializer.class)
 public class Application {
     @Id
     @GeneratedValue
@@ -62,40 +58,33 @@ public class Application {
         if(application.getDescription() != null) this.description = application.getDescription();
     }
 
-    public static class ApplicationSerializer extends JsonSerializer<Application> {
-        @Override
-        public void serialize(Application value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-            gen.writeStartObject();
-            gen.writeNumberField("id", value.getId());
-            gen.writeStringField("name", value.getName());
-            gen.writeStringField("description", value.getDescription());
-            gen.writeArrayFieldStart("monitor ids");
-            for(MonitorConfiguration monitor : value.getMonitors()) gen.writeNumber(monitor.getId().getMonitorConfigurationId());
-            gen.writeEndArray();
-            gen.writeArrayFieldStart("tags");
-            for(Tag tag : value.getTags()) gen.writeString(tag.getName());
-            gen.writeEndArray();
-            gen.writeEndObject();
-        }
+    public void serialize(JsonGenerator gen) throws IOException {
+        gen.writeStartObject();
+        gen.writeNumberField("id", getId());
+        gen.writeStringField("name", getName());
+        gen.writeStringField("description", getDescription());
+        gen.writeArrayFieldStart("monitor ids");
+        for(MonitorConfiguration monitor : getMonitors()) gen.writeNumber(monitor.getId().getMonitorConfigurationId());
+        gen.writeEndArray();
+        gen.writeArrayFieldStart("tags");
+        for(Tag tag : getTags()) gen.writeString(tag.getName());
+        gen.writeEndArray();
+        gen.writeEndObject();
     }
 
-    public static class ApplicationDeserializer extends JsonDeserializer<Application> {
-
-        @Override
-        public Application deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            JsonNode node = p.getCodec().readTree(p);
-            Application application = new Application();
-            if(node.has("name")) application.setName(node.get("name").asText());
-            if(node.has("description")) application.setDescription(node.get("description").asText());
-            if(node.has("tags")){
-                ObjectMapper om = new ObjectMapper();
-                node.get("tags").elements().forEachRemaining(tagNode -> {
-                    try {
-                        application.getTags().add(om.treeToValue(tagNode, Tag.class));
-                    } catch (JsonProcessingException ignored) {}
-                });
-            }
-            return application;
+    public static Application deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        JsonNode node = p.getCodec().readTree(p);
+        Application application = new Application();
+        if(node.has("name")) application.setName(node.get("name").asText());
+        if(node.has("description")) application.setDescription(node.get("description").asText());
+        if(node.has("tags")){
+            ObjectMapper om = new ObjectMapper();
+            node.get("tags").elements().forEachRemaining(tagNode -> {
+                try {
+                    application.getTags().add(om.treeToValue(tagNode, Tag.class));
+                } catch (JsonProcessingException ignored) {}
+            });
         }
+        return application;
     }
 }
