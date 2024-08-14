@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Entity
@@ -53,7 +54,8 @@ public class Rock {
         public void serialize(Rock value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             gen.writeStartObject();
             gen.writeNumberField("application id", value.getId().getApplication().getId());
-            gen.writeStringField("date", "This is the date");
+            String date = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(value.getId().getDate());
+            gen.writeStringField("date", date);
             ObjectMapper om = new ObjectMapper();
             try {
                 JsonNode jsonNode = om.readTree(value.getPebble());

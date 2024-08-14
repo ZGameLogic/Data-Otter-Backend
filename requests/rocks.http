@@ -1,5 +1,10 @@
+@application_id = 2
+
 ### Create rock
-POST {{base_url}}/rocks/1
+POST {{base_url}}/rocks/{{application_id}}
 content-type: application/text
 
 This is a body
+
+### Get rocks
+GET {{base_url}}/rocks/{{application_id}}?page=2
