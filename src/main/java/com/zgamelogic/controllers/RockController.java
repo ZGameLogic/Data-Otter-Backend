@@ -7,8 +7,11 @@ import com.zgamelogic.services.DataOtterWebsocketService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 
 @RestController
 @RequestMapping("rocks")
@@ -46,4 +49,22 @@ public class RockController {
         return ResponseEntity.ok(rockRepository.findAllById_Application_IdOrderById_DateDesc(appId, pageable));
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<?> handleUnauthorizedException() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    @ModelAttribute
+    public void authenticate(WebRequest request, Model model) {
+        String apiKey = request.getHeader("api-key");
+        // TODO actual check
+//        if (token == null || device == null) throw new UnauthorizedException();
+
+    }
+
+    private static class UnauthorizedException extends RuntimeException {
+        public UnauthorizedException() {
+            super("Unauthorized");
+        }
+    }
 }
