@@ -1,6 +1,5 @@
 package com.zgamelogic.data.rock;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -36,7 +35,6 @@ public class Rock {
     @Getter
     @NoArgsConstructor
     public static class RockId {
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         private Date date;
 
         @ManyToOne(cascade = CascadeType.REMOVE)
@@ -54,7 +52,7 @@ public class Rock {
         public void serialize(Rock value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             gen.writeStartObject();
             gen.writeNumberField("application id", value.getId().getApplication().getId());
-            String date = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(value.getId().getDate());
+            String date = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss:SSSS").format(value.getId().getDate());
             gen.writeStringField("date", date);
             ObjectMapper om = new ObjectMapper();
             try {

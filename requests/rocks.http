@@ -2,9 +2,12 @@
 
 ### Create rock
 POST {{base_url}}/rocks/{{application_id}}
-content-type: application/text
+content-type: application/json
 
-This is a body
+{
+  "Ben": 26,
+  "Reba": 27
+}
 
 ### Get rocks
-GET {{base_url}}/rocks/{{application_id}}?page=2
+GET {{base_url}}/rocks/{{application_id}}?page=0
