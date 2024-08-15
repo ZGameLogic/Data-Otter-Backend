@@ -4,6 +4,9 @@ import com.zgamelogic.data.application.ApplicationRepository;
 import com.zgamelogic.data.rock.Rock;
 import com.zgamelogic.data.rock.RockRepository;
 import com.zgamelogic.services.DataOtterWebsocketService;
+import com.zgamelogic.data.exceptions.UnauthorizedException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,16 +18,24 @@ import org.springframework.web.context.request.WebRequest;
 
 @RestController
 @RequestMapping("rocks")
+@PropertySource("File:./api.properties")
 public class RockController {
 
     private final DataOtterWebsocketService websocketService;
     private final ApplicationRepository applicationRepository;
     private final RockRepository rockRepository;
+    private final String apiKey;
 
-    public RockController(DataOtterWebsocketService websocketService, ApplicationRepository applicationRepository, RockRepository rockRepository) {
+    public RockController(
+            DataOtterWebsocketService websocketService,
+            ApplicationRepository applicationRepository,
+            RockRepository rockRepository,
+            @Value("${api-key}") String apiKey
+    ) {
         this.websocketService = websocketService;
         this.applicationRepository = applicationRepository;
         this.rockRepository = rockRepository;
+        this.apiKey = apiKey;
     }
 
     @PostMapping("/{appId}")
@@ -49,22 +60,14 @@ public class RockController {
         return ResponseEntity.ok(rockRepository.findAllById_Application_IdOrderById_DateDesc(appId, pageable));
     }
 
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<?> handleUnauthorizedException() {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-
     @ModelAttribute
     public void authenticate(WebRequest request, Model model) {
         String apiKey = request.getHeader("api-key");
-        // TODO actual check
-//        if (token == null || device == null) throw new UnauthorizedException();
-
+        if (apiKey == null || !apiKey.equals(this.apiKey)) throw new UnauthorizedException();
     }
 
-    private static class UnauthorizedException extends RuntimeException {
-        public UnauthorizedException() {
-            super("Unauthorized");
-        }
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<?> handleUnauthorizedException() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }
