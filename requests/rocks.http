@@ -3,10 +3,11 @@
 ### Create rock
 POST {{base_url}}/rocks/{{application_id}}
 content-type: application/json
+api-key: 5
 
 {
-  "Ben": 26,
-  "Reba": 27
+  "Ben": "{{$random.integer()}}",
+  "Reba": "{{$random.integer()}}"
 }
 
 ### Get rocks
