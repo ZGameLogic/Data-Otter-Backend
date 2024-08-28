@@ -2,9 +2,12 @@ package com.zgamelogic.controllers;
 
 import com.zgamelogic.data.application.Application;
 import com.zgamelogic.data.application.ApplicationRepository;
+import com.zgamelogic.data.tags.Tag;
 import com.zgamelogic.data.tags.TagRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("tags")
@@ -15,6 +18,12 @@ public class TagController {
     public TagController(ApplicationRepository applicationRepository, TagRepository tagRepository) {
         this.applicationRepository = applicationRepository;
         this.tagRepository = tagRepository;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Tag>> getTags(){
+        List<Tag> tags = tagRepository.findAll();
+        return ResponseEntity.ok(tags);
     }
 
     @DeleteMapping("/{tagId}")
