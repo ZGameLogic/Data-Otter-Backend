@@ -24,20 +24,16 @@ jobs:
 
       - name: Stop Monitors Service
         env:
-          DATA_OTTER_KEY: ${{ secrets.DATA_OTTER_KEY }}
+          DATA_OTTER_KEY: ${{ secrets.DATA_OTTER_AWS }}
         run: |
           echo "$DATA_OTTER_KEY" > private_key.pem
           chmod 600 private_key.pem
-          ssh -i private_key.pem -o StrictHostKeyChecking=no azureuser@20.40.218.161 'sudo systemctl stop monitors'
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ubuntu@44.201.152.75 'sudo systemctl stop monitors'
 
       - name: Upload Monitors.jar
-        env:
-          DATA_OTTER_KEY: ${{ secrets.DATA_OTTER_KEY }}
         run: |
-          scp -i private_key.pem -o StrictHostKeyChecking=no target/Monitors-1.0.0.jar azureuser@20.40.218.161:/home/azureuser/monitor/Monitors.jar
+          scp -i private_key.pem -o StrictHostKeyChecking=no target/Monitors-1.0.0.jar ubuntu@44.201.152.75:/home/ubuntu/monitor/Monitors.jar
 
       - name: Start Monitors Service
-        env:
-          DATA_OTTER_KEY: ${{ secrets.DATA_OTTER_KEY }}
         run: |
-          ssh -i private_key.pem -o StrictHostKeyChecking=no azureuser@20.40.218.161 'sudo systemctl start monitors'
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ubuntu@44.201.152.75 'sudo systemctl start monitors'
