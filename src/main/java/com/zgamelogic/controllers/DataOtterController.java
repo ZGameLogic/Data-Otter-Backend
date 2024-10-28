@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -105,5 +102,9 @@ public class DataOtterController {
         String body = changedMonitors.stream().map(monitor -> String.format("%s : %s", monitor.getId().getMonitor().getName(), monitor.isStatus() ? "up": "down")).collect(Collectors.joining("\n"));
         ApplePushNotification notification = new ApplePushNotification("Data Otter", subtitle, body);
         deviceRepository.findAll().forEach(device -> apns.sendNotification(device.getId(), notification));
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.WEEK_OF_YEAR, -1);
+        Date oneWeekAgo = calendar.getTime();
+        monitorStatusRepository.deleteRecordsOlderThan(oneWeekAgo);
     }
 }
