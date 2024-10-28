@@ -45,6 +45,9 @@ public class DataOtterController {
         this.masterNode = masterNode;
         this.apns = apns;
         this.deviceRepository = deviceRepository;
+        log.info("Performing initial cleanup");
+        cleanup();
+        log.info("Cleanup completed");
     }
 
     /**
@@ -58,6 +61,14 @@ public class DataOtterController {
                 )
             )
         );
+    }
+
+    @Scheduled(cron = "0 * * * * *")
+    public void cleanup(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, -1);
+        Date oneWeekAgo = calendar.getTime();
+        monitorStatusRepository.deleteRecordsOlderThan(oneWeekAgo);
     }
 
     /**
@@ -102,9 +113,5 @@ public class DataOtterController {
         String body = changedMonitors.stream().map(monitor -> String.format("%s : %s", monitor.getId().getMonitor().getName(), monitor.isStatus() ? "up": "down")).collect(Collectors.joining("\n"));
         ApplePushNotification notification = new ApplePushNotification("Data Otter", subtitle, body);
         deviceRepository.findAll().forEach(device -> apns.sendNotification(device.getId(), notification));
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, -1);
-        Date oneWeekAgo = calendar.getTime();
-        monitorStatusRepository.deleteRecordsOlderThan(oneWeekAgo);
     }
 }
