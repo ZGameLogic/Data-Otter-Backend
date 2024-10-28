@@ -103,7 +103,7 @@ public class DataOtterController {
         ApplePushNotification notification = new ApplePushNotification("Data Otter", subtitle, body);
         deviceRepository.findAll().forEach(device -> apns.sendNotification(device.getId(), notification));
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.WEEK_OF_YEAR, -1);
+        calendar.add(Calendar.DAY_OF_YEAR, -1);
         Date oneWeekAgo = calendar.getTime();
         monitorStatusRepository.deleteRecordsOlderThan(oneWeekAgo);
     }
