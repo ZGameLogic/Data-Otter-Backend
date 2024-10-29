@@ -27,5 +27,11 @@ public interface MonitorStatusRepository extends JpaRepository<MonitorStatus, Mo
 
     @Modifying
     @Transactional
+    void deleteAllById_MonitorId(long monitorId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM MonitorStatus ms WHERE ms.id.date < :cutoffDate")
+    void deleteRecordsOlderThan(Date cutoffDate);
     void deleteAllById_Monitor_Id_Application_Id(Long id_monitor_id_application_id);
 }

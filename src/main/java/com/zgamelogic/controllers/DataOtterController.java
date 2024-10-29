@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -48,6 +45,9 @@ public class DataOtterController {
         this.masterNode = masterNode;
         this.apns = apns;
         this.deviceRepository = deviceRepository;
+        log.info("Performing initial cleanup");
+        cleanup();
+        log.info("Cleanup completed");
     }
 
     /**
@@ -61,6 +61,14 @@ public class DataOtterController {
                 )
             )
         );
+    }
+
+    @Scheduled(cron = "0 * * * * *")
+    public void cleanup(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.WEEK_OF_YEAR, -1);
+        Date oneWeekAgo = calendar.getTime();
+        monitorStatusRepository.deleteRecordsOlderThan(oneWeekAgo);
     }
 
     /**
