@@ -1,12 +1,12 @@
 package com.zgamelogic.controllers;
 
-import com.zgamelogic.data.application.Application;
-import com.zgamelogic.data.application.ApplicationMonitorStatus;
-import com.zgamelogic.data.application.ApplicationRepository;
-import com.zgamelogic.data.monitorHistory.MonitorStatus;
-import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
-import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
-import com.zgamelogic.data.tags.TagRepository;
+import com.zgamelogic.data.components.DynamicApplicationRepository;
+import com.zgamelogic.data.entities.Application;
+import com.zgamelogic.data.serialization.ApplicationMonitorStatus;
+import com.zgamelogic.data.entities.MonitorStatus;
+import com.zgamelogic.data.repositories.MonitorStatusRepository;
+import com.zgamelogic.data.repositories.NodeMonitorReportRepository;
+import com.zgamelogic.data.repositories.TagRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,12 +20,12 @@ import java.util.Optional;
 @RequestMapping("applications")
 public class ApplicationController {
 
-    private final ApplicationRepository applicationRepository;
+    private final DynamicApplicationRepository applicationRepository;
     private final MonitorStatusRepository monitorStatusRepository;
     private final NodeMonitorReportRepository nodeMonitorReportRepository;
     private final TagRepository tagRepository;
 
-    public ApplicationController(ApplicationRepository applicationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, TagRepository tagRepository) {
+    public ApplicationController(DynamicApplicationRepository applicationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, TagRepository tagRepository) {
         this.applicationRepository = applicationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
         this.nodeMonitorReportRepository = nodeMonitorReportRepository;

@@ -1,7 +1,7 @@
 package com.zgamelogic.controllers;
 
-import com.zgamelogic.data.devices.Device;
-import com.zgamelogic.data.devices.DeviceRepository;
+import com.zgamelogic.data.entities.Device;
+import com.zgamelogic.data.repositories.DeviceRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;

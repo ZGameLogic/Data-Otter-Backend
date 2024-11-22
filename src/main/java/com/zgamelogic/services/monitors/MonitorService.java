@@ -1,6 +1,6 @@
 package com.zgamelogic.services.monitors;
 
-import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
+import com.zgamelogic.data.entities.MonitorConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;

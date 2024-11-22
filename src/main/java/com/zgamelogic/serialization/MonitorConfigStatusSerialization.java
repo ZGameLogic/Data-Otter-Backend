@@ -3,7 +3,7 @@ package com.zgamelogic.serialization;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationAndStatus;
+import com.zgamelogic.data.serialization.MonitorConfigurationAndStatus;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;

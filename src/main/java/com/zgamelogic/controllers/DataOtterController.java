@@ -1,12 +1,12 @@
 package com.zgamelogic.controllers;
 
-import com.zgamelogic.data.devices.DeviceRepository;
-import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
-import com.zgamelogic.data.monitorHistory.MonitorStatus;
-import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
-import com.zgamelogic.data.nodeConfiguration.NodeConfiguration;
-import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReport;
-import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
+import com.zgamelogic.data.repositories.DeviceRepository;
+import com.zgamelogic.data.repositories.MonitorConfigurationRepository;
+import com.zgamelogic.data.entities.MonitorStatus;
+import com.zgamelogic.data.repositories.MonitorStatusRepository;
+import com.zgamelogic.data.entities.NodeConfiguration;
+import com.zgamelogic.data.entities.NodeMonitorReport;
+import com.zgamelogic.data.repositories.NodeMonitorReportRepository;
 import com.zgamelogic.services.apns.ApplePushNotification;
 import com.zgamelogic.services.apns.ApplePushNotificationService;
 import com.zgamelogic.services.monitors.MonitorService;

@@ -1,10 +1,10 @@
 package com.zgamelogic.controllers;
 
-import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
-import com.zgamelogic.data.nodeConfiguration.NodeConfiguration;
-import com.zgamelogic.data.nodeConfiguration.NodeConfigurationRepository;
-import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReport;
-import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
+import com.zgamelogic.data.repositories.MonitorConfigurationRepository;
+import com.zgamelogic.data.entities.NodeConfiguration;
+import com.zgamelogic.data.repositories.NodeConfigurationRepository;
+import com.zgamelogic.data.entities.NodeMonitorReport;
+import com.zgamelogic.data.repositories.NodeMonitorReportRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;

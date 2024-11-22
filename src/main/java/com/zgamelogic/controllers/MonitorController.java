@@ -1,14 +1,15 @@
 package com.zgamelogic.controllers;
 
 import com.zgamelogic.App;
-import com.zgamelogic.data.application.Application;
-import com.zgamelogic.data.application.ApplicationRepository;
-import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
-import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationAndStatus;
-import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
-import com.zgamelogic.data.monitorHistory.MonitorStatus;
-import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
-import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
+import com.zgamelogic.data.components.DynamicApplicationRepository;
+import com.zgamelogic.data.entities.Application;
+import com.zgamelogic.data.repositories.ApplicationRepository;
+import com.zgamelogic.data.entities.MonitorConfiguration;
+import com.zgamelogic.data.serialization.MonitorConfigurationAndStatus;
+import com.zgamelogic.data.repositories.MonitorConfigurationRepository;
+import com.zgamelogic.data.entities.MonitorStatus;
+import com.zgamelogic.data.repositories.MonitorStatusRepository;
+import com.zgamelogic.data.repositories.NodeMonitorReportRepository;
 import com.zgamelogic.services.monitors.MonitorService;
 import com.zgamelogic.services.monitors.MonitorStatusReport;
 import lombok.extern.slf4j.Slf4j;
@@ -30,9 +31,9 @@ public class MonitorController {
     private final MonitorStatusRepository monitorStatusRepository;
     private final NodeMonitorReportRepository nodeMonitorReportRepository;
     private final MonitorService monitorService;
-    private final ApplicationRepository applicationRepository;
+    private final DynamicApplicationRepository applicationRepository;
 
-    public MonitorController(MonitorConfigurationRepository monitorConfigurationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService, App app, ApplicationRepository applicationRepository, ApplicationRepository applicationRepository1) {
+    public MonitorController(MonitorConfigurationRepository monitorConfigurationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService, App app, ApplicationRepository applicationRepository, DynamicApplicationRepository applicationRepository1) {
         this.monitorConfigurationRepository = monitorConfigurationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
         this.nodeMonitorReportRepository = nodeMonitorReportRepository;

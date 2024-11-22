@@ -3,7 +3,7 @@ package com.zgamelogic.serialization;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.zgamelogic.data.monitorHistory.MonitorStatus;
+import com.zgamelogic.data.entities.MonitorStatus;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;

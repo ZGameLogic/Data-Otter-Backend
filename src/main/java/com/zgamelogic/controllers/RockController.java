@@ -1,8 +1,8 @@
 package com.zgamelogic.controllers;
 
-import com.zgamelogic.data.application.ApplicationRepository;
-import com.zgamelogic.data.rock.Rock;
-import com.zgamelogic.data.rock.RockRepository;
+import com.zgamelogic.data.components.DynamicApplicationRepository;
+import com.zgamelogic.data.entities.Rock;
+import com.zgamelogic.data.repositories.RockRepository;
 import com.zgamelogic.services.DataOtterWebsocketService;
 import com.zgamelogic.data.exceptions.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,13 +22,13 @@ import org.springframework.web.context.request.WebRequest;
 public class RockController {
 
     private final DataOtterWebsocketService websocketService;
-    private final ApplicationRepository applicationRepository;
+    private final DynamicApplicationRepository applicationRepository;
     private final RockRepository rockRepository;
     private final String apiKey;
 
     public RockController(
             DataOtterWebsocketService websocketService,
-            ApplicationRepository applicationRepository,
+            DynamicApplicationRepository applicationRepository,
             RockRepository rockRepository,
             @Value("${api-key}") String apiKey
     ) {

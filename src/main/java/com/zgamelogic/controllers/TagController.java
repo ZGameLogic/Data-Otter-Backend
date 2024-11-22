@@ -1,9 +1,9 @@
 package com.zgamelogic.controllers;
 
-import com.zgamelogic.data.application.Application;
-import com.zgamelogic.data.application.ApplicationRepository;
-import com.zgamelogic.data.tags.Tag;
-import com.zgamelogic.data.tags.TagRepository;
+import com.zgamelogic.data.components.DynamicApplicationRepository;
+import com.zgamelogic.data.entities.Application;
+import com.zgamelogic.data.entities.Tag;
+import com.zgamelogic.data.repositories.TagRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,10 +12,10 @@ import java.util.List;
 @RestController
 @RequestMapping("tags")
 public class TagController {
-    private final ApplicationRepository applicationRepository;
+    private final DynamicApplicationRepository applicationRepository;
     private final TagRepository tagRepository;
 
-    public TagController(ApplicationRepository applicationRepository, TagRepository tagRepository) {
+    public TagController(DynamicApplicationRepository applicationRepository, TagRepository tagRepository) {
         this.applicationRepository = applicationRepository;
         this.tagRepository = tagRepository;
     }
