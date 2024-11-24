@@ -1,7 +1,7 @@
 package com.zgamelogic.controllers;
 
+import com.zgamelogic.data.components.DynamicDeviceRepository;
 import com.zgamelogic.data.entities.Device;
-import com.zgamelogic.data.repositories.DeviceRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class DeviceController {
-    private final DeviceRepository deviceRepository;
+    private final DynamicDeviceRepository deviceRepository;
 
-    public DeviceController(DeviceRepository deviceRepository) {
+    public DeviceController(DynamicDeviceRepository deviceRepository) {
         this.deviceRepository = deviceRepository;
     }
 

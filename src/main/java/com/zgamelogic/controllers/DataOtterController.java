@@ -1,6 +1,6 @@
 package com.zgamelogic.controllers;
 
-import com.zgamelogic.data.repositories.DeviceRepository;
+import com.zgamelogic.data.components.DynamicDeviceRepository;
 import com.zgamelogic.data.repositories.MonitorConfigurationRepository;
 import com.zgamelogic.data.entities.MonitorStatus;
 import com.zgamelogic.data.repositories.MonitorStatusRepository;
@@ -27,7 +27,7 @@ public class DataOtterController {
     private final MonitorService monitorService;
     private final NodeConfiguration masterNode;
     private final ApplePushNotificationService apns;
-    private final DeviceRepository deviceRepository;
+    private final DynamicDeviceRepository deviceRepository;
 
     public DataOtterController(
             MonitorConfigurationRepository monitorConfigurationRepository,
@@ -36,7 +36,7 @@ public class DataOtterController {
             MonitorService monitorService,
             @Qualifier("master-node") NodeConfiguration masterNode,
             ApplePushNotificationService apns,
-            DeviceRepository deviceRepository
+            DynamicDeviceRepository deviceRepository
     ) {
         this.monitorConfigurationRepository = monitorConfigurationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
