@@ -26,10 +26,6 @@ public class DynamicMonitorConfigurationRepository {
         primaryCache = new ArrayList<>();
     }
 
-
-
-
-
     private <T> T executeWithFallback(DynamicMonitorConfigurationRepository.RepositoryOperation<T> operation, boolean cache) {
         try {
             if (primaryAvailable) {

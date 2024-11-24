@@ -2,8 +2,8 @@ package com.zgamelogic.controllers;
 
 import com.zgamelogic.data.components.DynamicDeviceRepository;
 import com.zgamelogic.data.components.DynamicMonitorConfigurationRepository;
+import com.zgamelogic.data.components.DynamicMonitorStatusRepository;
 import com.zgamelogic.data.entities.MonitorStatus;
-import com.zgamelogic.data.repositories.MonitorStatusRepository;
 import com.zgamelogic.data.entities.NodeConfiguration;
 import com.zgamelogic.data.entities.NodeMonitorReport;
 import com.zgamelogic.data.repositories.NodeMonitorReportRepository;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Controller
 public class DataOtterController {
     private final DynamicMonitorConfigurationRepository monitorConfigurationRepository;
-    private final MonitorStatusRepository monitorStatusRepository;
+    private final DynamicMonitorStatusRepository monitorStatusRepository;
     private final NodeMonitorReportRepository nodeMonitorReportRepository;
     private final MonitorService monitorService;
     private final NodeConfiguration masterNode;
@@ -31,7 +31,7 @@ public class DataOtterController {
 
     public DataOtterController(
             DynamicMonitorConfigurationRepository monitorConfigurationRepository,
-            MonitorStatusRepository monitorStatusRepository,
+            DynamicMonitorStatusRepository monitorStatusRepository,
             NodeMonitorReportRepository nodeMonitorReportRepository,
             MonitorService monitorService,
             @Qualifier("master-node") NodeConfiguration masterNode,
