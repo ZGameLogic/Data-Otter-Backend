@@ -1,6 +1,6 @@
 package com.zgamelogic.controllers;
 
-import com.zgamelogic.data.repositories.MonitorConfigurationRepository;
+import com.zgamelogic.data.components.DynamicMonitorConfigurationRepository;
 import com.zgamelogic.data.entities.NodeConfiguration;
 import com.zgamelogic.data.repositories.NodeConfigurationRepository;
 import com.zgamelogic.data.entities.NodeMonitorReport;
@@ -22,10 +22,10 @@ import static com.zgamelogic.data.Constants.MASTER_NODE_NAME;
 @RestController
 public class NodeController {
     private final NodeMonitorReportRepository nodeMonitorReportRepository;
-    private final MonitorConfigurationRepository monitorConfigurationRepository;
+    private final DynamicMonitorConfigurationRepository monitorConfigurationRepository;
     private final NodeConfigurationRepository nodeConfigurationRepository;
 
-    public NodeController(NodeMonitorReportRepository nodeMonitorReportRepository, MonitorConfigurationRepository monitorConfigurationRepository, NodeConfigurationRepository nodeConfigurationRepository) {
+    public NodeController(NodeMonitorReportRepository nodeMonitorReportRepository, DynamicMonitorConfigurationRepository monitorConfigurationRepository, NodeConfigurationRepository nodeConfigurationRepository) {
         this.nodeMonitorReportRepository = nodeMonitorReportRepository;
         this.monitorConfigurationRepository = monitorConfigurationRepository;
         this.nodeConfigurationRepository = nodeConfigurationRepository;

@@ -2,11 +2,11 @@ package com.zgamelogic.controllers;
 
 import com.zgamelogic.App;
 import com.zgamelogic.data.components.DynamicApplicationRepository;
+import com.zgamelogic.data.components.DynamicMonitorConfigurationRepository;
 import com.zgamelogic.data.entities.Application;
 import com.zgamelogic.data.repositories.ApplicationRepository;
 import com.zgamelogic.data.entities.MonitorConfiguration;
 import com.zgamelogic.data.serialization.MonitorConfigurationAndStatus;
-import com.zgamelogic.data.repositories.MonitorConfigurationRepository;
 import com.zgamelogic.data.entities.MonitorStatus;
 import com.zgamelogic.data.repositories.MonitorStatusRepository;
 import com.zgamelogic.data.repositories.NodeMonitorReportRepository;
@@ -27,13 +27,13 @@ import java.util.stream.Stream;
 @Slf4j
 @RestController
 public class MonitorController {
-    private final MonitorConfigurationRepository monitorConfigurationRepository;
+    private final DynamicMonitorConfigurationRepository monitorConfigurationRepository;
     private final MonitorStatusRepository monitorStatusRepository;
     private final NodeMonitorReportRepository nodeMonitorReportRepository;
     private final MonitorService monitorService;
     private final DynamicApplicationRepository applicationRepository;
 
-    public MonitorController(MonitorConfigurationRepository monitorConfigurationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService, App app, ApplicationRepository applicationRepository, DynamicApplicationRepository applicationRepository1) {
+    public MonitorController(DynamicMonitorConfigurationRepository monitorConfigurationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService, App app, ApplicationRepository applicationRepository, DynamicApplicationRepository applicationRepository1) {
         this.monitorConfigurationRepository = monitorConfigurationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
         this.nodeMonitorReportRepository = nodeMonitorReportRepository;
