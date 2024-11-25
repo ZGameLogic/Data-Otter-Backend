@@ -1,10 +1,12 @@
 package com.zgamelogic.data.components;
 
 import com.zgamelogic.data.entities.MonitorStatus;
+import com.zgamelogic.data.events.DatabaseConnectionEvent;
 import com.zgamelogic.data.repositories.MonitorStatusRepository;
 import com.zgamelogic.data.repositories.backup.BackupMonitorStatusRepository;
 import com.zgamelogic.data.repositories.primary.PrimaryMonitorStatusRepository;
-import org.springframework.scheduling.annotation.Scheduled;
+import com.zgamelogic.services.DatabaseConnectionService;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -16,49 +18,47 @@ import java.util.Optional;
 public class DynamicMonitorStatusRepository {
     private final PrimaryMonitorStatusRepository primaryRepository;
     private final BackupMonitorStatusRepository backupRepository;
+    private final DatabaseConnectionService databaseConnectionService;
 
-    private boolean primaryAvailable;
     private final List<RepositoryOperation> primaryCache;
 
-    public DynamicMonitorStatusRepository(PrimaryMonitorStatusRepository primaryRepository, BackupMonitorStatusRepository backupRepository) {
+    public DynamicMonitorStatusRepository(PrimaryMonitorStatusRepository primaryRepository, BackupMonitorStatusRepository backupRepository, DatabaseConnectionService databaseConnectionService) {
         this.primaryRepository = primaryRepository;
         this.backupRepository = backupRepository;
-        primaryAvailable = true;
+        this.databaseConnectionService = databaseConnectionService;
         this.primaryCache = new ArrayList<>();
     }
 
-
-
     private <T> T executeWithFallback(DynamicMonitorStatusRepository.RepositoryOperation<T> operation, boolean cache) {
         try {
-            if (primaryAvailable) {
+            if (databaseConnectionService.isDatabaseConnected()) {
                 return operation.execute(primaryRepository);
             } else {
                 primaryCache.add(operation);
             }
         } catch (Exception e) {
-            primaryAvailable = false;
+            databaseConnectionService.setDatabaseConnected(false);
         }
         return operation.execute(backupRepository);
     }
 
     public void deleteAllById_Monitor_Id_Application_Id(long applicationId) {
         backupRepository.deleteAllById_Monitor_Id_Application_Id(applicationId);
-        if (primaryAvailable) {
+        if (databaseConnectionService.isDatabaseConnected()) {
             primaryRepository.deleteAllById_Monitor_Id_Application_Id(applicationId);
         }
     }
 
     public void deleteAllById_monitor_id_monitorConfigurationIdAndId_Monitor_Id_Application_Id(long id, long appId) {
         backupRepository.deleteAllById_monitor_id_monitorConfigurationIdAndId_Monitor_Id_Application_Id(id, appId);
-        if (primaryAvailable) {
+        if (databaseConnectionService.isDatabaseConnected()) {
             primaryRepository.deleteAllById_monitor_id_monitorConfigurationIdAndId_Monitor_Id_Application_Id(id, appId);
         }
     }
 
     public void deleteRecordsOlderThan(Date date) {
         backupRepository.deleteRecordsOlderThan(date);
-        if (primaryAvailable) {
+        if (databaseConnectionService.isDatabaseConnected()) {
             primaryRepository.deleteRecordsOlderThan(date);
         }
     }
@@ -84,14 +84,9 @@ public class DynamicMonitorStatusRepository {
         T execute(MonitorStatusRepository repo);
     }
 
-    @Scheduled(cron = "10 * * * * *")
-    private void connectionTest(){
-        if(primaryAvailable) return;
-        try {
-            primaryRepository.count();
-            syncBackupToPrimary();
-            primaryAvailable = true;
-        } catch(Exception ignored) {}
+    @EventListener
+    private void connectionEvent(DatabaseConnectionEvent event){
+        if(event.isConnected()) syncBackupToPrimary();
     }
 
     private void syncBackupToPrimary(){

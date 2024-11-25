@@ -1,10 +1,12 @@
 package com.zgamelogic.data.components;
 
 import com.zgamelogic.data.entities.Application;
+import com.zgamelogic.data.events.DatabaseConnectionEvent;
 import com.zgamelogic.data.repositories.ApplicationRepository;
 import com.zgamelogic.data.repositories.backup.BackupApplicationRepository;
 import com.zgamelogic.data.repositories.primary.PrimaryApplicationRepository;
-import org.springframework.scheduling.annotation.Scheduled;
+import com.zgamelogic.services.DatabaseConnectionService;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -15,26 +17,26 @@ import java.util.Optional;
 public class DynamicApplicationRepository {
     private final PrimaryApplicationRepository primaryApplicationRepository;
     private final BackupApplicationRepository backupApplicationRepository;
+    private final DatabaseConnectionService databaseConnectionService;
 
-    private boolean primaryAvailable;
     private final List<RepositoryOperation> primaryCache;
 
-    public DynamicApplicationRepository(PrimaryApplicationRepository primaryApplicationRepository, BackupApplicationRepository backupApplicationRepository) {
+    public DynamicApplicationRepository(PrimaryApplicationRepository primaryApplicationRepository, BackupApplicationRepository backupApplicationRepository, DatabaseConnectionService databaseConnectionService) {
         this.primaryApplicationRepository = primaryApplicationRepository;
         this.backupApplicationRepository = backupApplicationRepository;
-        primaryAvailable = true;
+        this.databaseConnectionService = databaseConnectionService;
         primaryCache = new ArrayList<>();
     }
 
     private <T> T executeWithFallback(RepositoryOperation<T> operation, boolean cache) {
         try {
-            if (primaryAvailable) {
+            if (databaseConnectionService.isDatabaseConnected()) {
                 return operation.execute(primaryApplicationRepository);
             } else {
                 primaryCache.add(operation);
             }
         } catch (Exception e) {
-            primaryAvailable = false;
+            databaseConnectionService.setDatabaseConnected(false);
         }
         return operation.execute(backupApplicationRepository);
     }
@@ -46,11 +48,11 @@ public class DynamicApplicationRepository {
 
     public void deleteById(long applicationId) {
         try {
-            if (primaryAvailable) {
+            if (databaseConnectionService.isDatabaseConnected()) {
                 primaryApplicationRepository.deleteById(applicationId);
             }
         } catch (Exception e) {
-            primaryAvailable = false;
+            databaseConnectionService.setDatabaseConnected(false);
         }
         backupApplicationRepository.deleteById(applicationId);
     }
@@ -79,14 +81,9 @@ public class DynamicApplicationRepository {
         T execute(ApplicationRepository repo);
     }
 
-    @Scheduled(cron = "10 * * * * *")
-    private void connectionTest(){
-        if(primaryAvailable) return;
-        try {
-            primaryApplicationRepository.count();
-            syncBackupToPrimary();
-            primaryAvailable = true;
-        } catch(Exception ignored) {}
+    @EventListener
+    private void connectionEvent(DatabaseConnectionEvent event){
+        if(event.isConnected()) syncBackupToPrimary();
     }
 
     private void syncBackupToPrimary(){

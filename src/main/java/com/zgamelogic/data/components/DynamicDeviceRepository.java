@@ -1,10 +1,12 @@
 package com.zgamelogic.data.components;
 
 import com.zgamelogic.data.entities.Device;
+import com.zgamelogic.data.events.DatabaseConnectionEvent;
 import com.zgamelogic.data.repositories.DeviceRepository;
 import com.zgamelogic.data.repositories.backup.BackupDeviceRepository;
 import com.zgamelogic.data.repositories.primary.PrimaryDeviceRepository;
-import org.springframework.scheduling.annotation.Scheduled;
+import com.zgamelogic.services.DatabaseConnectionService;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -14,14 +16,14 @@ import java.util.List;
 public class DynamicDeviceRepository {
     private final PrimaryDeviceRepository primaryDeviceRepository;
     private final BackupDeviceRepository backupDeviceRepository;
+    private final DatabaseConnectionService databaseConnectionService;
 
-    private boolean primaryAvailable;
-    private final List<RepositoryOperation> primaryCache;
+    private final List<DynamicDeviceRepository.RepositoryOperation> primaryCache;
 
-    public DynamicDeviceRepository(PrimaryDeviceRepository primaryDeviceRepository, BackupDeviceRepository backupDeviceRepository) {
+    public DynamicDeviceRepository(PrimaryDeviceRepository primaryDeviceRepository, BackupDeviceRepository backupDeviceRepository, DatabaseConnectionService databaseConnectionService) {
         this.primaryDeviceRepository = primaryDeviceRepository;
         this.backupDeviceRepository = backupDeviceRepository;
-        primaryAvailable = true;
+        this.databaseConnectionService = databaseConnectionService;
         primaryCache = new ArrayList<>();
     }
 
@@ -36,40 +38,35 @@ public class DynamicDeviceRepository {
 
     public void deleteById(String deviceId) {
         try {
-            if (primaryAvailable) {
+            if (databaseConnectionService.isDatabaseConnected()) {
                 primaryDeviceRepository.deleteById(deviceId);
             }
         } catch (Exception e) {
-            primaryAvailable = false;
+            databaseConnectionService.setDatabaseConnected(false);
         }
         backupDeviceRepository.deleteById(deviceId);
     }
 
     private <T> T executeWithFallback(DynamicDeviceRepository.RepositoryOperation<T> operation, boolean cache) {
         try {
-            if (primaryAvailable) {
+            if (databaseConnectionService.isDatabaseConnected()) {
                 return operation.execute(primaryDeviceRepository);
             } else {
                 primaryCache.add(operation);
             }
         } catch (Exception e) {
-            primaryAvailable = false;
+            databaseConnectionService.setDatabaseConnected(false);
         }
         return operation.execute(backupDeviceRepository);
     }
 
-    private interface RepositoryOperation<T> {
-        T execute(DeviceRepository repo);
+    @EventListener
+    private void connectionEvent(DatabaseConnectionEvent event){
+        if(event.isConnected()) syncBackupToPrimary();
     }
 
-    @Scheduled(cron = "10 * * * * *")
-    private void connectionTest(){
-        if(primaryAvailable) return;
-        try {
-            primaryDeviceRepository.count();
-            syncBackupToPrimary();
-            primaryAvailable = true;
-        } catch(Exception ignored) {}
+    protected interface RepositoryOperation<T> {
+        T execute(DeviceRepository repo);
     }
 
     private void syncBackupToPrimary(){
