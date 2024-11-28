@@ -29,8 +29,8 @@ public class MonitorController {
     private final DynamicMonitorConfigurationRepository monitorConfigurationRepository;
     private final DynamicMonitorStatusRepository monitorStatusRepository;
     private final DynamicNodeMonitorReportRepository nodeMonitorReportRepository;
-    private final MonitorService monitorService;
     private final DynamicApplicationRepository applicationRepository;
+    private final MonitorService monitorService;
 
     public MonitorController(DynamicMonitorConfigurationRepository monitorConfigurationRepository, DynamicMonitorStatusRepository monitorStatusRepository, DynamicNodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService, App app, DynamicApplicationRepository applicationRepository, DynamicApplicationRepository applicationRepository1) {
         this.monitorConfigurationRepository = monitorConfigurationRepository;
