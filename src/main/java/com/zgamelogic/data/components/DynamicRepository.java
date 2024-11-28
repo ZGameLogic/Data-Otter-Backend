@@ -10,41 +10,105 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-public abstract class DynamicRepository {
-    private final JpaRepository primaryRepository;
-    private final JpaRepository backupRepository;
+public abstract class DynamicRepository<T, ID, R extends JpaRepository<T, ID>> {
+    private final R primaryRepository;
+    private final R backupRepository;
     private final DatabaseConnectionService databaseConnectionService;
-
     private final List<RepositoryOperation> primaryCache;
+    private final List<VoidRepositoryOperation> primaryVoidCache;
 
-    public DynamicRepository(JpaRepository primaryRepository, JpaRepository backupRepository, DatabaseConnectionService databaseConnectionService) {
+    protected DynamicRepository(R primaryRepository, R backupRepository, DatabaseConnectionService databaseConnectionService) {
         this.primaryRepository = primaryRepository;
         this.backupRepository = backupRepository;
         this.databaseConnectionService = databaseConnectionService;
-        primaryCache = new ArrayList<>();
+        this.primaryCache = new ArrayList<>();
+        this.primaryVoidCache = new ArrayList<>();
     }
 
-    protected <T> T executeWithFallback(RepositoryOperation<T> operation, boolean cache) {
+    protected void execute(VoidRepositoryOperation<R> operation) {
+        execute(operation, false);
+    }
+
+    protected void execute(VoidRepositoryOperation<R> operation, boolean cache) {
+        try {
+            if(databaseConnectionService.isDatabaseConnected()){
+                operation.execute(primaryRepository);
+            } else if(cache){
+                primaryVoidCache.add(operation);
+            }
+        } catch (Exception e) {
+            databaseConnectionService.setDatabaseConnected(false);
+            if(cache) primaryVoidCache.add(operation);
+        }
+        operation.execute(backupRepository);
+    }
+
+    protected <U> U executeOnBoth(RepositoryOperation<R, U> operation) {
+        return executeOnBoth(operation, false);
+    }
+
+    protected <U> U executeOnBoth(RepositoryOperation<R, U> operation, boolean cache) {
+        if(!databaseConnectionService.isDatabaseConnected()){
+            if(cache) primaryCache.add(operation);
+            return operation.execute(backupRepository);
+        } else {
+            U result = null;
+            try {
+                result =  operation.execute(primaryRepository);
+            } catch (Exception e) {
+                databaseConnectionService.setDatabaseConnected(false);
+                if(cache) primaryCache.add(operation);
+            }
+            if(result == null){
+                result = operation.execute(backupRepository);
+            } else {
+                operation.execute(backupRepository);
+            }
+            return result;
+        }
+    }
+
+    protected <U> U executeWithFallback(RepositoryOperation<R, U> operation) {
+        return executeWithFallback(operation, false);
+    }
+
+    protected <U> U executeWithFallback(RepositoryOperation<R, U> operation, boolean cache) {
         try {
             if (databaseConnectionService.isDatabaseConnected()) {
                 return operation.execute(primaryRepository);
-            } else {
+            } else if (cache) {
                 primaryCache.add(operation);
             }
         } catch (Exception e) {
             databaseConnectionService.setDatabaseConnected(false);
+            if(cache) primaryCache.add(operation);
         }
         return operation.execute(backupRepository);
     }
 
-    protected interface RepositoryOperation<T> {
-        T execute(JpaRepository repo);
+    @EventListener
+    private void connectionEvent(DatabaseConnectionEvent event) {
+        if (event.isConnected()) {
+            syncBackupToPrimary();
+        }
     }
 
-    protected abstract void syncBackupToPrimary();
+    private void syncBackupToPrimary() {
+        for (RepositoryOperation<R, ?> operation : primaryCache) {
+            operation.execute(primaryRepository);
+        }
+        for (VoidRepositoryOperation<R> operation : primaryVoidCache) {
+            operation.execute(primaryRepository);
+        }
+        primaryVoidCache.clear();
+        primaryCache.clear();
+    }
 
-    @EventListener
-    private void connectionEvent(DatabaseConnectionEvent event){
-        if(event.isConnected()) syncBackupToPrimary();
+    protected interface RepositoryOperation<R, U> {
+        U execute(R repository);
+    }
+
+    protected interface VoidRepositoryOperation<R> {
+        void execute(R repository);
     }
 }
