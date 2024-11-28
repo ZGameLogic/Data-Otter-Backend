@@ -4,12 +4,12 @@ import com.zgamelogic.App;
 import com.zgamelogic.data.components.DynamicApplicationRepository;
 import com.zgamelogic.data.components.DynamicMonitorConfigurationRepository;
 import com.zgamelogic.data.components.DynamicMonitorStatusRepository;
+import com.zgamelogic.data.components.DynamicNodeMonitorReportRepository;
 import com.zgamelogic.data.entities.Application;
 import com.zgamelogic.data.repositories.ApplicationRepository;
 import com.zgamelogic.data.entities.MonitorConfiguration;
 import com.zgamelogic.data.serialization.MonitorConfigurationAndStatus;
 import com.zgamelogic.data.entities.MonitorStatus;
-import com.zgamelogic.data.repositories.NodeMonitorReportRepository;
 import com.zgamelogic.services.monitors.MonitorService;
 import com.zgamelogic.services.monitors.MonitorStatusReport;
 import lombok.extern.slf4j.Slf4j;
@@ -29,11 +29,11 @@ import java.util.stream.Stream;
 public class MonitorController {
     private final DynamicMonitorConfigurationRepository monitorConfigurationRepository;
     private final DynamicMonitorStatusRepository monitorStatusRepository;
-    private final NodeMonitorReportRepository nodeMonitorReportRepository;
+    private final DynamicNodeMonitorReportRepository nodeMonitorReportRepository;
     private final MonitorService monitorService;
     private final DynamicApplicationRepository applicationRepository;
 
-    public MonitorController(DynamicMonitorConfigurationRepository monitorConfigurationRepository, DynamicMonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService, App app, ApplicationRepository applicationRepository, DynamicApplicationRepository applicationRepository1) {
+    public MonitorController(DynamicMonitorConfigurationRepository monitorConfigurationRepository, DynamicMonitorStatusRepository monitorStatusRepository, DynamicNodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService, App app, ApplicationRepository applicationRepository, DynamicApplicationRepository applicationRepository1) {
         this.monitorConfigurationRepository = monitorConfigurationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
         this.nodeMonitorReportRepository = nodeMonitorReportRepository;

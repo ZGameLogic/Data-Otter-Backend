@@ -1,6 +1,7 @@
 package com.zgamelogic.controllers;
 
 import com.zgamelogic.data.components.DynamicApplicationRepository;
+import com.zgamelogic.data.components.DynamicRockRepository;
 import com.zgamelogic.data.entities.Rock;
 import com.zgamelogic.data.repositories.RockRepository;
 import com.zgamelogic.services.DataOtterWebsocketService;
@@ -23,13 +24,13 @@ public class RockController {
 
     private final DataOtterWebsocketService websocketService;
     private final DynamicApplicationRepository applicationRepository;
-    private final RockRepository rockRepository;
+    private final DynamicRockRepository rockRepository;
     private final String apiKey;
 
     public RockController(
             DataOtterWebsocketService websocketService,
             DynamicApplicationRepository applicationRepository,
-            RockRepository rockRepository,
+            DynamicRockRepository rockRepository,
             @Value("${api-key}") String apiKey
     ) {
         this.websocketService = websocketService;

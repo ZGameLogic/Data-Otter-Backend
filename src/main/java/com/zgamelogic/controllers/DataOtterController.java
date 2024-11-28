@@ -3,10 +3,10 @@ package com.zgamelogic.controllers;
 import com.zgamelogic.data.components.DynamicDeviceRepository;
 import com.zgamelogic.data.components.DynamicMonitorConfigurationRepository;
 import com.zgamelogic.data.components.DynamicMonitorStatusRepository;
+import com.zgamelogic.data.components.DynamicNodeMonitorReportRepository;
 import com.zgamelogic.data.entities.MonitorStatus;
 import com.zgamelogic.data.entities.NodeConfiguration;
 import com.zgamelogic.data.entities.NodeMonitorReport;
-import com.zgamelogic.data.repositories.NodeMonitorReportRepository;
 import com.zgamelogic.services.apns.ApplePushNotification;
 import com.zgamelogic.services.apns.ApplePushNotificationService;
 import com.zgamelogic.services.monitors.MonitorService;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class DataOtterController {
     private final DynamicMonitorConfigurationRepository monitorConfigurationRepository;
     private final DynamicMonitorStatusRepository monitorStatusRepository;
-    private final NodeMonitorReportRepository nodeMonitorReportRepository;
+    private final DynamicNodeMonitorReportRepository nodeMonitorReportRepository;
     private final MonitorService monitorService;
     private final NodeConfiguration masterNode;
     private final ApplePushNotificationService apns;
@@ -32,7 +32,7 @@ public class DataOtterController {
     public DataOtterController(
             DynamicMonitorConfigurationRepository monitorConfigurationRepository,
             DynamicMonitorStatusRepository monitorStatusRepository,
-            NodeMonitorReportRepository nodeMonitorReportRepository,
+            DynamicNodeMonitorReportRepository nodeMonitorReportRepository,
             MonitorService monitorService,
             @Qualifier("master-node") NodeConfiguration masterNode,
             ApplePushNotificationService apns,

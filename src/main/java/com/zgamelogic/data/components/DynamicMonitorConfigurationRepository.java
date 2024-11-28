@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class DynamicMonitorConfigurationRepository extends DynamicRepository<MonitorConfiguration, MonitorConfiguration.MonitorConfigurationId, MonitorConfigurationRepository> {
+public class DynamicMonitorConfigurationRepository extends DynamicRepository<MonitorConfiguration, Long, MonitorConfigurationRepository> {
 
     protected DynamicMonitorConfigurationRepository(PrimaryMonitorConfigurationRepository primaryRepository, BackupMonitorConfigurationRepository backupRepository, DatabaseConnectionService databaseConnectionService) {
         super(primaryRepository, backupRepository, databaseConnectionService);
@@ -38,7 +38,7 @@ public class DynamicMonitorConfigurationRepository extends DynamicRepository<Mon
     }
 
     public void deleteById_MonitorConfigurationId(long id) {
-        execute(repo -> repo.deleteById_MonitorConfigurationId(id));
+        executeWithFallbackVoid(repo -> repo.deleteById_MonitorConfigurationId(id));
     }
 
     private interface RepositoryOperation<T> {

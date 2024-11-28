@@ -24,6 +24,6 @@ public class DynamicDeviceRepository extends DynamicRepository<Device, String, D
     }
 
     public void deleteById(String deviceId) {
-        execute(repo -> repo.deleteById(deviceId));
+        executeWithFallbackVoid(repo -> repo.deleteById(deviceId));
     }
 }

@@ -22,7 +22,7 @@ public class DynamicApplicationRepository extends DynamicRepository<Application,
     }
 
     public void deleteById(long applicationId) {
-        execute(repo -> repo.deleteById(applicationId), true);
+        executeWithFallbackVoid(repo -> repo.deleteById(applicationId), true);
     }
 
     public List<Application> findAll() {

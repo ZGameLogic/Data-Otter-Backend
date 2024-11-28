@@ -25,11 +25,34 @@ public abstract class DynamicRepository<T, ID, R extends JpaRepository<T, ID>> {
         this.primaryVoidCache = new ArrayList<>();
     }
 
-    protected void execute(VoidRepositoryOperation<R> operation) {
-        execute(operation, false);
+    public T save(T entity) {
+        return executeWithFallback(repo -> repo.save(entity));
     }
 
-    protected void execute(VoidRepositoryOperation<R> operation, boolean cache) {
+    protected void executeOnBothVoid(VoidRepositoryOperation<R> operation) {
+        executeOnBothVoid(operation, false);
+    }
+
+    protected void executeOnBothVoid(VoidRepositoryOperation<R> operation, boolean cache) {
+        if(!databaseConnectionService.isDatabaseConnected()){
+            if(cache) primaryVoidCache.add(operation);
+            operation.execute(backupRepository);
+        } else {
+            try {
+                operation.execute(primaryRepository);
+            } catch (Exception e) {
+                databaseConnectionService.setDatabaseConnected(false);
+                if(cache) primaryVoidCache.add(operation);
+            }
+            operation.execute(backupRepository);
+        }
+    }
+
+    protected void executeWithFallbackVoid(VoidRepositoryOperation<R> operation) {
+        executeWithFallbackVoid(operation, false);
+    }
+
+    protected void executeWithFallbackVoid(VoidRepositoryOperation<R> operation, boolean cache) {
         try {
             if(databaseConnectionService.isDatabaseConnected()){
                 operation.execute(primaryRepository);

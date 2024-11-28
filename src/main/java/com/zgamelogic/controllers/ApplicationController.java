@@ -2,11 +2,11 @@ package com.zgamelogic.controllers;
 
 import com.zgamelogic.data.components.DynamicApplicationRepository;
 import com.zgamelogic.data.components.DynamicMonitorStatusRepository;
+import com.zgamelogic.data.components.DynamicNodeMonitorReportRepository;
+import com.zgamelogic.data.components.DynamicTagRepository;
 import com.zgamelogic.data.entities.Application;
 import com.zgamelogic.data.serialization.ApplicationMonitorStatus;
 import com.zgamelogic.data.entities.MonitorStatus;
-import com.zgamelogic.data.repositories.NodeMonitorReportRepository;
-import com.zgamelogic.data.repositories.TagRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,10 +22,10 @@ public class ApplicationController {
 
     private final DynamicApplicationRepository applicationRepository;
     private final DynamicMonitorStatusRepository monitorStatusRepository;
-    private final NodeMonitorReportRepository nodeMonitorReportRepository;
-    private final TagRepository tagRepository;
+    private final DynamicNodeMonitorReportRepository nodeMonitorReportRepository;
+    private final DynamicTagRepository tagRepository;
 
-    public ApplicationController(DynamicApplicationRepository applicationRepository, DynamicMonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, TagRepository tagRepository) {
+    public ApplicationController(DynamicApplicationRepository applicationRepository, DynamicMonitorStatusRepository monitorStatusRepository, DynamicNodeMonitorReportRepository nodeMonitorReportRepository, DynamicTagRepository tagRepository) {
         this.applicationRepository = applicationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
         this.nodeMonitorReportRepository = nodeMonitorReportRepository;
