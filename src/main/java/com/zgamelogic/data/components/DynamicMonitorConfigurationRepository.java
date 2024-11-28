@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class DynamicMonitorConfigurationRepository extends DynamicRepository<MonitorConfiguration, Long, MonitorConfigurationRepository> {
+public class DynamicMonitorConfigurationRepository extends DynamicRepository<MonitorConfiguration, MonitorConfiguration.MonitorConfigurationId, MonitorConfigurationRepository> {
 
     protected DynamicMonitorConfigurationRepository(PrimaryMonitorConfigurationRepository primaryRepository, BackupMonitorConfigurationRepository backupRepository, DatabaseConnectionService databaseConnectionService) {
         super(primaryRepository, backupRepository, databaseConnectionService);

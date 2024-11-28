@@ -7,6 +7,8 @@ import com.zgamelogic.data.repositories.primary.PrimaryNodeConfigurationReposito
 import com.zgamelogic.services.DatabaseConnectionService;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 public class DynamicNodeConfigurationRepository extends DynamicRepository<NodeConfiguration, Long, NodeConfigurationRepository>{
     public DynamicNodeConfigurationRepository(PrimaryNodeConfigurationRepository primaryRepository, BackupNodeConfigurationRepository backupRepository, DatabaseConnectionService databaseConnectionService) {
@@ -19,5 +21,9 @@ public class DynamicNodeConfigurationRepository extends DynamicRepository<NodeCo
 
     public NodeConfiguration save(NodeConfiguration nodeConfiguration) {
         return executeWithFallback(repo -> repo.save(nodeConfiguration), true);
+    }
+
+    public Optional<NodeConfiguration> findByName(String masterNodeName) {
+        return executeWithFallback(repo -> repo.findByName(masterNodeName));
     }
 }

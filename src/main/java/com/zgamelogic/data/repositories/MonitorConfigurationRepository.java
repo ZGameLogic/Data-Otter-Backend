@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-public interface MonitorConfigurationRepository extends JpaRepository<MonitorConfiguration, Long> {
+public interface MonitorConfigurationRepository extends JpaRepository<MonitorConfiguration, MonitorConfiguration.MonitorConfigurationId> {
     List<MonitorConfiguration> findAllByActiveIsTrue();
     Optional<MonitorConfiguration> findById_MonitorConfigurationIdAndId_Application_Id(Long id, Long applicationId);
     boolean existsById_MonitorConfigurationIdAndId_Application_Id(Long id, Long applicationId);

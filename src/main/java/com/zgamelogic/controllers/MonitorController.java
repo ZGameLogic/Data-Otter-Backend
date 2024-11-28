@@ -6,7 +6,6 @@ import com.zgamelogic.data.components.DynamicMonitorConfigurationRepository;
 import com.zgamelogic.data.components.DynamicMonitorStatusRepository;
 import com.zgamelogic.data.components.DynamicNodeMonitorReportRepository;
 import com.zgamelogic.data.entities.Application;
-import com.zgamelogic.data.repositories.ApplicationRepository;
 import com.zgamelogic.data.entities.MonitorConfiguration;
 import com.zgamelogic.data.serialization.MonitorConfigurationAndStatus;
 import com.zgamelogic.data.entities.MonitorStatus;
@@ -33,7 +32,7 @@ public class MonitorController {
     private final MonitorService monitorService;
     private final DynamicApplicationRepository applicationRepository;
 
-    public MonitorController(DynamicMonitorConfigurationRepository monitorConfigurationRepository, DynamicMonitorStatusRepository monitorStatusRepository, DynamicNodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService, App app, ApplicationRepository applicationRepository, DynamicApplicationRepository applicationRepository1) {
+    public MonitorController(DynamicMonitorConfigurationRepository monitorConfigurationRepository, DynamicMonitorStatusRepository monitorStatusRepository, DynamicNodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService, App app, DynamicApplicationRepository applicationRepository, DynamicApplicationRepository applicationRepository1) {
         this.monitorConfigurationRepository = monitorConfigurationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
         this.nodeMonitorReportRepository = nodeMonitorReportRepository;

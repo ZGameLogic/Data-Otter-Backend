@@ -55,7 +55,7 @@ public class NodeController {
     }
 
     @Bean("master-node")
-    public NodeConfiguration masterNode(NodeConfigurationRepository nodeConfigurationRepository) {
+    public NodeConfiguration masterNode() {
         Optional<NodeConfiguration> nodeConfig = nodeConfigurationRepository.findByName(MASTER_NODE_NAME);
         NodeConfiguration masterNode = nodeConfig.orElseGet(() -> nodeConfigurationRepository.save(new NodeConfiguration(MASTER_NODE_NAME)));
         log.info("Master node id: {}", masterNode.getId());
