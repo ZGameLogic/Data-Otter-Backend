@@ -31,7 +31,7 @@ public class Application {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "APPLICATION_TAGS",
+        name = "Application Tags",
         joinColumns = @JoinColumn(name = "application_id"),
         inverseJoinColumns = @JoinColumn(name = "tag_name")
     )

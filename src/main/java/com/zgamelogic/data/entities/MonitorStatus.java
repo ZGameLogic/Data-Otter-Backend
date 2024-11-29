@@ -12,7 +12,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Getter
 @ToString
-@Table(name = "status_history")
+@Table(name = "Status History")
 @JsonSerialize(using = MonitorStatusSerialization.class)
 public class MonitorStatus {
     @EmbeddedId

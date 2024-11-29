@@ -15,7 +15,7 @@ import java.io.IOException;
 @Getter
 @Setter
 @AllArgsConstructor
-@Table(name = "monitor_configurations")
+@Table(name = "Monitor Configurations")
 @ToString
 @JsonDeserialize(using = MonitorConfiguration.MonitorConfigurationDeserialization.class)
 @JsonSerialize(using = MonitorConfiguration.MonitorConfigurationSerialization.class)
@@ -29,7 +29,6 @@ public class MonitorConfiguration {
     private String url;
     private String regex;
     @Setter
-//    @Column(columnDefinition = "boolean default true")
     private boolean active;
 
     public MonitorConfiguration(long applicationId, String name, Type type, String url, String regex) {

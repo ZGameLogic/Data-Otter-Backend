@@ -19,7 +19,7 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "TAGS")
+@Table(name = "Tags")
 @JsonSerialize(using = Tag.TagSerializer.class)
 @JsonDeserialize(using = Tag.TagDeserializer.class)
 public class Tag {
