@@ -29,7 +29,7 @@ public class MonitorConfiguration {
     private String url;
     private String regex;
     @Setter
-    @Column(columnDefinition = "boolean default true")
+//    @Column(columnDefinition = "boolean default true")
     private boolean active;
 
     public MonitorConfiguration(long applicationId, String name, Type type, String url, String regex) {

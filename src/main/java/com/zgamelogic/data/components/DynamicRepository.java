@@ -26,7 +26,7 @@ public abstract class DynamicRepository<T, ID, R extends JpaRepository<T, ID>> {
     }
 
     public T save(T entity) {
-        return executeWithFallback(repo -> repo.save(entity));
+        return executeWithFallback(repo -> repo.save(entity), true);
     }
 
     protected void executeOnBothVoid(VoidRepositoryOperation<R> operation) {
