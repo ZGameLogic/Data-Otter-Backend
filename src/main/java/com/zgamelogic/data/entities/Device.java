@@ -13,7 +13,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @ToString
-@Table(name = "Devices")
+@Table(name = "APPLICATION")
 public class Device {
     @Id
     private String id;

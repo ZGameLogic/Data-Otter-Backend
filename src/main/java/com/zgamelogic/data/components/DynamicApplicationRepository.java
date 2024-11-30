@@ -16,11 +16,6 @@ public class DynamicApplicationRepository extends DynamicRepository<Application,
         super(primaryRepository, backupRepository, databaseConnectionService);
     }
 
-    public Application save(Application application) {
-        getBackupRepository().save(application);
-        return executeWithFallback(repo -> repo.save(application), true);
-    }
-
     public void deleteById(long applicationId) {
         executeWithFallbackVoid(repo -> repo.deleteById(applicationId), true);
     }

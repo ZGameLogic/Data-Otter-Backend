@@ -30,10 +30,6 @@ public class DynamicMonitorStatusRepository extends DynamicRepository<MonitorSta
         executeOnBothVoid(repo -> repo.deleteRecordsOlderThan(date), true);
     }
 
-    public MonitorStatus save(MonitorStatus monitorStatus) {
-        return executeOnBoth(repo -> repo.save(monitorStatus), true);
-    }
-
     public List<MonitorStatus> findByApplicationIdAndTopOneForEachMonitor(Long id) {
         return executeWithFallback(repo -> repo.findByApplicationIdAndTopOneForEachMonitor(id), false);
     }

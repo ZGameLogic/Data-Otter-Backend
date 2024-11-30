@@ -22,6 +22,7 @@ import java.util.Set;
 @Setter
 @JsonSerialize(using = Application.ApplicationSerializer.class)
 @JsonDeserialize(using = Application.ApplicationDeserializer.class)
+@Table(name = "APPLICATIONS")
 public class Application {
     @Id
     @GeneratedValue
@@ -31,7 +32,7 @@ public class Application {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "Application Tags",
+        name = "APPLICATION_TAGS",
         joinColumns = @JoinColumn(name = "application_id"),
         inverseJoinColumns = @JoinColumn(name = "tag_name")
     )

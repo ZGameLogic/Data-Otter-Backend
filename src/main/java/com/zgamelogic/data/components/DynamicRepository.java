@@ -26,7 +26,15 @@ public abstract class DynamicRepository<T, ID, R extends JpaRepository<T, ID>> {
     }
 
     public T save(T entity) {
-        return executeWithFallback(repo -> repo.save(entity), true);
+        try {
+            T saved = primaryRepository.save(entity);
+            backupRepository.save(saved);
+            return saved;
+        } catch(Exception e){
+            T saved = backupRepository.save(entity);
+            primaryCache.add(repo -> repo.save(saved));
+            return saved;
+        }
     }
 
     protected void executeOnBothVoid(VoidRepositoryOperation<R> operation) {
@@ -127,7 +135,7 @@ public abstract class DynamicRepository<T, ID, R extends JpaRepository<T, ID>> {
         primaryCache.clear();
     }
 
-    protected interface RepositoryOperation<R, U> {
+    protected interface RepositoryOperation<R extends JpaRepository, U> {
         U execute(R repository);
     }
 

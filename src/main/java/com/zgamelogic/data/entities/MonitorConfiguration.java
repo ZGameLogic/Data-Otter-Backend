@@ -15,7 +15,7 @@ import java.io.IOException;
 @Getter
 @Setter
 @AllArgsConstructor
-@Table(name = "Monitor Configurations")
+@Table(name = "MONITOR_CONFIGURATIONS")
 @ToString
 @JsonDeserialize(using = MonitorConfiguration.MonitorConfigurationDeserialization.class)
 @JsonSerialize(using = MonitorConfiguration.MonitorConfigurationSerialization.class)

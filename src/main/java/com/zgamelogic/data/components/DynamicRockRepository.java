@@ -16,10 +16,6 @@ public class DynamicRockRepository extends DynamicRepository<Rock, Rock.RockId, 
         super(primaryRepository, backupRepository, databaseConnectionService);
     }
 
-    public Rock save(Rock rock) {
-        return executeOnBoth(repo -> repo.save(rock));
-    }
-
     public Page<Rock> findAllById_Application_IdOrderById_DateDesc(long appId, Pageable pageable) {
         return executeWithFallback(repo -> repo.findAllById_Application_IdOrderById_DateDesc(appId, pageable));
     }

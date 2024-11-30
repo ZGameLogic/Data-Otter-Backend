@@ -19,10 +19,6 @@ public class DynamicDeviceRepository extends DynamicRepository<Device, String, D
         return executeWithFallback(DeviceRepository::findAll, false);
     }
 
-    public Device save(Device device) {
-        return executeOnBoth(repo -> repo.save(device), true);
-    }
-
     public void deleteById(String deviceId) {
         executeWithFallbackVoid(repo -> repo.deleteById(deviceId));
     }

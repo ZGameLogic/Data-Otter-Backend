@@ -17,7 +17,7 @@ import java.util.Date;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "Rocks")
+@Table(name = "ROCKS")
 @JsonSerialize(using = Rock.RockSerializer.class)
 public class Rock {
     @EmbeddedId

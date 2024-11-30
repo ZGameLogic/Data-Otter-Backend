@@ -19,10 +19,6 @@ public class DynamicNodeConfigurationRepository extends DynamicRepository<NodeCo
         return executeWithFallback(repo -> repo.existsById(nodeId));
     }
 
-    public NodeConfiguration save(NodeConfiguration nodeConfiguration) {
-        return executeWithFallback(repo -> repo.save(nodeConfiguration), true);
-    }
-
     public Optional<NodeConfiguration> findByName(String masterNodeName) {
         return executeWithFallback(repo -> repo.findByName(masterNodeName));
     }

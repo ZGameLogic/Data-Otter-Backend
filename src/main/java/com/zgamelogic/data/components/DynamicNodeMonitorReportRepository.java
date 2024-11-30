@@ -28,10 +28,6 @@ public class DynamicNodeMonitorReportRepository extends DynamicRepository<NodeMo
         executeOnBothVoid(CrudRepository::deleteAll, true);
     }
 
-    public NodeMonitorReport save(NodeMonitorReport nodeMonitorReport) {
-        return executeOnBoth(repo -> repo.save(nodeMonitorReport), true);
-    }
-
     public List<NodeMonitorReport> findAllById_Monitor_Id_MonitorConfigurationId(Long monitorConfigurationId) {
         return executeWithFallback(repo -> repo.findAllById_Monitor_Id_MonitorConfigurationId(monitorConfigurationId));
     }

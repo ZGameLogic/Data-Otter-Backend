@@ -10,6 +10,14 @@ Content-Type: application/json
 
 {
   "name": "Test Application",
+  "description": "This is a fun test application"
+}
+### Create a new application with tags
+POST {{base_url}}/applications
+Content-Type: application/json
+
+{
+  "name": "Test Application",
   "description": "This is a fun test application",
   "tags": ["kubernetes", {
     "name": "Bep",

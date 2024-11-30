@@ -17,10 +17,6 @@ public class DynamicMonitorConfigurationRepository extends DynamicRepository<Mon
         super(primaryRepository, backupRepository, databaseConnectionService);
     }
 
-    public MonitorConfiguration save(MonitorConfiguration monitorConfiguration) {
-        return executeOnBoth(repo -> repo.save(monitorConfiguration));
-    }
-
     public Optional<MonitorConfiguration> findById_MonitorConfigurationIdAndId_Application_Id(Long monitorConfigurationId, long appId) {
         return executeWithFallback(repo -> repo.findById_MonitorConfigurationIdAndId_Application_Id(monitorConfigurationId, appId), false);
     }

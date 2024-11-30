@@ -10,7 +10,7 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-@Table(name = "Node Reports")
+@Table(name = "NODE_REPORTS")
 public class NodeMonitorReport {
     @EmbeddedId
     @JsonIgnore
