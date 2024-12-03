@@ -5,12 +5,14 @@ import com.zgamelogic.data.repositories.ApplicationRepository;
 import com.zgamelogic.data.repositories.backup.BackupApplicationRepository;
 import com.zgamelogic.data.repositories.primary.PrimaryApplicationRepository;
 import com.zgamelogic.services.DatabaseConnectionService;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
 @Component
+@DependsOn("dynamicTagRepository")
 public class DynamicApplicationRepository extends DynamicRepository<Application, Long, ApplicationRepository> {
     protected DynamicApplicationRepository(PrimaryApplicationRepository primaryRepository, BackupApplicationRepository backupRepository, DatabaseConnectionService databaseConnectionService) {
         super(primaryRepository, backupRepository, databaseConnectionService);

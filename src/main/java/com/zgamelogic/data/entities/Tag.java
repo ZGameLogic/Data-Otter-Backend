@@ -27,7 +27,7 @@ public class Tag {
     private String name;
     private String description;
 
-    @ManyToMany(mappedBy = "tags")
+    @ManyToMany(mappedBy = "tags", cascade = CascadeType.REMOVE)
     private Set<Application> applications;
 
     public Tag(String name){

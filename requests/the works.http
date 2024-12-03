@@ -1,0 +1,11 @@
+### Get Health
+GET {{base_url}}/health
+
+### Create basic application
+POST {{base_url}}/applications
+Content-Type: application/json
+
+{
+  "description": "This is a fun test application",
+  "name": "Test Application"
+}

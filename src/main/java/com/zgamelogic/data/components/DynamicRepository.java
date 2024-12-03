@@ -23,6 +23,7 @@ public abstract class DynamicRepository<T, ID, R extends JpaRepository<T, ID>> {
         this.databaseConnectionService = databaseConnectionService;
         this.primaryCache = new ArrayList<>();
         this.primaryVoidCache = new ArrayList<>();
+        syncPrimaryToBackup();
     }
 
     public T save(T entity) {
@@ -133,6 +134,11 @@ public abstract class DynamicRepository<T, ID, R extends JpaRepository<T, ID>> {
         }
         primaryVoidCache.clear();
         primaryCache.clear();
+    }
+
+    protected void syncPrimaryToBackup() {
+        backupRepository.deleteAll();
+        backupRepository.saveAll(primaryRepository.findAll());
     }
 
     protected interface RepositoryOperation<R extends JpaRepository, U> {
