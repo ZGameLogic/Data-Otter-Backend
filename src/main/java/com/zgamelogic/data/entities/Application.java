@@ -25,7 +25,7 @@ import java.util.Set;
 @Table(name = "APPLICATIONS")
 public class Application {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String description;
