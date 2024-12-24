@@ -1,16 +1,23 @@
-GET http://localhost:8080/monitors
+@monitor_id = 102
+@application_id = 1
+
+GET {{base_url}}/monitors/{{application_id}}?include-status=true
 ###
-GET http://localhost:8080/monitors/1
+GET {{base_url}}/monitors/{{application_id}}
 ###
-GET http://localhost:8080/monitors?include-status=true
+GET {{base_url}}/monitors?include-status=true
 ###
-GET http://localhost:8080/monitors/1?include-status=true
+GET {{base_url}}/monitors/{{monitor_id}}?include-status=true
 ###
-GET http://localhost:8080/monitors/1/history
+GET {{base_url}}/monitors/{{application_id}}/{{monitor_id}}
 ###
-GET http://localhost:8080/monitors/1/history?condensed=true
+DELETE {{base_url}}/monitors/{{monitor_id}}
 ###
-POST http://localhost:8080/monitors
+GET {{base_url}}/monitors/1/history?condensed=true
+###
+POST {{base_url}}/monitors/{{monitor_id}}/active/true
+###
+POST {{base_url}}/monitors/{{application_id}}
 Content-Type: application/json
 
 {
@@ -20,7 +27,7 @@ Content-Type: application/json
     "regex": "Healthy"
 }
 ###
-POST http://localhost:8080/monitors/test
+POST {{base_url}}/monitors/test
 Content-Type: application/json
 
 {
@@ -30,13 +37,11 @@ Content-Type: application/json
   "regex": "Healthy"
 }
 ###
-@put_id = 1
-PUT http://localhost:8080/monitors/{{put_id}}
+PUT {{base_url}}/monitors/{{application_id}}/{{monitor_id}}
 Content-Type: application/json
 
 {
   "name": "Ben"
 }
 ###
-@delete_id = 1
-DELETE http://localhost:8080/monitors/{{delete_id}}
+DELETE {{base_url}}/monitors/{{monitor_id}}

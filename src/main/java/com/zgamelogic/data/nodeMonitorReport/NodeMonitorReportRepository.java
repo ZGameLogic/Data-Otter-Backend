@@ -6,10 +6,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public interface NodeMonitorReportRepository extends JpaRepository<NodeMonitorReport, NodeMonitorReportId> {
+public interface NodeMonitorReportRepository extends JpaRepository<NodeMonitorReport, NodeMonitorReport.NodeMonitorReportId> {
     @Modifying
     @Transactional
-    void deleteAllById_MonitorId(long monitorId);
+    void deleteAllById_monitor_id_monitorConfigurationId(long monitorId);
+    @Modifying
+    @Transactional
+    void deleteAllById_Monitor_Id_Application_Id(long applicationId);
 
-    List<NodeMonitorReport> findAllById_MonitorId(long monitorId);
+    List<NodeMonitorReport> findAllById_Monitor_Id_MonitorConfigurationId(long monitorId);
 }

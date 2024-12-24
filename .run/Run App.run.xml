@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run App" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <option name="SCHEDULED_DEBUGGER" value="true" />
+    <module name="Monitors" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.zgamelogic.App" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.zgamelogic.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

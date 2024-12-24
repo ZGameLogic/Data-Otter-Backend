@@ -1,0 +1,22 @@
+@monitor_id = 503
+@application_id = 1
+@node_id = 2
+
+### register node
+POST {{base_url}}/nodes
+Content-Type: application/json
+
+{
+  "name": "test node"
+}
+
+### Send report
+POST {{base_url}}/nodes/{{node_id}}/report/{{monitor_id}}
+Content-Type: application/json
+
+{
+  "milliseconds": 33,
+  "status": true,
+  "attempts": 2,
+  "statusCode": 200
+}

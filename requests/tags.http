@@ -1,0 +1,8 @@
+@application_id = 1
+@tag_id = Kubernetes
+
+### Get tags
+GET {{base_url}}/tags
+
+### Delete tag
+DELETE {{base_url}}/tags/Bep

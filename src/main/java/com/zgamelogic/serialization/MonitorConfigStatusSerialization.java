@@ -3,7 +3,6 @@ package com.zgamelogic.serialization;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.zgamelogic.data.groupConfiguration.MonitorGroup;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationAndStatus;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,7 +14,8 @@ public class MonitorConfigStatusSerialization extends JsonSerializer<MonitorConf
     @Override
     public void serialize(MonitorConfigurationAndStatus data, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeStartObject();
-        jsonGenerator.writeNumberField("id", data.monitorConfiguration().getId());
+        jsonGenerator.writeNumberField("monitor id", data.monitorConfiguration().getId().getMonitorConfigurationId());
+        jsonGenerator.writeNumberField("application id", data.monitorConfiguration().getId().getApplication().getId());
         jsonGenerator.writeStringField("name", data.monitorConfiguration().getName());
         jsonGenerator.writeStringField("type", data.monitorConfiguration().getType().name());
         jsonGenerator.writeStringField("url", data.monitorConfiguration().getUrl());
@@ -31,13 +31,6 @@ public class MonitorConfigStatusSerialization extends JsonSerializer<MonitorConf
             jsonGenerator.writeNumberField("status code", data.monitorStatus().getStatusCode());
             jsonGenerator.writeEndObject();
         }
-        jsonGenerator.writeArrayFieldStart("groups");
-        if(data.monitorConfiguration().getGroups() != null){
-            for(MonitorGroup group: data.monitorConfiguration().getGroups()){
-                jsonGenerator.writeNumber(group.getId());
-            }
-        }
-        jsonGenerator.writeEndArray();
         jsonGenerator.writeEndObject();
     }
 }

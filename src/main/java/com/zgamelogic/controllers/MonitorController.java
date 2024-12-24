@@ -1,7 +1,8 @@
 package com.zgamelogic.controllers;
 
-import com.zgamelogic.data.groupConfiguration.MonitorGroup;
-import com.zgamelogic.data.groupConfiguration.MonitorGroupRepository;
+import com.zgamelogic.App;
+import com.zgamelogic.data.application.Application;
+import com.zgamelogic.data.application.ApplicationRepository;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationAndStatus;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
@@ -28,28 +29,28 @@ public class MonitorController {
     private final MonitorConfigurationRepository monitorConfigurationRepository;
     private final MonitorStatusRepository monitorStatusRepository;
     private final NodeMonitorReportRepository nodeMonitorReportRepository;
-    private final MonitorGroupRepository monitorGroupRepository;
     private final MonitorService monitorService;
+    private final ApplicationRepository applicationRepository;
 
-    public MonitorController(MonitorConfigurationRepository monitorConfigurationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, MonitorGroupRepository monitorGroupRepository, MonitorService monitorService) {
+    public MonitorController(MonitorConfigurationRepository monitorConfigurationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService, App app, ApplicationRepository applicationRepository, ApplicationRepository applicationRepository1) {
         this.monitorConfigurationRepository = monitorConfigurationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
         this.nodeMonitorReportRepository = nodeMonitorReportRepository;
-        this.monitorGroupRepository = monitorGroupRepository;
         this.monitorService = monitorService;
+        this.applicationRepository = applicationRepository1;
     }
 
-    @PostMapping("monitors")
-    private ResponseEntity<?> createMonitor(@RequestBody MonitorConfiguration monitorConfiguration) throws ExecutionException, InterruptedException {
+    @PostMapping("monitors/{appId}")
+    private ResponseEntity<?> createMonitor(
+            @PathVariable long appId,
+            @RequestBody MonitorConfiguration monitorConfiguration
+    ) throws ExecutionException, InterruptedException {
+        if(!applicationRepository.existsById(appId)) return ResponseEntity.notFound().build();
         MonitorStatusReport status = monitorService.getMonitorStatus(monitorConfiguration).get();
         if(!status.status()) return ResponseEntity.status(400).body(status);
-        if(monitorConfiguration.getGroups() != null) {
-            List<MonitorGroup> groups = monitorGroupRepository.findAllById(monitorConfiguration.getGroups().stream().map(MonitorGroup::getId).toList());
-            groups.forEach(group -> group.getMonitors().add(monitorConfiguration));
-            monitorConfiguration.setGroups(groups);
-        }
+        monitorConfiguration.getId().setApplication(new Application(appId));
         MonitorConfiguration m = monitorConfigurationRepository.save(monitorConfiguration);
-        return ResponseEntity.ok(m);
+        return ResponseEntity.ok(monitorConfigurationRepository.findById_MonitorConfigurationIdAndId_Application_Id(m.getId().getMonitorConfigurationId(), appId).get());
     }
 
     @PostMapping("monitors/test")
@@ -60,15 +61,25 @@ public class MonitorController {
     }
 
     @GetMapping("monitors")
+    private ResponseEntity<List<MonitorConfigurationAndStatus>> getAllMonitorsNoAppId(
+            @RequestParam(required = false, name = "include-status") Boolean includeStatus,
+            @RequestParam(required = false, name = "active") Boolean activeOnly
+    ) {
+        return getAllMonitors(null, includeStatus, activeOnly);
+    }
+
+    @GetMapping("monitors/{appId}")
     private ResponseEntity<List<MonitorConfigurationAndStatus>> getAllMonitors(
+            @PathVariable Long appId,
             @RequestParam(required = false, name = "include-status") Boolean includeStatus,
             @RequestParam(required = false, name = "active") Boolean activeOnly
     ) {
         List<MonitorConfigurationAndStatus> payload = new ArrayList<>();
         List<MonitorConfiguration> configurations = activeOnly != null && activeOnly ? monitorConfigurationRepository.findAllByActiveIsTrue() : monitorConfigurationRepository.findAll();
+        if(appId != null) configurations.removeIf(app -> app.getId().getApplication().getId() != appId.longValue());
         configurations.forEach(monitorConfiguration -> {
             if(includeStatus != null && includeStatus) {
-                Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTop1ById_MonitorIdOrderById_DateDesc(monitorConfiguration.getId());
+                Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_Date(monitorConfiguration.getId().getMonitorConfigurationId(), monitorConfiguration.getId().getApplication().getId());
                 payload.add(new MonitorConfigurationAndStatus(
                         monitorConfiguration,
                         mostRecentStatus.orElse(null)
@@ -80,20 +91,21 @@ public class MonitorController {
                 ));
             }
         });
-        List<MonitorConfigurationAndStatus> sortedPayload = payload.stream().sorted(Comparator.comparing(c -> c.monitorConfiguration().getId())).toList();
+        List<MonitorConfigurationAndStatus> sortedPayload = payload.stream().sorted(Comparator.comparing(c -> c.monitorConfiguration().getId().getMonitorConfigurationId())).toList();
         return ResponseEntity.ok(sortedPayload);
     }
 
-    @GetMapping("monitors/{id}")
+    @GetMapping("monitors/{appId}/{id}")
     private ResponseEntity<MonitorConfigurationAndStatus> getMonitorStatus(
             @PathVariable long id,
+            @PathVariable long appId,
             @RequestParam(required = false, name = "include-status") Boolean includeStatus
     ) {
-        Optional<MonitorConfiguration> oMonitor = monitorConfigurationRepository.findById(id);
+        Optional<MonitorConfiguration> oMonitor = monitorConfigurationRepository.findById_MonitorConfigurationIdAndId_Application_Id(id, appId);
         if(oMonitor.isEmpty()) return ResponseEntity.notFound().build();
         MonitorConfiguration monitor = oMonitor.get();
         if(includeStatus != null && includeStatus) {
-            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTop1ById_MonitorIdOrderById_DateDesc(id);
+            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_Date(id, appId);
             MonitorConfigurationAndStatus payload = new MonitorConfigurationAndStatus(
                     monitor,
                     mostRecentStatus.orElse(null)
@@ -107,30 +119,32 @@ public class MonitorController {
         }
     }
 
-    @DeleteMapping("monitors/{id}")
-    private ResponseEntity<?> deleteMonitor(@PathVariable long id) {
-        if(!monitorConfigurationRepository.existsById(id)) return ResponseEntity.notFound().build();
-        monitorStatusRepository.deleteAllById_MonitorId(id);
-        nodeMonitorReportRepository.deleteAllById_MonitorId(id);
-        monitorConfigurationRepository.deleteById(id);
+    @DeleteMapping("monitors/{appId}/{id}")
+    private ResponseEntity<?> deleteMonitor(@PathVariable long appId, @PathVariable long id) {
+        if(!monitorConfigurationRepository.existsById_MonitorConfigurationIdAndId_Application_Id(id, appId)) return ResponseEntity.notFound().build();
+        monitorStatusRepository.deleteAllById_monitor_id_monitorConfigurationIdAndId_Monitor_Id_Application_Id(id, appId);
+        nodeMonitorReportRepository.deleteAllById_monitor_id_monitorConfigurationId(id);
+        monitorConfigurationRepository.deleteById_MonitorConfigurationId(id);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("monitors/{id}")
+    @PutMapping("monitors/{appId}/{id}")
     private ResponseEntity<MonitorConfiguration> updateMonitor(
             @PathVariable long id,
+            @PathVariable long appId,
             @RequestBody MonitorConfiguration updatedConfiguration
     ) {
-        if(!monitorConfigurationRepository.existsById(id)) return ResponseEntity.notFound().build();
-        MonitorConfiguration original  = monitorConfigurationRepository.findById(id).get();
+        if(!monitorConfigurationRepository.existsById_MonitorConfigurationIdAndId_Application_Id(id, appId)) return ResponseEntity.notFound().build();
+        MonitorConfiguration original  = monitorConfigurationRepository.findById_MonitorConfigurationIdAndId_Application_Id(id, appId).get();
         original.update(updatedConfiguration);
         MonitorConfiguration saved = monitorConfigurationRepository.save(original);
         return ResponseEntity.ok(saved);
     }
 
-    @GetMapping("monitors/{id}/history")
+    @GetMapping("monitors/{appId}/{id}/history")
     private ResponseEntity<List<MonitorStatus>> getMonitorHistory(
             @PathVariable long id,
+            @PathVariable long appId,
             @RequestParam(required = false)
             @DateTimeFormat(pattern = "MM-dd-yyyy HH:mm:ss")
             Date start,
@@ -140,10 +154,10 @@ public class MonitorController {
             @RequestParam(required = false)
             Boolean condensed
     ) {
-        if(!monitorConfigurationRepository.existsById(id)) return ResponseEntity.notFound().build();
+        if(!monitorConfigurationRepository.existsById_MonitorConfigurationIdAndId_Application_Id(id, appId)) return ResponseEntity.notFound().build();
         if (end == null) end = new Date();
         if (start == null) start = Date.from(end.toInstant().minus(7, ChronoUnit.DAYS));
-        List<MonitorStatus> history = monitorStatusRepository.findByMonitorIdAndDateBetween(id, start, end);
+        List<MonitorStatus> history = monitorStatusRepository.findByMonitorIdAndDateBetween(id, start, end, appId);
         if(condensed != null && condensed && !history.isEmpty()) {
             List<Integer> changeIndices = IntStream.range(0, history.size())
                     .filter(
@@ -162,42 +176,14 @@ public class MonitorController {
         return ResponseEntity.ok(history);
     }
 
-    @PostMapping("monitors/{monitorId}/group/{groupId}")
-    public ResponseEntity<MonitorGroup> addToGroup(
-            @PathVariable Long monitorId,
-            @PathVariable Long groupId
-    ){
-        Optional<MonitorGroup> group = monitorGroupRepository.findById(groupId);
-        if(group.isEmpty()) return ResponseEntity.badRequest().build();
-        Optional<MonitorConfiguration> configuration = monitorConfigurationRepository.findById(monitorId);
-        if(configuration.isEmpty()) return ResponseEntity.badRequest().build();
-        group.get().getMonitors().add(configuration.get());
-        MonitorGroup savedGroup = monitorGroupRepository.save(group.get());
-        return ResponseEntity.ok(savedGroup);
-    }
-
-    @PostMapping("monitors/{monitorId}/active/{active}")
-    public ResponseEntity<?> disableMonitor(@PathVariable long monitorId, @PathVariable boolean active){
-        Optional<MonitorConfiguration> configuration = monitorConfigurationRepository.findById(monitorId);
+    @PostMapping("monitors/{appId}/{monitorId}/active/{active}")
+    public ResponseEntity<?> disableMonitor(@PathVariable long monitorId, @PathVariable long appId, @PathVariable boolean active){
+        Optional<MonitorConfiguration> configuration = monitorConfigurationRepository.findById_MonitorConfigurationIdAndId_Application_Id(monitorId, appId);
         if(configuration.isEmpty()) return ResponseEntity.badRequest().build();
         configuration.get().setActive(active);
         monitorConfigurationRepository.save(configuration.get());
-        nodeMonitorReportRepository.deleteAllById_MonitorId(monitorId);
+        nodeMonitorReportRepository.deleteAllById_monitor_id_monitorConfigurationId(monitorId);
         return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("monitors/{monitorId}/group/{groupId}")
-    public ResponseEntity<MonitorGroup> removeFromGroup(
-            @PathVariable Long monitorId,
-            @PathVariable Long groupId
-    ){
-        Optional<MonitorGroup> group = monitorGroupRepository.findById(groupId);
-        if(group.isEmpty()) return ResponseEntity.badRequest().build();
-        Optional<MonitorConfiguration> configuration = monitorConfigurationRepository.findById(monitorId);
-        if(configuration.isEmpty()) return ResponseEntity.badRequest().build();
-        group.get().getMonitors().remove(configuration.get());
-        MonitorGroup savedGroup = monitorGroupRepository.save(group.get());
-        return ResponseEntity.ok(savedGroup);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

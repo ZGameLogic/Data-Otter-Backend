@@ -1,0 +1,27 @@
+@application_id = 1
+@include_status = true
+### Get all applications
+GET {{base_url}}/applications?include-status={{include_status}}
+### Get specific application
+GET {{base_url}}/applications/{{application_id}}?include-status={{include_status}}
+### Create a new application
+POST {{base_url}}/applications
+Content-Type: application/json
+
+{
+  "name": "Test Application",
+  "description": "This is a fun test application",
+  "tags": ["kubernetes", {
+    "name": "Bep",
+    "description": "Another tag?!"
+  }]
+}
+### Update an existing application
+PUT {{base_url}}/applications/{{application_id}}
+Content-Type: application/json
+
+{
+  "description": "Crazy"
+}
+### Delete an application
+DELETE {{base_url}}/applications/{{application_id}}
