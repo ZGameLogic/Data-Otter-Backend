@@ -5,6 +5,7 @@ import com.zgamelogic.data.rock.Rock;
 import com.zgamelogic.data.rock.RockRepository;
 import com.zgamelogic.services.DataOtterWebsocketService;
 import com.zgamelogic.data.exceptions.UnauthorizedException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.Page;
@@ -16,9 +17,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("rocks")
 @PropertySource("File:./api.properties")
+@Slf4j
 public class RockController {
 
     private final DataOtterWebsocketService websocketService;
@@ -47,6 +51,12 @@ public class RockController {
         Rock rock = new Rock(appId, pebble);
         Rock saved = rockRepository.save(rock);
         return ResponseEntity.ok(saved);
+    }
+
+    @GetMapping("/stats")
+    private ResponseEntity<?> stats() {
+        List<Long> applicationIds = applicationRepository.findAllIds();
+        return ResponseEntity.ok(applicationRepository);
     }
 
     @GetMapping("/{appId}")
