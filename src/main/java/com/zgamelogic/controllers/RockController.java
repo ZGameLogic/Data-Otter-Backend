@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("rocks")
@@ -56,7 +58,12 @@ public class RockController {
     @GetMapping("/stats")
     private ResponseEntity<?> stats() {
         List<Long> applicationIds = applicationRepository.findAllIds();
-        return ResponseEntity.ok(applicationRepository);
+        Map<Long, Long> result = applicationIds.stream()
+        .collect(Collectors.toMap(
+                id -> id,
+                rockRepository::countAllById_Application_Id
+        ));
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{appId}")
