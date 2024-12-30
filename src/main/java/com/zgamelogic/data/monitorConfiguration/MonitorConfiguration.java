@@ -21,7 +21,7 @@ import java.io.IOException;
 @JsonDeserialize(using = MonitorConfiguration.MonitorConfigurationDeserialization.class)
 @JsonSerialize(using = MonitorConfiguration.MonitorConfigurationSerialization.class)
 public class MonitorConfiguration {
-    public enum Type { WEB, API }
+    public enum Type { WEB, API, DATABASE }
     @EmbeddedId
     private MonitorConfigurationId id;
     private String name;
