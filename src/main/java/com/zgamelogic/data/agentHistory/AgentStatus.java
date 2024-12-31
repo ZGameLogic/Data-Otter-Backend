@@ -17,6 +17,10 @@ public class AgentStatus {
     private long diskUsage;
     private String agentVersion;
 
+    public AgentStatus(AgentAPIStatus agentStatus){
+        
+    }
+
     public AgentStatus(long agentId, long memoryUsage, long cpuUsage, long diskUsage, String agentVersion) {
         this.memoryUsage = memoryUsage;
         this.cpuUsage = cpuUsage;

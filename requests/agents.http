@@ -1,0 +1,14 @@
+POST {{base_url}}/agent/register
+Content-Type: application/json
+
+{
+    "name": "test",
+    "os": "windows"
+}
+###
+POST {{base_url}}/agent/status
+Content-Type: application/json
+
+{
+
+}
