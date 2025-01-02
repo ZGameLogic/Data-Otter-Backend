@@ -6,10 +6,7 @@ import com.zgamelogic.data.agentHistory.AgentStatusRepository;
 import com.zgamelogic.data.agents.Agent;
 import com.zgamelogic.data.agents.AgentRepository;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class AgentController {
@@ -29,7 +26,13 @@ public class AgentController {
 
     @PostMapping("agent/{agentId}/status")
     public ResponseEntity<AgentStatus> status(@RequestBody AgentAPIStatus status, @PathVariable long agentId) {
-        AgentStatus saved = agentStatusRepository.save(status);
+        AgentStatus saved = agentStatusRepository.save(new AgentStatus(agentId, status));
         return ResponseEntity.ok(saved);
+    }
+
+    @GetMapping("agent/{agentId}")
+    public ResponseEntity<Agent> getStatus(@PathVariable long agentId) {
+        if(!agentRepository.existsById(agentId)) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(agentRepository.findById(agentId).get());
     }
 }
