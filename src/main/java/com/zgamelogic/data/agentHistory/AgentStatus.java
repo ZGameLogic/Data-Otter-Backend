@@ -25,7 +25,7 @@ public class AgentStatus {
     private long diskUsage;
     private String agentVersion;
 
-    public AgentStatus(long agentId, AgentAPIStatus agentStatus){
+    public AgentStatus(long agentId, AgentReport agentStatus){
         this(
             agentId,
             agentStatus.getMemoryUsage(),

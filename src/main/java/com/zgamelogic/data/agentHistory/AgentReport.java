@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class AgentAPIStatus {
+public class AgentReport {
     private long memoryUsage;
     private long cpuUsage;
     private long diskUsage;
