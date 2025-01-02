@@ -171,7 +171,17 @@ public class MonitorController {
                     .flatMap(idx -> Stream.of(history.get(idx)))
                     .distinct()
                     .toList();
+            if(condensedList.size() == 1) {
+                MonitorStatus first = condensedList.get(0).clone();
+                first.getId().setDate(start);
+                condensedList = List.of(first, condensedList.get(0));
+            }
             return ResponseEntity.ok(condensedList);
+        }
+        if(history.size() == 1) {
+            MonitorStatus first = history.get(0).clone();
+            first.getId().setDate(start);
+            return ResponseEntity.ok(List.of(first, history.get(0)));
         }
         return ResponseEntity.ok(history);
     }
