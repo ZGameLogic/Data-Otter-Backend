@@ -38,6 +38,7 @@ public class ApplicationController {
         List<Application> apps = applicationRepository.findAll();
         List<ApplicationMonitorStatus> appMonitorStatuses = new ArrayList<>();
         for(Application app : apps) {
+            log.info("Application monitoring gathering status for {}", app.getName());
             List<MonitorStatus> statuses = null;
             if(includeStatus != null && includeStatus){
                 statuses = monitorStatusRepository.findByApplicationIdAndTopOneForEachMonitor(app.getId());
