@@ -34,6 +34,7 @@ public class ApplicationController {
 
     @GetMapping
     public ResponseEntity<List<ApplicationMonitorStatus>> getApplications(@RequestParam(required = false, name = "include-status") Boolean includeStatus) {
+        log.info("Applications called");
         List<Application> apps = applicationRepository.findAll();
         List<ApplicationMonitorStatus> appMonitorStatuses = new ArrayList<>();
         for(Application app : apps) {
@@ -43,6 +44,7 @@ public class ApplicationController {
             }
             appMonitorStatuses.add(new ApplicationMonitorStatus(app, statuses));
         }
+        log.info("Applications returned");
         return ResponseEntity.ok(appMonitorStatuses);
     }
 
