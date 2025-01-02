@@ -34,18 +34,15 @@ public class ApplicationController {
 
     @GetMapping
     public ResponseEntity<List<ApplicationMonitorStatus>> getApplications(@RequestParam(required = false, name = "include-status") Boolean includeStatus) {
-        log.info("Applications called");
         List<Application> apps = applicationRepository.findAll();
         List<ApplicationMonitorStatus> appMonitorStatuses = new ArrayList<>();
         for(Application app : apps) {
-            log.info("Application monitoring gathering status for {}", app.getName());
             List<MonitorStatus> statuses = null;
             if(includeStatus != null && includeStatus){
                 statuses = monitorStatusRepository.findByApplicationIdAndTopOneForEachMonitor(app.getId());
             }
             appMonitorStatuses.add(new ApplicationMonitorStatus(app, statuses));
         }
-        log.info("Applications returned");
         return ResponseEntity.ok(appMonitorStatuses);
     }
 
