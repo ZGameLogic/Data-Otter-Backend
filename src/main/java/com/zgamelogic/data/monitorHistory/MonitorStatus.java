@@ -16,7 +16,7 @@ import java.util.Date;
 @ToString
 @Table(name = "status_history")
 @JsonSerialize(using = MonitorStatusSerialization.class)
-public class MonitorStatus {
+public class MonitorStatus implements Cloneable{
     @EmbeddedId
     private MonitorStatusId id;
     private long milliseconds;
@@ -60,6 +60,15 @@ public class MonitorStatus {
         this.statusCode = report.getStatusCode();
     }
 
+    @Override
+    public MonitorStatus clone() {
+        try {
+            return (MonitorStatus) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
+
     @Embeddable
     @Getter
     @NoArgsConstructor
@@ -75,6 +84,7 @@ public class MonitorStatus {
         })
         private MonitorConfiguration monitor;
 
+        @Setter
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         private Date date;
     }

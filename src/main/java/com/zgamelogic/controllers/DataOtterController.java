@@ -94,8 +94,11 @@ public class DataOtterController {
             }
             Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_Date(monitorStatus.getId().getMonitor().getId().getMonitorConfigurationId(), monitorStatus.getId().getMonitor().getId().getApplication().getId());
             mostRecentStatus.ifPresent(previousStatus -> {
-                if(previousStatus.isStatus() == monitorStatus.isStatus()) return;
-                changedMonitors.add(monitorStatus);
+                if(previousStatus.isStatus() != monitorStatus.isStatus()) {
+                    changedMonitors.add(monitorStatus);
+                } else {
+                    monitorStatusRepository.deleteById_Monitor_Id_Application_IdAndId_Monitor_Id_MonitorConfigurationIdAndId_Date(previousStatus.getId().getMonitor().getId().getApplication().getId(), previousStatus.getId().getMonitor().getId().getMonitorConfigurationId(), previousStatus.getId().getDate());
+                }
             });
             monitorStatusRepository.save(monitorStatus);
         });

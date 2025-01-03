@@ -1,5 +1,6 @@
 package com.zgamelogic.data.monitorHistory;
 
+import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -27,7 +28,7 @@ public interface MonitorStatusRepository extends JpaRepository<MonitorStatus, Mo
 
     @Modifying
     @Transactional
-    void deleteAllById_MonitorId(long monitorId);
+    void deleteById_Monitor_Id_Application_IdAndId_Monitor_Id_MonitorConfigurationIdAndId_Date(Long id_monitor_id_application_id, Long id_monitor_id_monitorConfigurationId, Date id_date);
 
     @Modifying
     @Transactional
