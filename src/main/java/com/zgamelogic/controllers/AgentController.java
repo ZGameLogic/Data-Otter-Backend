@@ -9,7 +9,12 @@ import com.zgamelogic.data.agents.AgentRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.Optional;
+
+import static com.zgamelogic.data.Constants.AGENT_STATUS_MISSING_MINUTE_COUNT;
 
 @RestController
 public class AgentController {
@@ -43,7 +48,7 @@ public class AgentController {
     public ResponseEntity<AgentWithLastStatus> getAgentStatus(@PathVariable long agentId) {
         if(!agentRepository.existsById(agentId)) return ResponseEntity.notFound().build();
         Agent agent = agentRepository.findById(agentId).get();
-        Optional<AgentStatus> status = agentStatusRepository.findTopById_Agent_IdOrderById_Date(agentId);
+        Optional<AgentStatus> status = agentStatusRepository.findFirstByIdAgentIdAndIdDateAfterOrderByIdDateAsc(agentId, Date.from(Instant.now().minus(AGENT_STATUS_MISSING_MINUTE_COUNT, ChronoUnit.MINUTES)));
         return status.map(
                 agentStatus -> ResponseEntity.ok(new AgentWithLastStatus(agentStatus, agent))
                 ).orElseGet(

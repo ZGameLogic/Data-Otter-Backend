@@ -17,4 +17,4 @@ Content-Type: application/json
   "agentVersion" : "12.3.4"
 }
 ### Get an agent status
-GET {{base_url}}/agent/1
+GET {{base_url}}/agent/1/status
