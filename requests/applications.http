@@ -1,5 +1,5 @@
 @application_id = 1
-@include_status = true
+@include_status = false
 ### Get all applications
 GET {{base_url}}/applications?include-status={{include_status}}
 ### Get specific application

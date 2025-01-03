@@ -7,11 +7,11 @@ import com.zgamelogic.data.monitorHistory.MonitorStatus;
 import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
 import com.zgamelogic.data.tags.TagRepository;
+import com.zgamelogic.services.CacheService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,27 +23,26 @@ public class ApplicationController {
     private final ApplicationRepository applicationRepository;
     private final MonitorStatusRepository monitorStatusRepository;
     private final NodeMonitorReportRepository nodeMonitorReportRepository;
+    private final CacheService cacheService;
     private final TagRepository tagRepository;
 
-    public ApplicationController(ApplicationRepository applicationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, TagRepository tagRepository) {
+    public ApplicationController(ApplicationRepository applicationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, CacheService cacheService, TagRepository tagRepository) {
         this.applicationRepository = applicationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
         this.nodeMonitorReportRepository = nodeMonitorReportRepository;
+        this.cacheService = cacheService;
         this.tagRepository = tagRepository;
     }
 
     @GetMapping
     public ResponseEntity<List<ApplicationMonitorStatus>> getApplications(@RequestParam(required = false, name = "include-status") Boolean includeStatus) {
-        List<Application> apps = applicationRepository.findAll();
-        List<ApplicationMonitorStatus> appMonitorStatuses = new ArrayList<>();
-        for(Application app : apps) {
-            List<MonitorStatus> statuses = null;
-            if(includeStatus != null && includeStatus){
-                statuses = monitorStatusRepository.findByApplicationIdAndTopOneForEachMonitor(app.getId());
-            }
-            appMonitorStatuses.add(new ApplicationMonitorStatus(app, statuses));
+        List<ApplicationMonitorStatus> statuses = cacheService.getAppMonitorStatuses();
+        if(!includeStatus) {
+            statuses = statuses.stream().map(
+                    status -> new ApplicationMonitorStatus(status.application(), null)
+            ).toList();
         }
-        return ResponseEntity.ok(appMonitorStatuses);
+        return ResponseEntity.ok(statuses);
     }
 
     @GetMapping("/{applicationId}")
