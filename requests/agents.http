@@ -1,0 +1,20 @@
+### Register an agent
+POST {{base_url}}/agent/register
+Content-Type: application/json
+
+{
+    "name": "test",
+    "os": "windows"
+}
+### Add an agent status
+POST {{base_url}}/agent/1/status
+Content-Type: application/json
+
+{
+  "memoryUsage": 15,
+  "cpuUsage": 12,
+  "diskUsage": 24,
+  "agentVersion" : "12.3.4"
+}
+### Get an agent status
+GET {{base_url}}/agent/1/status
