@@ -44,6 +44,13 @@ public class AgentController {
         return ResponseEntity.ok(agentRepository.findById(agentId).get());
     }
 
+    @DeleteMapping("agent/{agentId}")
+    public ResponseEntity<?> removeAgent(@PathVariable long agentId) {
+        if(!agentRepository.existsById(agentId)) return ResponseEntity.notFound().build();
+        agentRepository.deleteById(agentId);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("agent/{agentId}/status")
     public ResponseEntity<AgentWithLastStatus> getAgentStatus(@PathVariable long agentId) {
         if(!agentRepository.existsById(agentId)) return ResponseEntity.notFound().build();
