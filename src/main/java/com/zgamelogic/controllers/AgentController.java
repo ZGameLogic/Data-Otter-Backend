@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static com.zgamelogic.data.Constants.AGENT_STATUS_MISSING_MINUTE_COUNT;
@@ -42,6 +43,11 @@ public class AgentController {
     public ResponseEntity<Agent> getAgent(@PathVariable long agentId) {
         if(!agentRepository.existsById(agentId)) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(agentRepository.findById(agentId).get());
+    }
+
+    @GetMapping("agents")
+    public ResponseEntity<List<Agent>> getAgents() {
+        return ResponseEntity.ok(agentRepository.findAll());
     }
 
     @DeleteMapping("agent/{agentId}")
