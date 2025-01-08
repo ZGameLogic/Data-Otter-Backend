@@ -6,5 +6,5 @@ import java.util.Date;
 import java.util.Optional;
 
 public interface AgentStatusRepository extends JpaRepository<AgentStatus, AgentStatus.AgentStatusId> {
-    Optional<AgentStatus> findFirstByIdAgentIdAndIdDateAfterOrderByIdDateAsc(long id, Date date);
+    Optional<AgentStatus> findFirstByIdAgentIdAndIdDateAfterOrderByIdDateDesc(long id, Date date);
 }

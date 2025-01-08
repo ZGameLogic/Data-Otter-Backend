@@ -61,7 +61,7 @@ public class AgentController {
     public ResponseEntity<AgentWithLastStatus> getAgentStatus(@PathVariable long agentId) {
         if(!agentRepository.existsById(agentId)) return ResponseEntity.notFound().build();
         Agent agent = agentRepository.findById(agentId).get();
-        Optional<AgentStatus> status = agentStatusRepository.findFirstByIdAgentIdAndIdDateAfterOrderByIdDateAsc(agentId, Date.from(Instant.now().minus(AGENT_STATUS_MISSING_MINUTE_COUNT, ChronoUnit.MINUTES)));
+        Optional<AgentStatus> status = agentStatusRepository.findFirstByIdAgentIdAndIdDateAfterOrderByIdDateDesc(agentId, Date.from(Instant.now().minus(AGENT_STATUS_MISSING_MINUTE_COUNT, ChronoUnit.MINUTES)));
         return status.map(
                 agentStatus -> ResponseEntity.ok(new AgentWithLastStatus(agentStatus, agent))
                 ).orElseGet(
