@@ -1,5 +1,6 @@
 package com.zgamelogic.controllers;
 
+import com.zgamelogic.data.agentHistory.AgentStatusRepository;
 import com.zgamelogic.data.devices.DeviceRepository;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfigurationRepository;
 import com.zgamelogic.data.monitorHistory.MonitorStatus;
@@ -28,6 +29,7 @@ public class DataOtterController {
     private final NodeConfiguration masterNode;
     private final ApplePushNotificationService apns;
     private final DeviceRepository deviceRepository;
+    private final AgentStatusRepository agentStatusRepository;
 
     public DataOtterController(
             MonitorConfigurationRepository monitorConfigurationRepository,
@@ -36,7 +38,8 @@ public class DataOtterController {
             MonitorService monitorService,
             @Qualifier("master-node") NodeConfiguration masterNode,
             ApplePushNotificationService apns,
-            DeviceRepository deviceRepository
+            DeviceRepository deviceRepository,
+            AgentStatusRepository agentStatusRepository
     ) {
         this.monitorConfigurationRepository = monitorConfigurationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
@@ -45,6 +48,7 @@ public class DataOtterController {
         this.masterNode = masterNode;
         this.apns = apns;
         this.deviceRepository = deviceRepository;
+        this.agentStatusRepository = agentStatusRepository;
         log.info("Performing initial cleanup");
         cleanup();
         log.info("Cleanup completed");
@@ -69,6 +73,7 @@ public class DataOtterController {
         calendar.add(Calendar.DAY_OF_YEAR, -1);
         Date oneWeekAgo = calendar.getTime();
         monitorStatusRepository.deleteRecordsOlderThan(oneWeekAgo);
+        agentStatusRepository.deleteRecordsOlderThan(oneWeekAgo);
     }
 
     /**
