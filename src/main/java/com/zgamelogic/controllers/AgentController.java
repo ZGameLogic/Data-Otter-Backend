@@ -39,15 +39,19 @@ public class AgentController {
         return ResponseEntity.ok(saved);
     }
 
-    @GetMapping("agent/{agentId}")
-    public ResponseEntity<Agent> getAgent(@PathVariable long agentId) {
-        if(!agentRepository.existsById(agentId)) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(agentRepository.findById(agentId).get());
-    }
-
     @GetMapping("agents")
-    public ResponseEntity<List<Agent>> getAgents() {
-        return ResponseEntity.ok(agentRepository.findAll());
+    public ResponseEntity<List<AgentWithLastStatus>> getAgents(@RequestParam(required = false, name = "include-status") Boolean includeStatus) {
+        if(includeStatus == null || !includeStatus) return ResponseEntity.ok(agentRepository.findAll().stream().map(agent -> new AgentWithLastStatus(null, agent)).toList());
+        return ResponseEntity.ok(
+                agentRepository.findAll().stream().map(agent -> {
+                    Optional<AgentStatus> status = agentStatusRepository.findFirstByIdAgentIdAndIdDateAfterOrderByIdDateDesc(agent.getId(), Date.from(Instant.now().minus(AGENT_STATUS_MISSING_MINUTE_COUNT, ChronoUnit.MINUTES)));
+                    return status.map(
+                            agentStatus -> new AgentWithLastStatus(agentStatus, agent)
+                    ).orElseGet(
+                            () -> new AgentWithLastStatus(null, agent)
+                    );
+                }).toList()
+        );
     }
 
     @DeleteMapping("agent/{agentId}")
@@ -57,15 +61,19 @@ public class AgentController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("agent/{agentId}/status")
-    public ResponseEntity<AgentWithLastStatus> getAgentStatus(@PathVariable long agentId) {
+    @GetMapping("agent/{agentId}")
+    public ResponseEntity<AgentWithLastStatus> getAgentStatus(
+            @PathVariable long agentId,
+            @RequestParam(required = false, name = "include-status") Boolean includeStatus
+    ) {
         if(!agentRepository.existsById(agentId)) return ResponseEntity.notFound().build();
         Agent agent = agentRepository.findById(agentId).get();
+        if(!includeStatus) return ResponseEntity.ok(new AgentWithLastStatus(null, agent));
         Optional<AgentStatus> status = agentStatusRepository.findFirstByIdAgentIdAndIdDateAfterOrderByIdDateDesc(agentId, Date.from(Instant.now().minus(AGENT_STATUS_MISSING_MINUTE_COUNT, ChronoUnit.MINUTES)));
         return status.map(
                 agentStatus -> ResponseEntity.ok(new AgentWithLastStatus(agentStatus, agent))
                 ).orElseGet(
-                        () -> ResponseEntity.ok(new AgentWithLastStatus(null, agent)
-        ));
+                        () -> ResponseEntity.ok(new AgentWithLastStatus(null, agent))
+        );
     }
 }
