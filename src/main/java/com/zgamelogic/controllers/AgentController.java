@@ -6,6 +6,7 @@ import com.zgamelogic.data.agentHistory.AgentStatusRepository;
 import com.zgamelogic.data.agents.AgentWithLastStatus;
 import com.zgamelogic.data.agents.Agent;
 import com.zgamelogic.data.agents.AgentRepository;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,6 +38,22 @@ public class AgentController {
     public ResponseEntity<AgentStatus> status(@RequestBody AgentReport status, @PathVariable long agentId) {
         AgentStatus saved = agentStatusRepository.save(new AgentStatus(agentId, status));
         return ResponseEntity.ok(saved);
+    }
+
+    @GetMapping("agent/{agentId}/status/history")
+    public ResponseEntity<List<AgentStatus>> statusHistory(
+            @PathVariable long agentId,
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = "MM-dd-yyyy HH:mm:ss")
+            Date start,
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = "MM-dd-yyyy HH:mm:ss")
+            Date end
+    ){
+        if(!agentRepository.existsById(agentId)) return ResponseEntity.notFound().build();
+        if (end == null) end = new Date();
+        if (start == null) start = Date.from(end.toInstant().minus(7, ChronoUnit.DAYS));
+        return ResponseEntity.ok(agentStatusRepository.findByAgentIdAndDateBetween(agentId, start, end));
     }
 
     @GetMapping("agents")
