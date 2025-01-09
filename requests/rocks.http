@@ -13,3 +13,6 @@ api-key: 5
 ### Get rocks
 GET {{base_url}}/rocks/{{application_id}}?page=0
 api-key: 5
+
+### get stacks
+GET {{base_url}}/rocks/stats
