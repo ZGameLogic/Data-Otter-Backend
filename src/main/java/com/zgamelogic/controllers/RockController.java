@@ -4,18 +4,14 @@ import com.zgamelogic.data.application.ApplicationRepository;
 import com.zgamelogic.data.rock.Rock;
 import com.zgamelogic.data.rock.RockRepository;
 import com.zgamelogic.services.DataOtterWebsocketService;
-import com.zgamelogic.data.exceptions.UnauthorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.WebRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -77,14 +73,14 @@ public class RockController {
         return ResponseEntity.ok(rockRepository.findAllById_Application_IdOrderById_DateDesc(appId, pageable));
     }
 
-    @ModelAttribute
-    public void authenticate(WebRequest request, Model model) {
-        String apiKey = request.getHeader("api-key");
-        if (apiKey == null || !apiKey.equals(this.apiKey)) throw new UnauthorizedException();
-    }
-
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<?> handleUnauthorizedException() {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
+//    @ModelAttribute
+//    public void authenticate(WebRequest request, Model model) {
+//        String apiKey = request.getHeader("api-key");
+//        if (apiKey == null || !apiKey.equals(this.apiKey)) throw new UnauthorizedException();
+//    }
+//
+//    @ExceptionHandler(UnauthorizedException.class)
+//    public ResponseEntity<?> handleUnauthorizedException() {
+//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//    }
 }
