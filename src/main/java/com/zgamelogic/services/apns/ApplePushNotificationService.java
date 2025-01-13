@@ -36,7 +36,7 @@ public class ApplePushNotificationService {
         headers.add("apns-push-type", "alert");
         headers.add("apns-priority", "5");
         headers.add("apns-expiration", "0");
-        headers.add("apns-topic", "zgamelogic.Data-Otter");
+        headers.add("apns-topic", "zgamelogic.Monitors");
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
