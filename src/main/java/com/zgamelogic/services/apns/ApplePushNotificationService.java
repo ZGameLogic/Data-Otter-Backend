@@ -29,6 +29,8 @@ public class ApplePushNotificationService {
     @Value("${org_id}") private String orgId;
     @Value("${APN}")    private String apnEndpoint;
 
+    public void sendNotification()
+
     public void sendNotification(String device, ApplePushNotification notification){
         String url = apnEndpoint + "/3/device/" + device;
         HttpHeaders headers = new HttpHeaders();
