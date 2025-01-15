@@ -83,7 +83,7 @@ public class DataOtterController {
     public void minuteJobs(){
         List<MonitorStatus> changedMonitors = new ArrayList<>();
         monitorConfigurationRepository.findAllByActiveIsTrue().forEach(configuration -> {
-            List<NodeMonitorReport> reports = nodeMonitorReportRepository.findAllById_Monitor_Id_MonitorConfigurationId(configuration.getId().getMonitorConfigurationId());
+            List<NodeMonitorReport> reports = nodeMonitorReportRepository.findAllById_Monitor_Id_Application_IdAndId_Monitor_Id_MonitorConfigurationId(configuration.getId().getApplication().getId(), configuration.getId().getMonitorConfigurationId());
             if(reports.isEmpty()) return;
             MonitorStatus monitorStatus;
             if(reports.size() == 1){

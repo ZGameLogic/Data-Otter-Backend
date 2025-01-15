@@ -15,4 +15,5 @@ public interface NodeMonitorReportRepository extends JpaRepository<NodeMonitorRe
     void deleteAllById_Monitor_Id_Application_Id(long applicationId);
 
     List<NodeMonitorReport> findAllById_Monitor_Id_MonitorConfigurationId(long monitorId);
+    List<NodeMonitorReport> findAllById_Monitor_Id_Application_IdAndId_Monitor_Id_MonitorConfigurationId(long appId, long monitorId);
 }
