@@ -120,6 +120,6 @@ public class DataOtterController {
         }
         String body = changedMonitors.stream().map(monitor -> String.format("%s : %s", monitor.getId().getMonitor().getName(), monitor.isStatus() ? "up": "down")).collect(Collectors.joining("\n"));
         ApplePushNotification notification = new ApplePushNotification("Data Otter", subtitle, body);
-        deviceRepository.findAll().forEach(device -> apns.sendNotification(device.getId(), notification));
+//        deviceRepository.findAll().forEach(device -> apns.sendNotification(device.getId(), notification));
     }
 }
