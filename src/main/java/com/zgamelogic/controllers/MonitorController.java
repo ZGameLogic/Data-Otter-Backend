@@ -79,7 +79,7 @@ public class MonitorController {
         if(appId != null) configurations.removeIf(app -> app.getId().getApplication().getId() != appId.longValue());
         configurations.forEach(monitorConfiguration -> {
             if(includeStatus != null && includeStatus) {
-                Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_Date(monitorConfiguration.getId().getMonitorConfigurationId(), monitorConfiguration.getId().getApplication().getId());
+                Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_DateDesc(monitorConfiguration.getId().getMonitorConfigurationId(), monitorConfiguration.getId().getApplication().getId());
                 payload.add(new MonitorConfigurationAndStatus(
                         monitorConfiguration,
                         mostRecentStatus.orElse(null)
@@ -105,7 +105,7 @@ public class MonitorController {
         if(oMonitor.isEmpty()) return ResponseEntity.notFound().build();
         MonitorConfiguration monitor = oMonitor.get();
         if(includeStatus != null && includeStatus) {
-            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_Date(id, appId);
+            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_DateDesc(id, appId);
             MonitorConfigurationAndStatus payload = new MonitorConfigurationAndStatus(
                     monitor,
                     mostRecentStatus.orElse(null)

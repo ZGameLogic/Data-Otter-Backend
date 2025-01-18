@@ -52,6 +52,7 @@ public class DataOtterController {
         log.info("Performing initial cleanup");
         cleanup();
         log.info("Cleanup completed");
+        System.out.println(monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_DateDesc(1L, 1L));
     }
 
     /**
@@ -97,12 +98,12 @@ public class DataOtterController {
                         .thenComparingInt(NodeMonitorReport::getAttempts)).get();
                 monitorStatus = new MonitorStatus(configuration, topReport);
             }
-            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_Date(monitorStatus.getId().getMonitor().getId().getMonitorConfigurationId(), monitorStatus.getId().getMonitor().getId().getApplication().getId());
+            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_DateDesc(monitorStatus.getId().getMonitor().getId().getMonitorConfigurationId(), monitorStatus.getId().getMonitor().getId().getApplication().getId());
             mostRecentStatus.ifPresent(previousStatus -> {
                 if(previousStatus.isStatus() != monitorStatus.isStatus()) {
                     changedMonitors.add(monitorStatus);
                 } else {
-//                    monitorStatusRepository.deleteById_Monitor_Id_Application_IdAndId_Monitor_Id_MonitorConfigurationIdAndId_Date(previousStatus.getId().getMonitor().getId().getApplication().getId(), previousStatus.getId().getMonitor().getId().getMonitorConfigurationId(), previousStatus.getId().getDate());
+                    monitorStatusRepository.deleteById_Monitor_Id_Application_IdAndId_Monitor_Id_MonitorConfigurationIdAndId_Date(previousStatus.getId().getMonitor().getId().getApplication().getId(), previousStatus.getId().getMonitor().getId().getMonitorConfigurationId(), previousStatus.getId().getDate());
                 }
             });
             monitorStatusRepository.save(monitorStatus);
@@ -120,6 +121,6 @@ public class DataOtterController {
         }
         String body = changedMonitors.stream().map(monitor -> String.format("%s : %s", monitor.getId().getMonitor().getName(), monitor.isStatus() ? "up": "down")).collect(Collectors.joining("\n"));
         ApplePushNotification notification = new ApplePushNotification("Data Otter", subtitle, body);
-//        deviceRepository.findAll().forEach(device -> apns.sendNotification(device.getId(), notification));
+        deviceRepository.findAll().forEach(device -> apns.sendNotification(device.getId(), notification));
     }
 }

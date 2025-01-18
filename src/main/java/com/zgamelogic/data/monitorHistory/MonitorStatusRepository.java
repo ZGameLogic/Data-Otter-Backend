@@ -1,6 +1,5 @@
 package com.zgamelogic.data.monitorHistory;
 
-import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MonitorStatusRepository extends JpaRepository<MonitorStatus, MonitorStatus.MonitorStatusId> {
-    Optional<MonitorStatus> findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_Date(Long id_monitor_id_monitorConfigurationId, Long id_monitor_id_application_id);
+    Optional<MonitorStatus> findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_DateDesc(Long id_monitor_id_monitorConfigurationId, Long id_monitor_id_application_id);
 
     @Query("SELECT ms FROM MonitorStatus ms " +
             "WHERE ms.id.date = (SELECT MAX(subMs.id.date) FROM MonitorStatus subMs WHERE subMs.id.monitor.id = ms.id.monitor.id) " +
