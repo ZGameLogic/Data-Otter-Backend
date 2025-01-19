@@ -12,6 +12,7 @@ import java.util.Optional;
 
 public interface MonitorStatusRepository extends JpaRepository<MonitorStatus, MonitorStatus.MonitorStatusId> {
     Optional<MonitorStatus> findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_DateDesc(Long id_monitor_id_monitorConfigurationId, Long id_monitor_id_application_id);
+    long countById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_Id(Long id_monitor_id_monitorConfigurationId, Long id_monitor_id_application_id);
 
     @Query("SELECT ms FROM MonitorStatus ms " +
             "WHERE ms.id.date = (SELECT MAX(subMs.id.date) FROM MonitorStatus subMs WHERE subMs.id.monitor.id = ms.id.monitor.id) " +
