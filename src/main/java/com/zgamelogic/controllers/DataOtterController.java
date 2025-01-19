@@ -102,7 +102,8 @@ public class DataOtterController {
                 if(previousStatus.isStatus() != monitorStatus.isStatus()) {
                     changedMonitors.add(monitorStatus);
                 } else {
-                    if(monitorStatusRepository.countById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_Id(previousStatus.getId().getMonitor().getId().getApplication().getId(), previousStatus.getId().getMonitor().getId().getMonitorConfigurationId()) > 1) {
+                    List<MonitorStatus> statuses = monitorStatusRepository.findTop2ById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_DateDesc(monitorStatus.getId().getMonitor().getId().getMonitorConfigurationId(), monitorStatus.getId().getMonitor().getId().getApplication().getId());
+                    if(statuses.size() == 2 && statuses.get(0).isStatus() == statuses.get(1).isStatus() && statuses.get(0).isStatus() == monitorStatus.isStatus()){
                         monitorStatusRepository.deleteById_Monitor_Id_Application_IdAndId_Monitor_Id_MonitorConfigurationIdAndId_Date(previousStatus.getId().getMonitor().getId().getApplication().getId(), previousStatus.getId().getMonitor().getId().getMonitorConfigurationId(), previousStatus.getId().getDate());
                     }
                 }
