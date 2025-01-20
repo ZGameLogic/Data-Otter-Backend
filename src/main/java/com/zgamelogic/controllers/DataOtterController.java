@@ -97,14 +97,16 @@ public class DataOtterController {
                         .thenComparingInt(NodeMonitorReport::getAttempts)).get();
                 monitorStatus = new MonitorStatus(configuration, topReport);
             }
-            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_DateDesc(monitorStatus.getId().getMonitor().getId().getMonitorConfigurationId(), monitorStatus.getId().getMonitor().getId().getApplication().getId());
+            long monitorId = monitorStatus.getId().getMonitor().getId().getMonitorConfigurationId();
+            long applicationId = monitorStatus.getId().getMonitor().getId().getApplication().getId();
+            Optional<MonitorStatus> mostRecentStatus = monitorStatusRepository.findTopById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_DateDesc(monitorId, applicationId);
             mostRecentStatus.ifPresent(previousStatus -> {
                 if(previousStatus.isStatus() != monitorStatus.isStatus()) {
                     changedMonitors.add(monitorStatus);
                 } else {
-                    List<MonitorStatus> statuses = monitorStatusRepository.findTop2ById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_DateDesc(monitorStatus.getId().getMonitor().getId().getMonitorConfigurationId(), monitorStatus.getId().getMonitor().getId().getApplication().getId());
+                    List<MonitorStatus> statuses = monitorStatusRepository.findTop2ById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_DateDesc(monitorId, applicationId);
                     if(statuses.size() == 2 && statuses.get(0).isStatus() == statuses.get(1).isStatus() && statuses.get(0).isStatus() == monitorStatus.isStatus()){
-                        monitorStatusRepository.deleteById_Monitor_Id_Application_IdAndId_Monitor_Id_MonitorConfigurationIdAndId_Date(previousStatus.getId().getMonitor().getId().getApplication().getId(), previousStatus.getId().getMonitor().getId().getMonitorConfigurationId(), previousStatus.getId().getDate());
+                        monitorStatusRepository.deleteById_Monitor_Id_Application_IdAndId_Monitor_Id_MonitorConfigurationIdAndId_Date(applicationId, monitorId, previousStatus.getId().getDate());
                     }
                 }
             });

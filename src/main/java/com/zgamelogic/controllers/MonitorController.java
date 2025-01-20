@@ -196,6 +196,12 @@ public class MonitorController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("monitors/history")
+    public ResponseEntity<?> deleteMonitorHistory() {
+        monitorStatusRepository.deleteAll();
+        return ResponseEntity.ok().build();
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     private ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         return ResponseEntity.badRequest().body(e.getMessage());
