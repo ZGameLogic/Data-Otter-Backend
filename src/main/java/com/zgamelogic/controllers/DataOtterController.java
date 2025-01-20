@@ -106,7 +106,7 @@ public class DataOtterController {
                 } else {
                     List<MonitorStatus> statuses = monitorStatusRepository.findTop2ById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_DateDesc(monitorId, applicationId);
                     if(statuses.size() == 2 && statuses.get(0).isStatus() == statuses.get(1).isStatus() && statuses.get(0).isStatus() == monitorStatus.isStatus()){
-                        monitorStatusRepository.deleteById_Monitor_Id_Application_IdAndId_Monitor_Id_MonitorConfigurationIdAndId_Date(applicationId, monitorId, previousStatus.getId().getDate());
+//                        monitorStatusRepository.deleteById_Monitor_Id_Application_IdAndId_Monitor_Id_MonitorConfigurationIdAndId_Date(applicationId, monitorId, previousStatus.getId().getDate());
                     }
                 }
             });
