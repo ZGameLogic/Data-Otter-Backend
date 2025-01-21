@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.zgamelogic.data.Constants.AGENT_STATUS_MISSING_MINUTE_COUNT;
 
@@ -48,12 +46,18 @@ public class AgentController {
             Date start,
             @RequestParam(required = false)
             @DateTimeFormat(pattern = "MM-dd-yyyy HH:mm:ss")
-            Date end
+            Date end,
+            @RequestParam(required = false)
+            Boolean fill
     ){
         if(!agentRepository.existsById(agentId)) return ResponseEntity.notFound().build();
         if (end == null) end = new Date();
         if (start == null) start = Date.from(end.toInstant().minus(7, ChronoUnit.DAYS));
-        return ResponseEntity.ok(agentStatusRepository.findByAgentIdAndDateBetween(agentId, start, end));
+        List<AgentStatus> history = agentStatusRepository.findByAgentIdAndDateBetween(agentId, start, end);
+        if(fill != null && fill) {
+            // TODO fill in the missing entries
+        }
+        return ResponseEntity.ok(history);
     }
 
     @GetMapping("agents")

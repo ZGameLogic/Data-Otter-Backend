@@ -24,6 +24,7 @@ public class AgentStatus {
     private long cpuUsage;
     private long diskUsage;
     private String agentVersion;
+    private Boolean status;
 
     public AgentStatus(long agentId, AgentReport agentStatus){
         this(
@@ -41,6 +42,7 @@ public class AgentStatus {
         this.diskUsage = diskUsage;
         this.agentVersion = agentVersion;
         this.id = new AgentStatusId(agentId, new Date());
+        status = true;
     }
 
     @Embeddable
