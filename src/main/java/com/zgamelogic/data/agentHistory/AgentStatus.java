@@ -45,6 +45,12 @@ public class AgentStatus {
         status = true;
     }
 
+    public AgentStatus(long agentId, long memoryUsage, long cpuUsage, long diskUsage, String agentVersion, boolean status, Date date) {
+        this(agentId, memoryUsage, cpuUsage, diskUsage, agentVersion);
+        id.date = date;
+        this.status = status;
+    }
+
     @Embeddable
     @Getter
     @NoArgsConstructor
@@ -76,6 +82,7 @@ public class AgentStatus {
             gen.writeNumberField("cpu usage", value.getCpuUsage());
             gen.writeNumberField("disk usage", value.getDiskUsage());
             gen.writeStringField("agent version", value.getAgentVersion());
+            gen.writeBooleanField("status", value.getStatus());
             gen.writeEndObject();
         }
     }

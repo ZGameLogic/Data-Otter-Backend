@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -52,14 +54,29 @@ public class AgentController {
     ){
         if(!agentRepository.existsById(agentId)) return ResponseEntity.notFound().build();
         if (end == null) end = new Date();
-        if (start == null) start = Date.from(end.toInstant().minus(7, ChronoUnit.DAYS));
+        if (start == null) start = Date.from(end.toInstant().minus(12, ChronoUnit.HOURS));
         List<AgentStatus> history = agentStatusRepository.findByAgentIdAndDateBetween(agentId, start, end);
         if(fill) {
-            // TODO fill in the missing entries
+            int index = 0;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            for(Instant i = start.toInstant(); i.isBefore(end.toInstant()); i = i.plus(1, ChronoUnit.MINUTES)){
+                String indexDate = formatter.format(i.atZone(ZoneId.systemDefault()));
+                if(history.stream().noneMatch(record -> {
+                    String current = formatter.format(record.getId().getDate().toInstant().atZone(ZoneId.systemDefault()));
+                    return current.equals(indexDate);
+                })){
+                    history.add(index, new AgentStatus(agentId, 0, 0, 0, "", false, Date.from(i)));
+                }
+                index++;
+            }
         }
         return ResponseEntity.ok(history);
     }
 
+    /*
+    3
+    true1 true2 true4
+     */
     @GetMapping("agents")
     public ResponseEntity<List<AgentWithLastStatus>> getAgents(@RequestParam(required = false, name = "include-status") Boolean includeStatus) {
         if(includeStatus == null || !includeStatus) return ResponseEntity.ok(agentRepository.findAll().stream().map(agent -> new AgentWithLastStatus(null, agent)).toList());
