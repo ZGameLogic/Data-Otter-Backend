@@ -70,7 +70,7 @@ public class DataOtterController {
     @Scheduled(cron = "0 * * * * *")
     public void cleanup(){
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.HOUR, -24);
+        calendar.add(Calendar.DAY_OF_YEAR, -7);
         Date oneWeekAgo = calendar.getTime();
         monitorStatusRepository.deleteRecordsOlderThan(oneWeekAgo);
         agentStatusRepository.deleteRecordsOlderThan(oneWeekAgo);
@@ -103,11 +103,6 @@ public class DataOtterController {
             mostRecentStatus.ifPresent(previousStatus -> {
                 if(previousStatus.isStatus() != monitorStatus.isStatus()) {
                     changedMonitors.add(monitorStatus);
-                } else {
-                    List<MonitorStatus> statuses = monitorStatusRepository.findTop2ById_Monitor_Id_MonitorConfigurationIdAndId_Monitor_Id_Application_IdOrderById_DateDesc(monitorId, applicationId);
-                    if(statuses.size() == 2 && statuses.get(0).isStatus() == statuses.get(1).isStatus() && statuses.get(0).isStatus() == monitorStatus.isStatus()){
-//                        monitorStatusRepository.deleteById_Monitor_Id_Application_IdAndId_Monitor_Id_MonitorConfigurationIdAndId_Date(applicationId, monitorId, previousStatus.getId().getDate());
-                    }
                 }
             });
             monitorStatusRepository.save(monitorStatus);
