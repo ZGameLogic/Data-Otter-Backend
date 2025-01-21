@@ -47,14 +47,14 @@ public class AgentController {
             @RequestParam(required = false)
             @DateTimeFormat(pattern = "MM-dd-yyyy HH:mm:ss")
             Date end,
-            @RequestParam(required = false)
-            Boolean fill
+            @RequestParam(required = false, defaultValue = "false")
+            boolean fill
     ){
         if(!agentRepository.existsById(agentId)) return ResponseEntity.notFound().build();
         if (end == null) end = new Date();
         if (start == null) start = Date.from(end.toInstant().minus(7, ChronoUnit.DAYS));
         List<AgentStatus> history = agentStatusRepository.findByAgentIdAndDateBetween(agentId, start, end);
-        if(fill != null && fill) {
+        if(fill) {
             // TODO fill in the missing entries
         }
         return ResponseEntity.ok(history);
