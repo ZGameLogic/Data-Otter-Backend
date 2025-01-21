@@ -73,10 +73,6 @@ public class AgentController {
         return ResponseEntity.ok(history);
     }
 
-    /*
-    3
-    true1 true2 true4
-     */
     @GetMapping("agents")
     public ResponseEntity<List<AgentWithLastStatus>> getAgents(@RequestParam(required = false, name = "include-status") Boolean includeStatus) {
         if(includeStatus == null || !includeStatus) return ResponseEntity.ok(agentRepository.findAll().stream().map(agent -> new AgentWithLastStatus(null, agent)).toList());

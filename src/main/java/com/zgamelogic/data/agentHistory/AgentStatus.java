@@ -82,7 +82,11 @@ public class AgentStatus {
             gen.writeNumberField("cpu usage", value.getCpuUsage());
             gen.writeNumberField("disk usage", value.getDiskUsage());
             gen.writeStringField("agent version", value.getAgentVersion());
-            gen.writeBooleanField("status", value.getStatus());
+            if(value.getStatus() != null) {
+                gen.writeBooleanField("status", value.getStatus());
+            } else {
+                gen.writeBooleanField("status", true);
+            }
             gen.writeEndObject();
         }
     }
