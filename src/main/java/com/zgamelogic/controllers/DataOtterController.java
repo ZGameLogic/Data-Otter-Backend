@@ -70,7 +70,7 @@ public class DataOtterController {
     @Scheduled(cron = "0 * * * * *")
     public void cleanup(){
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, -7);
+        calendar.add(Calendar.DAY_OF_YEAR, -1);
         Date oneWeekAgo = calendar.getTime();
         monitorStatusRepository.deleteRecordsOlderThan(oneWeekAgo);
         agentStatusRepository.deleteRecordsOlderThan(oneWeekAgo);
