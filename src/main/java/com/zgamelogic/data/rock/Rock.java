@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.zgamelogic.data.application.Application;
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -34,6 +35,7 @@ public class Rock {
     @Embeddable
     @Getter
     @NoArgsConstructor
+    @EqualsAndHashCode
     public static class RockId {
         private Date date;
 
