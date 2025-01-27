@@ -95,6 +95,12 @@ public class AgentController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("agent/history")
+    public ResponseEntity<?> deleteAgentHistory() {
+        agentStatusRepository.deleteAll();
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("agent/{agentId}")
     public ResponseEntity<AgentWithLastStatus> getAgentStatus(
             @PathVariable long agentId,
