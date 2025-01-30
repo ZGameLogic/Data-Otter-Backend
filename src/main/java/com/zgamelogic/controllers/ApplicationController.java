@@ -8,6 +8,7 @@ import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
 import com.zgamelogic.data.tags.TagRepository;
 import com.zgamelogic.services.CacheService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -61,8 +62,7 @@ public class ApplicationController {
     }
 
     @PostMapping
-    public ResponseEntity<Application> createApplication(@RequestBody Application application){
-        if(application.getName() == null) return ResponseEntity.badRequest().build();
+    public ResponseEntity<Application> createApplication(@Valid @RequestBody Application application){
         if(application.getTags() != null){
             application.getTags().stream()
                     .filter(tag -> !tagRepository.existsById(tag.getName()))

@@ -9,7 +9,7 @@ POST {{base_url}}/applications
 Content-Type: application/json
 
 {
-  "name": "Test Application",
+  "name": "",
   "description": "This is a fun test application",
   "tags": ["kubernetes", {
     "name": "Bep",

@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
 import com.zgamelogic.data.tags.Tag;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +30,9 @@ public class Application {
     @Id
     @GeneratedValue
     private Long id;
+
+    @NotBlank(message = "Application name is required")
+    @Size(max = 100, message = "Name cannot be longer than 100 characters")
     private String name;
     private String description;
 
