@@ -9,7 +9,9 @@ import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
 import com.zgamelogic.data.tags.TagRepository;
 import com.zgamelogic.services.CacheService;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +21,7 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequestMapping("applications")
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class ApplicationController {
 
     private final ApplicationRepository applicationRepository;
@@ -26,14 +29,6 @@ public class ApplicationController {
     private final NodeMonitorReportRepository nodeMonitorReportRepository;
     private final CacheService cacheService;
     private final TagRepository tagRepository;
-
-    public ApplicationController(ApplicationRepository applicationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, CacheService cacheService, TagRepository tagRepository) {
-        this.applicationRepository = applicationRepository;
-        this.monitorStatusRepository = monitorStatusRepository;
-        this.nodeMonitorReportRepository = nodeMonitorReportRepository;
-        this.cacheService = cacheService;
-        this.tagRepository = tagRepository;
-    }
 
     @GetMapping
     public ResponseEntity<List<ApplicationMonitorStatus>> getApplications(@RequestParam(required = false, name = "include-status") Boolean includeStatus) {

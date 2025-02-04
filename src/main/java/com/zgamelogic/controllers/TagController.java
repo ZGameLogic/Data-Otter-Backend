@@ -4,6 +4,8 @@ import com.zgamelogic.data.application.Application;
 import com.zgamelogic.data.application.ApplicationRepository;
 import com.zgamelogic.data.tags.Tag;
 import com.zgamelogic.data.tags.TagRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,14 +13,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("tags")
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class TagController {
     private final ApplicationRepository applicationRepository;
     private final TagRepository tagRepository;
-
-    public TagController(ApplicationRepository applicationRepository, TagRepository tagRepository) {
-        this.applicationRepository = applicationRepository;
-        this.tagRepository = tagRepository;
-    }
 
     @GetMapping
     public ResponseEntity<List<Tag>> getTags(){

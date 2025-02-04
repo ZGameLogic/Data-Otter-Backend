@@ -5,7 +5,9 @@ import com.zgamelogic.data.nodeConfiguration.NodeConfiguration;
 import com.zgamelogic.data.nodeConfiguration.NodeConfigurationRepository;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReport;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,16 +22,11 @@ import static com.zgamelogic.data.Constants.MASTER_NODE_NAME;
 
 @Slf4j
 @RestController
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class NodeController {
     private final NodeMonitorReportRepository nodeMonitorReportRepository;
     private final MonitorConfigurationRepository monitorConfigurationRepository;
     private final NodeConfigurationRepository nodeConfigurationRepository;
-
-    public NodeController(NodeMonitorReportRepository nodeMonitorReportRepository, MonitorConfigurationRepository monitorConfigurationRepository, NodeConfigurationRepository nodeConfigurationRepository) {
-        this.nodeMonitorReportRepository = nodeMonitorReportRepository;
-        this.monitorConfigurationRepository = monitorConfigurationRepository;
-        this.nodeConfigurationRepository = nodeConfigurationRepository;
-    }
 
     @PostMapping("nodes/{nodeId}/report/{applicationId}/{monitorId}")
     private ResponseEntity<NodeMonitorReport> report(

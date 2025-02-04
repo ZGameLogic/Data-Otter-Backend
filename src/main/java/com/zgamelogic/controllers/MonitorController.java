@@ -1,6 +1,5 @@
 package com.zgamelogic.controllers;
 
-import com.zgamelogic.App;
 import com.zgamelogic.data.application.Application;
 import com.zgamelogic.data.application.ApplicationRepository;
 import com.zgamelogic.data.monitorConfiguration.MonitorConfiguration;
@@ -11,7 +10,9 @@ import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
 import com.zgamelogic.services.monitors.MonitorService;
 import com.zgamelogic.services.monitors.MonitorStatusReport;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -25,20 +26,13 @@ import java.util.stream.Stream;
 
 @Slf4j
 @RestController
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class MonitorController {
     private final MonitorConfigurationRepository monitorConfigurationRepository;
     private final MonitorStatusRepository monitorStatusRepository;
     private final NodeMonitorReportRepository nodeMonitorReportRepository;
     private final MonitorService monitorService;
     private final ApplicationRepository applicationRepository;
-
-    public MonitorController(MonitorConfigurationRepository monitorConfigurationRepository, MonitorStatusRepository monitorStatusRepository, NodeMonitorReportRepository nodeMonitorReportRepository, MonitorService monitorService, App app, ApplicationRepository applicationRepository, ApplicationRepository applicationRepository1) {
-        this.monitorConfigurationRepository = monitorConfigurationRepository;
-        this.monitorStatusRepository = monitorStatusRepository;
-        this.nodeMonitorReportRepository = nodeMonitorReportRepository;
-        this.monitorService = monitorService;
-        this.applicationRepository = applicationRepository1;
-    }
 
     @PostMapping("monitors/{appId}")
     private ResponseEntity<?> createMonitor(

@@ -6,6 +6,8 @@ import com.zgamelogic.data.agentHistory.AgentStatusRepository;
 import com.zgamelogic.data.agents.AgentWithLastStatus;
 import com.zgamelogic.data.agents.Agent;
 import com.zgamelogic.data.agents.AgentRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,14 +21,10 @@ import java.util.*;
 import static com.zgamelogic.data.Constants.AGENT_STATUS_MISSING_MINUTE_COUNT;
 
 @RestController
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class AgentController {
     private final AgentRepository agentRepository;
     private final AgentStatusRepository agentStatusRepository;
-
-    public AgentController(AgentRepository agentRepository, AgentStatusRepository agentStatusRepository) {
-        this.agentRepository = agentRepository;
-        this.agentStatusRepository = agentStatusRepository;
-    }
 
     @PostMapping("agent/register")
     public ResponseEntity<Agent> register(@RequestBody Agent agent) {
