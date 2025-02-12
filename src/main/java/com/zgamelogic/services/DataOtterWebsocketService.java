@@ -1,6 +1,7 @@
 package com.zgamelogic.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zgamelogic.data.websocket.WebsocketMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -40,11 +41,11 @@ public class DataOtterWebsocketService extends TextWebSocketHandler {
         sessions.remove(session);
     }
 
-    public void sendMessage(Object message){
+    public void sendMessage(String type, Object message){
         ObjectMapper om = new ObjectMapper();
         sessions.forEach(session -> {
             try {
-                session.sendMessage(new BinaryMessage(om.writeValueAsBytes(message)));
+                session.sendMessage(new BinaryMessage(om.writeValueAsBytes(new WebsocketMessage(type, message))));
             } catch (IOException e) {
                 log.error("Error sending message", e);
             }

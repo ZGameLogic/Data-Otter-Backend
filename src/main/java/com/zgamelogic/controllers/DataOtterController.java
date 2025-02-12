@@ -8,6 +8,7 @@ import com.zgamelogic.data.monitorHistory.MonitorStatusRepository;
 import com.zgamelogic.data.nodeConfiguration.NodeConfiguration;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReport;
 import com.zgamelogic.data.nodeMonitorReport.NodeMonitorReportRepository;
+import com.zgamelogic.services.DataOtterWebsocketService;
 import com.zgamelogic.services.apns.ApplePushNotification;
 import com.zgamelogic.services.apns.ApplePushNotificationService;
 import com.zgamelogic.services.monitors.MonitorService;
@@ -30,6 +31,7 @@ public class DataOtterController {
     private final ApplePushNotificationService apns;
     private final DeviceRepository deviceRepository;
     private final AgentStatusRepository agentStatusRepository;
+    private final DataOtterWebsocketService dataOtterWebsocketService;
 
     public DataOtterController(
             MonitorConfigurationRepository monitorConfigurationRepository,
@@ -39,7 +41,8 @@ public class DataOtterController {
             @Qualifier("master-node") NodeConfiguration masterNode,
             ApplePushNotificationService apns,
             DeviceRepository deviceRepository,
-            AgentStatusRepository agentStatusRepository
+            AgentStatusRepository agentStatusRepository,
+            DataOtterWebsocketService dataOtterWebsocketService
     ) {
         this.monitorConfigurationRepository = monitorConfigurationRepository;
         this.monitorStatusRepository = monitorStatusRepository;
@@ -49,6 +52,7 @@ public class DataOtterController {
         this.apns = apns;
         this.deviceRepository = deviceRepository;
         this.agentStatusRepository = agentStatusRepository;
+        this.dataOtterWebsocketService = dataOtterWebsocketService;
         log.info("Performing initial cleanup");
         cleanup();
         log.info("Cleanup completed");
@@ -106,6 +110,7 @@ public class DataOtterController {
                 }
             });
             monitorStatusRepository.save(monitorStatus);
+            dataOtterWebsocketService.sendMessage("monitor status", monitorStatus);
         });
         nodeMonitorReportRepository.deleteAll();
         if(changedMonitors.isEmpty()) return;
