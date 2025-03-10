@@ -1,0 +1,16 @@
+@application_id = 1
+
+### Create metric
+POST {{base_url}}/metrics/{{application_id}}
+content-type: application/json
+
+{
+  "application id": {{application_id}},
+  "resource": "test",
+  "data": "15",
+  "unit": "cm"
+}
+
+### Get metrics
+GET {{base_url}}/metrics/{{application_id}}
+content-type: application/json
