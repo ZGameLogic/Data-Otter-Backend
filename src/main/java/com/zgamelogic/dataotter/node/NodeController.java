@@ -1,0 +1,60 @@
+package com.zgamelogic.dataotter.node;
+
+import com.zgamelogic.dataotter.monitor.database.MonitorConfigurationRepository;
+import com.zgamelogic.dataotter.node.database.NodeConfiguration;
+import com.zgamelogic.dataotter.node.database.NodeConfigurationRepository;
+import com.zgamelogic.dataotter.node.database.NodeMonitorReport;
+import com.zgamelogic.dataotter.node.database.NodeMonitorReportRepository;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
+
+import static com.zgamelogic.dataotter.Constants.MASTER_NODE_NAME;
+
+@Slf4j
+@RestController
+@AllArgsConstructor(onConstructor = @__(@Autowired))
+public class NodeController {
+    private final NodeMonitorReportRepository nodeMonitorReportRepository;
+    private final MonitorConfigurationRepository monitorConfigurationRepository;
+    private final NodeConfigurationRepository nodeConfigurationRepository;
+
+    @PostMapping("nodes/{nodeId}/report/{applicationId}/{monitorId}")
+    private ResponseEntity<NodeMonitorReport> report(
+            @PathVariable("nodeId") long nodeId,
+            @PathVariable("monitorId") long monitorId,
+            @PathVariable("applicationId") long applicationId,
+            @RequestBody NodeMonitorReport nodeMonitorReport
+    ) {
+        if(!monitorConfigurationRepository.existsById_MonitorConfigurationIdAndId_Application_Id(monitorId, applicationId)) return ResponseEntity.notFound().build();
+        if(!monitorConfigurationRepository.findById_MonitorConfigurationIdAndId_Application_Id(monitorId, applicationId).get().isActive()) return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        if(!nodeConfigurationRepository.existsById(nodeId)) return ResponseEntity.notFound().build();
+        nodeMonitorReport.setId(new NodeMonitorReport.NodeMonitorReportId(applicationId, monitorId, nodeId));
+        NodeMonitorReport report = nodeMonitorReportRepository.save(nodeMonitorReport);
+        return ResponseEntity.ok(report);
+    }
+
+    @PostMapping("nodes")
+    private ResponseEntity<NodeConfiguration> nodes(@RequestBody NodeConfiguration nodeConfiguration){
+        if(nodeConfiguration.getName() == null && !nodeConfiguration.getName().equals(MASTER_NODE_NAME)) return ResponseEntity.badRequest().build();
+        NodeConfiguration saved = nodeConfigurationRepository.save(nodeConfiguration);
+        return ResponseEntity.ok(saved);
+    }
+
+    @Bean("master-node")
+    public NodeConfiguration masterNode(NodeConfigurationRepository nodeConfigurationRepository) {
+        Optional<NodeConfiguration> nodeConfig = nodeConfigurationRepository.findByName(MASTER_NODE_NAME);
+        NodeConfiguration masterNode = nodeConfig.orElseGet(() -> nodeConfigurationRepository.save(new NodeConfiguration(MASTER_NODE_NAME)));
+        log.info("Master node id: {}", masterNode.getId());
+        return masterNode;
+    }
+}
