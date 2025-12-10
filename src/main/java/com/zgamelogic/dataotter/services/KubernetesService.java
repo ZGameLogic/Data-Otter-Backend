@@ -1,4 +1,4 @@
-package com.zgamelogic.services;
+package com.zgamelogic.dataotter.services;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import jakarta.annotation.PostConstruct;
