@@ -23,13 +23,14 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
-@PropertySource("File:./APNS.properties")
+@PropertySource(value = "File:./APNS.properties", ignoreResourceNotFound = true)
 public class ApplePushNotificationService {
-    @Value("${kid}")    private String kid;
-    @Value("${org_id}") private String orgId;
-    @Value("${APN}")    private String apnEndpoint;
+    @Value("${kid:}")    private String kid;
+    @Value("${org_id:}") private String orgId;
+    @Value("${APN:}")    private String apnEndpoint;
 
     public void sendNotification(String device, ApplePushNotification notification){
+        if(kid.isEmpty() || orgId.isEmpty() || apnEndpoint.isEmpty()) return;
         String url = apnEndpoint + "/3/device/" + device;
         HttpHeaders headers = new HttpHeaders();
         headers.add("authorization", "bearer " + authJWT());
