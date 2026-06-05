@@ -28,12 +28,12 @@ jobs:
         run: |
           echo "$DATA_OTTER_KEY" > private_key.pem
           chmod 600 private_key.pem
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ubuntu@54.167.40.144 'sudo systemctl stop monitors'
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ubuntu@44.223.51.243 'sudo systemctl stop monitors'
 
       - name: Upload Monitors.jar
         run: |
-          scp -i private_key.pem -o StrictHostKeyChecking=no target/Monitors-1.0.0.jar ubuntu@54.167.40.144:/home/ubuntu/monitor/Monitors.jar
+          scp -i private_key.pem -o StrictHostKeyChecking=no target/Monitors-1.0.0.jar ubuntu@44.223.51.243:/home/ubuntu/monitor/Monitors.jar
 
       - name: Start Monitors Service
         run: |
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ubuntu@54.167.40.144 'sudo systemctl start monitors'
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ubuntu@44.223.51.243 'sudo systemctl start monitors'
